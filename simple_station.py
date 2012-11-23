@@ -9,7 +9,7 @@ print "constructing fds file:       ", filename
 
 grid_spacing = 0.25
 
-t_end = 10.0
+t_end = 0.0
 
 FP  = 3
 HRR = 125
@@ -24,10 +24,13 @@ GB = UB - 2*BSB
 
 TL = 5
 
-OB = 20
-OL = 10
+OB = 17
+OL = 17
 OH =  3
 OHB = 4
+
+T1B = 8.5
+T2B = 8.5
 
 minb = 0.5
 
@@ -76,7 +79,7 @@ obst(f, [deff[0], d[0], deff[2], deff[3], deff[4], deff[5]], color="BLACK" )
 obst(f, [d[1], deff[1], deff[2], deff[3], deff[4], deff[5]], color="BLACK" ) 
 
 # y min
-obst(f, [d[0], d[1], deff[2], d[2], deff[4], deff[5]], color="INVISIBLE" ) 
+obst(f, [d[0], d[1], deff[2], d[2], deff[4], deff[5]], color="BLACK" ) 
 # y max
 obst(f, [d[0], d[1], d[3], deff[3], deff[4], deff[5]], color="BLACK" ) 
 
@@ -103,31 +106,46 @@ obst(f, [TU, d[1], -UB/2.0, UB/2.0, UH, d[5]], color="INVISIBLE")
 # top wall between stairs
 obst(f, [0.0, TU, -UB/2.0+BSB, UB/2.0-BSB, UH, d[5]], color="ORANGE")
 
-#back walls
-obst(f, [UL, d[1], d[2], -UB/2.0+BSB, d[4], d[5]], color="INVISIBLE")
-obst(f, [UL, d[1], UB/2.0-BSB, d[3], d[4], d[5]], color="ORANGE")
-#wall above tunel
-obst(f, [UL, UL+TL, -UB/2.0+BSB, UB/2.0-BSB, UH, d[5]], color="ORANGE")
+# back wall
+obst(f, [UL, d[1], d[2], d[3], d[4], d[5]], color="ORANGE")
+# tunnel hole
+hole(f, [UL, deff[1], -GB/2., GB/2., d[4], UH])
 
 #####################################################################
 # upper room
+
 # floor above tunnel
-obst(f, [d[0], 0.0, d[2], d[3], UH, OHB], color="BRICK")
+obst(f, [d[0], 0.0, d[2], d[3], d[4], OHB], color="BRICK")
 
-# walls next to tunnel
-obst(f, [d[0], 0.0, d[2], -UB/2.0+BSB, d[4], UH], color="INVISIBLE")
-obst(f, [d[0], 0.0, UB/2.0-BSB, d[3], d[4], UH], color="ORANGE")
+# walls
+obst(f, [-OL/2., 0.0,  d[2], -UB/2.0, UH, d[5]], color="ORANGE")
+obst(f, [-OL/4., 0.0, -UB/2.0+BSB, UB/2.0-BSB, UH, d[5]], color="ORANGE")
+obst(f, [-OL/2., 0.0, UB/2.0, d[3], UH, d[5]], color="ORANGE")
 
+# tunnel hole
+hole(f, [deff[0], 0, -GB/2., GB/2., d[4], UH])
+
+# stair holes
+hole(f, [d[0], d[0]+T1B, deff[2], d[2], OHB, d[5]])
+hole(f, [deff[0], d[0], d[3], d[3]-T2B, OHB, d[5]])
+
+#####################################################################
+# train
+
+#obst(f, [
+
+#####################################################################
+# sources
 
 # fire
-# f.write("&REAC FUEL = 'METHANE' /\n")
-# f.write("&SURF ID='fire', HRRPUA=%d /\n"%HRR)
-# f.write("&VENT XB= %e, %e, %e, %e, %e, %e, SURF_ID='fire' /\n"%
-#         (FP-0.5, FP+0.5, 0.0, 1.0, 0.0, 0.0) )
+f.write("&REAC FUEL = 'METHANE' /\n")
+f.write("&SURF ID='fire', HRRPUA=%d /\n"%HRR)
+f.write("&VENT XB= %e, %e, %e, %e, %e, %e, SURF_ID='fire' /\n"%
+        (FP-0.5, FP+0.5, 0.0, 1.0, 0.0, 0.0) )
                 
 #vents
-f.write("&SURF ID='inlet', VEL=-10.0 /\n")
-f.write("&VENT XB=%e, %e, %e, %e, %e, %e, SURF_ID='inlet' /\n"%(UL+TL, UL+TL, -GB/2.0, GB/2.0, d[4], UH))
+#f.write("&SURF ID='inlet', VEL=-10.0 /\n")
+#f.write("&VENT XB=%e, %e, %e, %e, %e, %e, SURF_ID='inlet' /\n"%(UL+TL, UL+TL, -GB/2.0, GB/2.0, d[4], UH))
 
 # output
 f.write("&SLCF PBY=0.0, QUANTITY='TEMPERATURE' /\n")
@@ -137,5 +155,6 @@ f.write("&SLCF PBZ=%e, QUANTITY='VELOCITY' /\n"%(UH-grid_spacing))
 f.write("&SLCF PBZ=%e, QUANTITY='VELOCITY' /\n"%(OHB+OH))
 f.write("&SLCF PBX=%e, QUANTITY='VELOCITY' /\n"%(TU/2.0))
 
+f.write("&TAIL /\n")
 
 f.close()
