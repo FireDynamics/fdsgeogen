@@ -2,20 +2,29 @@ import numpy as np
 
 from helper import *
 
-filename = 'station.fds'
+grid_spacing = 0.100
+ID = ('simple_station_%.3f'%grid_spacing).replace('.','')
+
+filename = ID + '.fds'
 f = open(filename, 'w')
 
 print "constructing fds file:       ", filename
 
-grid_spacing = 0.25
+nmeshes = 8
+grid_spacing = 0.10
 
 t_end = 0.0
 
-FP  = 3
-HRR = 125
+TTP  = 15
+TTL  = 25 
+TFP  = TTP + 7
+TDW  = 2
+TDN  = 4
+TWW  = 0.2
+THRR = 125
 
 UB = 10
-UL = 30
+UL = 70
 UH =  3
 BSB = 3
 TU = 2
@@ -61,14 +70,27 @@ print "corrected domain [m]:        ", deff
 print "grid spacing [m]:            ", grid_spacing
 print "grid size:                   ", grid
 
-f.write("&HEAD CHID='station', TITLE='Simple Metro Station Setup' /\n")
+f.write("&HEAD CHID='%s', TITLE='Simple Metro Station Setup' /\n"%ID)
 f.write("&TIME T_END=%e /\n"%t_end)
 
-f.write("&MESH IJK=%d,%d,%d, XB=%e,%e,%e,%e,%e,%e /\n"%
-                (grid[0], grid[1], grid[2], 
-                deff[0], deff[1],
-                deff[2], deff[3],
-                deff[4], deff[5]) )
+dnx = grid[0] / nmeshes
+rnx = 0
+
+if (grid[0] % nmeshes) != 0:
+    dnx = grid[0] / (nmeshes-1)
+    rnx = grid[0] % dnx
+    
+for m in range(nmeshes):
+    nx = dnx
+    if m == nmeshes-1 and rnx != 0: nx = rnx
+    
+    xmin = deff[0] +  m*dnx       * grid_spacing 
+    xmax = deff[0] + (m*dnx + nx) * grid_spacing
+    f.write("&MESH IJK=%d,%d,%d, XB=%e,%e,%e,%e,%e,%e /\n"%
+                    (nx, grid[1], grid[2], 
+                    xmin, xmax,
+                    deff[2], deff[3],
+                    deff[4], deff[5]) )
                 
 
 #####################################################################
@@ -79,7 +101,7 @@ obst(f, [deff[0], d[0], deff[2], deff[3], deff[4], deff[5]], color="BLACK" )
 obst(f, [d[1], deff[1], deff[2], deff[3], deff[4], deff[5]], color="BLACK" ) 
 
 # y min
-obst(f, [d[0], d[1], deff[2], d[2], deff[4], deff[5]], color="BLACK" ) 
+obst(f, [d[0], d[1], deff[2], d[2], deff[4], deff[5]], color="INVISIBLE" ) 
 # y max
 obst(f, [d[0], d[1], d[3], deff[3], deff[4], deff[5]], color="BLACK" ) 
 
@@ -118,9 +140,9 @@ hole(f, [UL, deff[1], -GB/2., GB/2., d[4], UH])
 obst(f, [d[0], 0.0, d[2], d[3], d[4], OHB], color="BRICK")
 
 # walls
-obst(f, [-OL/2., 0.0,  d[2], -UB/2.0, UH, d[5]], color="ORANGE")
-obst(f, [-OL/4., 0.0, -UB/2.0+BSB, UB/2.0-BSB, UH, d[5]], color="ORANGE")
-obst(f, [-OL/2., 0.0, UB/2.0, d[3], UH, d[5]], color="ORANGE")
+obst(f, [-OL/2., 0.0,  d[2], -UB/2.0, OHB, d[5]], color="ORANGE")
+obst(f, [-OL/4., 0.0, -UB/2.0+BSB, UB/2.0-BSB, OHB, d[5]], color="ORANGE")
+obst(f, [-OL/2., 0.0, UB/2.0, d[3], OHB, d[5]], color="ORANGE")
 
 # tunnel hole
 hole(f, [deff[0], 0, -GB/2., GB/2., d[4], UH])
@@ -132,16 +154,35 @@ hole(f, [deff[0], d[0], d[3], d[3]-T2B, OHB, d[5]])
 #####################################################################
 # train
 
-#obst(f, [
+# left
+obst(f, [TTP, TTP+TTL, 0.0, -TWW, 0.0, UH-TWW], color="MIDNIGHT BLUE")
+# right
+obst(f, [TTP, TTP+TTL, -GB/2.0, -GB/2.0+TWW, 0.0, UH-TWW], color="BLUE")
+# front
+obst(f, [TTP+TTL-TWW, TTP+TTL, -GB/2.0, 0.0, 0.0, UH-TWW], color="MIDNIGHT BLUE")
+# back
+obst(f, [TTP-TWW, TTP, -GB/2.0, 0.0, 0.0, UH-TWW], color="MIDNIGHT BLUE")
+# top
+obst(f, [TTP, TTP+TTL, -GB/2.0, 0.0, OH-TWW, OH], color="POWDER BLUE")
+# bottom
+obst(f, [TTP, TTP+TTL, -GB/2.0, 0.0, d[4], 1.0], color="BLACK")
+
+
+dist_door = TTL / (TDN+1)
+for i in range(1,TDN+1):
+    hole(f, [TTP + i*dist_door - TDW/2.0, TTP + i*dist_door + TDW/2.0, -GB/2.0, -GB/2.0+TWW, 1.0, UH-TWW])
+
+#hole(f, [TTP+TWW, TTP+TTL-TWW, -GB/2.0+TWW, -TWW, 1.0, UH-TWW])
 
 #####################################################################
 # sources
 
 # fire
 f.write("&REAC FUEL = 'METHANE' /\n")
-f.write("&SURF ID='fire', HRRPUA=%d /\n"%HRR)
+f.write("&SURF ID='fire', HRRPUA=%d /\n"%THRR)
+obst(f, [TFP-0.5, TFP+0.5, -1.0-TWW, -TWW, 1.0, 1.5], color="RED")
 f.write("&VENT XB= %e, %e, %e, %e, %e, %e, SURF_ID='fire' /\n"%
-        (FP-0.5, FP+0.5, 0.0, 1.0, 0.0, 0.0) )
+        (TFP-0.5, TFP+0.5, -1.0-TWW, -TWW, 1.5, 1.5) )
                 
 #vents
 #f.write("&SURF ID='inlet', VEL=-10.0 /\n")
