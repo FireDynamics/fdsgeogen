@@ -27,7 +27,8 @@ UB = 10
 UL = 70
 UH =  3
 BSB = 3
-TU = 2
+TU = 5
+UGH = 1
 
 GB = UB - 2*BSB
 
@@ -36,7 +37,7 @@ TL = 5
 OB = 17
 OL = 17
 OH =  3
-OHB = 4
+OHB = 5
 
 T1B = 8.5
 T2B = 8.5
@@ -112,10 +113,16 @@ obst(f, [d[0], d[1], d[2], d[3], d[5], deff[5]], color="INVISIBLE" )
 
 #obst(f, [d[0], d[1], d[2], d[3], d[5] - b[2], d[5]], transp=True ) 
 
+# add open boundaries
+f.write("&VENT MB='XMIN' ,SURF_ID='OPEN' /\n")
+f.write("&VENT MB='XMAX' ,SURF_ID='OPEN' /\n")
+f.write("&VENT MB='YMIN' ,SURF_ID='OPEN' /\n")
+f.write("&VENT MB='YMAX' ,SURF_ID='OPEN' /\n")
+
 #####################################################################
 # platforms
-obst(f, [0.0, UL, -UB/2.0, -UB/2.0 + BSB, 0.0, 1.0], color="BRICK" ) 
-obst(f, [0.0, UL,  UB/2.0 - BSB, UB/2.0, 0.0, 1.0], color="BRICK" ) 
+obst(f, [0.0, UL, -UB/2.0, -UB/2.0 + BSB, 0.0, UGH], color="BRICK" ) 
+obst(f, [0.0, UL,  UB/2.0 - BSB, UB/2.0, 0.0, UGH], color="BRICK" ) 
 
 #####################################################################
 # lower room walls
@@ -124,14 +131,14 @@ obst(f, [0.0, UL, d[2], -UB/2.0, d[4], d[5]], color="INVISIBLE")
 obst(f, [0.0, UL,  UB/2.0, d[3], d[4], d[5]], color="ORANGE")
 
 # top wall
-obst(f, [TU, d[1], -UB/2.0, UB/2.0, UH, d[5]], color="INVISIBLE")
+obst(f, [TU, d[1], -UB/2.0, UB/2.0, UH+UGH, d[5]], color="INVISIBLE")
 # top wall between stairs
-obst(f, [0.0, TU, -UB/2.0+BSB, UB/2.0-BSB, UH, d[5]], color="ORANGE")
+obst(f, [0.0, TU, -UB/2.0+BSB, UB/2.0-BSB, UH+UGH, d[5]], color="ORANGE")
 
 # back wall
 obst(f, [UL, d[1], d[2], d[3], d[4], d[5]], color="ORANGE")
 # tunnel hole
-hole(f, [UL, deff[1], -GB/2., GB/2., d[4], UH])
+hole(f, [UL, deff[1], -GB/2., GB/2., d[4], UH+UGH])
 
 #####################################################################
 # upper room
@@ -145,7 +152,7 @@ obst(f, [-OL/4., 0.0, -UB/2.0+BSB, UB/2.0-BSB, OHB, d[5]], color="ORANGE")
 obst(f, [-OL/2., 0.0, UB/2.0, d[3], OHB, d[5]], color="ORANGE")
 
 # tunnel hole
-hole(f, [deff[0], 0, -GB/2., GB/2., d[4], UH])
+hole(f, [deff[0], 0, -GB/2., GB/2., d[4], UH+UGH])
 
 # stair holes
 hole(f, [d[0], d[0]+T1B, deff[2], d[2], OHB, d[5]])
@@ -165,12 +172,12 @@ obst(f, [TTP-TWW, TTP, -GB/2.0, 0.0, 0.0, UH-TWW], color="MIDNIGHT BLUE")
 # top
 obst(f, [TTP, TTP+TTL, -GB/2.0, 0.0, OH-TWW, OH], color="POWDER BLUE")
 # bottom
-obst(f, [TTP, TTP+TTL, -GB/2.0, 0.0, d[4], 1.0], color="BLACK")
+obst(f, [TTP, TTP+TTL, -GB/2.0, 0.0, d[4], UGH], color="BLACK")
 
 
 dist_door = TTL / (TDN+1)
 for i in range(1,TDN+1):
-    hole(f, [TTP + i*dist_door - TDW/2.0, TTP + i*dist_door + TDW/2.0, -GB/2.0, -GB/2.0+TWW, 1.0, UH-TWW])
+    hole(f, [TTP + i*dist_door - TDW/2.0, TTP + i*dist_door + TDW/2.0, -GB/2.0, -GB/2.0+TWW, UGH, UH-TWW])
 
 #hole(f, [TTP+TWW, TTP+TTL-TWW, -GB/2.0+TWW, -TWW, 1.0, UH-TWW])
 
@@ -188,13 +195,32 @@ f.write("&VENT XB= %e, %e, %e, %e, %e, %e, SURF_ID='fire' /\n"%
 #f.write("&SURF ID='inlet', VEL=-10.0 /\n")
 #f.write("&VENT XB=%e, %e, %e, %e, %e, %e, SURF_ID='inlet' /\n"%(UL+TL, UL+TL, -GB/2.0, GB/2.0, d[4], UH))
 
-# output
-f.write("&SLCF PBY=0.0, QUANTITY='TEMPERATURE' /\n")
-f.write("&SLCF PBY=0.0, QUANTITY='VELOCITY' /\n")
+#### output
 
-f.write("&SLCF PBZ=%e, QUANTITY='VELOCITY' /\n"%(UH-grid_spacing))
-f.write("&SLCF PBZ=%e, QUANTITY='VELOCITY' /\n"%(OHB+OH))
-f.write("&SLCF PBX=%e, QUANTITY='VELOCITY' /\n"%(TU/2.0))
+## lower room
+f.write("&SLCF PBZ=%e,  QUANTITY='TEMPERATURE', VECTOR=.TRUE. /\n"%(UGH+2.0))
+f.write("&SLCF PBY=%e,  QUANTITY='TEMPERATURE', VECTOR=.TRUE. /\n"%( GB/2.0 + 1.0))
+f.write("&SLCF PBY=%e,  QUANTITY='TEMPERATURE', VECTOR=.TRUE. /\n"%(-GB/2.0 - 1.0))
+f.write("&SLCF PBY=0.0, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /\n")
+
+## upper room
+f.write("&SLCF PBX=%e, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /\n"%(d[0]+T1B/2.0))
+f.write("&SLCF PBY=%e, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /\n"%(d[3]-T2B/2.0))
+
+
+f.write("&SLCF PBZ=%e,  QUANTITY='TEMPERATURE', VECTOR=.TRUE. /\n"%(UH+UGH-grid_spacing))
+f.write("&SLCF PBZ=%e,  QUANTITY='TEMPERATURE', VECTOR=.TRUE. /\n"%(OHB+OH))
+f.write("&SLCF PBX=%e,  QUANTITY='TEMPERATURE', VECTOR=.TRUE. /\n"%(TU/2.0))
+
+
+ndev = 10
+for i in range(1,ndev+1):
+    z = i * UH/float(ndev)
+    f.write("&DEVC ID='T1-%02d', XYZ=%e,%e,%e, QUANTITY='TEMPERATURE'  /\n"%(i, 5, -GB/2.0 - 1.0, UGH + z))
+    f.write("&DEVC ID='T2-%02d', XYZ=%e,%e,%e, QUANTITY='TEMPERATURE'  /\n"%(i, 5, +GB/2.0 + 1.0, UGH + z))
+    z = i * OH/float(ndev)
+    f.write("&DEVC ID='T3-%02d', XYZ=%e,%e,%e, QUANTITY='TEMPERATURE'  /\n"%(i, d[0]+T1B/2.0, d[2]+2.0, OHB + z))
+    f.write("&DEVC ID='T4-%02d', XYZ=%e,%e,%e, QUANTITY='TEMPERATURE'  /\n"%(i, d[0]+2.0, d[3]-T2B/2.0, OHB + z))
 
 f.write("&TAIL /\n")
 
