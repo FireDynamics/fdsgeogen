@@ -21,7 +21,7 @@ TFP  = TTP + 7
 TDW  = 2
 TDN  = 4
 TWW  = 0.2
-THRR = 125
+THRR = 10000
 
 UB = 10
 UL = 70
@@ -162,22 +162,22 @@ hole(f, [deff[0], d[0], d[3], d[3]-T2B, OHB, d[5]])
 # train
 
 # left
-obst(f, [TTP, TTP+TTL, 0.0, -TWW, 0.0, UH-TWW], color="MIDNIGHT BLUE")
+obst(f, [TTP, TTP+TTL, 0.0, -TWW, 0.0, UH+UGH-TWW], color="MIDNIGHT BLUE")
 # right
-obst(f, [TTP, TTP+TTL, -GB/2.0, -GB/2.0+TWW, 0.0, UH-TWW], color="BLUE")
+obst(f, [TTP, TTP+TTL, -GB/2.0, -GB/2.0+TWW, 0.0, UH+UGH-TWW], color="BLUE")
 # front
-obst(f, [TTP+TTL-TWW, TTP+TTL, -GB/2.0, 0.0, 0.0, UH-TWW], color="MIDNIGHT BLUE")
+obst(f, [TTP+TTL-TWW, TTP+TTL, -GB/2.0, 0.0, 0.0, UH+UGH-TWW], color="MIDNIGHT BLUE")
 # back
-obst(f, [TTP-TWW, TTP, -GB/2.0, 0.0, 0.0, UH-TWW], color="MIDNIGHT BLUE")
+obst(f, [TTP-TWW, TTP, -GB/2.0, 0.0, 0.0, UH+UGH-TWW], color="MIDNIGHT BLUE")
 # top
-obst(f, [TTP, TTP+TTL, -GB/2.0, 0.0, OH-TWW, OH], color="POWDER BLUE")
+obst(f, [TTP-TWW, TTP+TTL, -GB/2.0, 0.0, UH+UGH-TWW, UH+UGH], color="POWDER BLUE")
 # bottom
 obst(f, [TTP, TTP+TTL, -GB/2.0, 0.0, d[4], UGH], color="BLACK")
 
 
 dist_door = TTL / (TDN+1)
 for i in range(1,TDN+1):
-    hole(f, [TTP + i*dist_door - TDW/2.0, TTP + i*dist_door + TDW/2.0, -GB/2.0, -GB/2.0+TWW, UGH, UH-TWW])
+    hole(f, [TTP + i*dist_door - TDW/2.0, TTP + i*dist_door + TDW/2.0, -GB/2.0, -GB/2.0+TWW, UGH, UH+UGH-TWW-0.5])
 
 #hole(f, [TTP+TWW, TTP+TTL-TWW, -GB/2.0+TWW, -TWW, 1.0, UH-TWW])
 
