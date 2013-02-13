@@ -2,16 +2,15 @@ import numpy as np
 
 from helper import *
 
-grid_spacing = 0.100
-ID = ('simple_station_%.3f'%grid_spacing).replace('.','')
+grid_spacing = 0.500
+nmeshes = 1
+ID = ('simple_station_g%.3f_n%03d'%(grid_spacing, nmeshes)).replace('.','')
 
 filename = ID + '.fds'
 f = open(filename, 'w')
 
 print "constructing fds file:       ", filename
 
-nmeshes = 8
-grid_spacing = 0.10
 
 t_end = 0.0
 
@@ -97,17 +96,17 @@ for m in range(nmeshes):
 #####################################################################
 # all boundary walls                
 # x min
-obst(f, [deff[0], d[0], deff[2], deff[3], deff[4], deff[5]], color="BLACK" ) 
+obst(f, [deff[0], d[0], deff[2], deff[3], deff[4], deff[5]], color="INVISIBLE" ) 
 # x max
-obst(f, [d[1], deff[1], deff[2], deff[3], deff[4], deff[5]], color="BLACK" ) 
+obst(f, [d[1], deff[1], deff[2], deff[3], deff[4], deff[5]], color="INVISIBLE" ) 
 
 # y min
 obst(f, [d[0], d[1], deff[2], d[2], deff[4], deff[5]], color="INVISIBLE" ) 
 # y max
-obst(f, [d[0], d[1], d[3], deff[3], deff[4], deff[5]], color="BLACK" ) 
+obst(f, [d[0], d[1], d[3], deff[3], deff[4], deff[5]], color="GRAY" ) 
 
 # z min
-obst(f, [d[0], d[1], d[2], d[3], deff[4], d[4]], color="BLACK" ) 
+obst(f, [d[0], d[1], d[2], d[3], deff[4], d[4]], color="GRAY" ) 
 # z max
 obst(f, [d[0], d[1], d[2], d[3], d[5], deff[5]], color="INVISIBLE" ) 
 
@@ -147,12 +146,24 @@ hole(f, [UL, deff[1], -GB/2., GB/2., d[4], UH+UGH])
 obst(f, [d[0], 0.0, d[2], d[3], d[4], OHB], color="BRICK")
 
 # walls
-obst(f, [-OL/2., 0.0,  d[2], -UB/2.0, OHB, d[5]], color="ORANGE")
+obst(f, [-OL/2., 0.0,  d[2], -UB/2.0, OHB, d[5]], color="INVISIBLE")
 obst(f, [-OL/4., 0.0, -UB/2.0+BSB, UB/2.0-BSB, OHB, d[5]], color="ORANGE")
 obst(f, [-OL/2., 0.0, UB/2.0, d[3], OHB, d[5]], color="ORANGE")
 
 # tunnel hole
 hole(f, [deff[0], 0, -GB/2., GB/2., d[4], UH+UGH])
+
+# ceiling above stairs
+nsteps = int(OH / grid_spacing)
+slope  = float(OH) / float(TL)
+dz     = float(OH) / nsteps
+for i in range(nsteps):
+    xmin = TL * i / float(nsteps-1)
+    xmax = TL
+    zmax = d[5] - i * dz
+    zmin = d[5] - (i+1) * dz
+    obst(f, [xmin, xmax, -UB/2.0, -UB/2.0+BSB, zmin, zmax], color="ORANGE")
+    obst(f, [xmin, xmax, UB/2.0-BSB, UB/2.0, zmin, zmax], color="ORANGE")
 
 # stair holes
 hole(f, [d[0], d[0]+T1B, deff[2], d[2], OHB, d[5]])
@@ -206,10 +217,11 @@ f.write("&SLCF PBY=0.0, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /\n")
 ## upper room
 f.write("&SLCF PBX=%e, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /\n"%(d[0]+T1B/2.0))
 f.write("&SLCF PBY=%e, QUANTITY='TEMPERATURE', VECTOR=.TRUE. /\n"%(d[3]-T2B/2.0))
+f.write("&SLCF PBZ=%e,  QUANTITY='TEMPERATURE', VECTOR=.TRUE. /\n"%(OHB+2.0))
 
 
 f.write("&SLCF PBZ=%e,  QUANTITY='TEMPERATURE', VECTOR=.TRUE. /\n"%(UH+UGH-grid_spacing))
-f.write("&SLCF PBZ=%e,  QUANTITY='TEMPERATURE', VECTOR=.TRUE. /\n"%(OHB+OH))
+f.write("&SLCF PBZ=%e,  QUANTITY='TEMPERATURE', VECTOR=.TRUE. /\n"%(OHB+OH-grid_spacing))
 f.write("&SLCF PBX=%e,  QUANTITY='TEMPERATURE', VECTOR=.TRUE. /\n"%(TU/2.0))
 
 
@@ -217,10 +229,31 @@ ndev = 10
 for i in range(1,ndev+1):
     z = i * UH/float(ndev)
     f.write("&DEVC ID='T1-%02d', XYZ=%e,%e,%e, QUANTITY='TEMPERATURE'  /\n"%(i, 5, -GB/2.0 - 1.0, UGH + z))
+    
+ndev = 10
+for i in range(1,ndev+1):
+    z = i * UH/float(ndev)    
     f.write("&DEVC ID='T2-%02d', XYZ=%e,%e,%e, QUANTITY='TEMPERATURE'  /\n"%(i, 5, +GB/2.0 + 1.0, UGH + z))
+    
+ndev = 10
+for i in range(1,ndev+1):    
     z = i * OH/float(ndev)
     f.write("&DEVC ID='T3-%02d', XYZ=%e,%e,%e, QUANTITY='TEMPERATURE'  /\n"%(i, d[0]+T1B/2.0, d[2]+2.0, OHB + z))
+
+ndev = 10
+for i in range(1,ndev+1):    
+    z = i * OH/float(ndev)
     f.write("&DEVC ID='T4-%02d', XYZ=%e,%e,%e, QUANTITY='TEMPERATURE'  /\n"%(i, d[0]+2.0, d[3]-T2B/2.0, OHB + z))
+
+ndev = 30
+for i in range(1,ndev+1):    
+    x = i * UL/float(ndev)
+    f.write("&DEVC ID='T5-%02d', XYZ=%e,%e,%e, QUANTITY='TEMPERATURE'  /\n"%(i, x, -GB/2.0 - 1.0, UGH + UH - 0.5))
+    
+ndev = 10
+for i in range(1,ndev+1):    
+    x = -i * OL/float(ndev)
+    f.write("&DEVC ID='T5-%02d', XYZ=%e,%e,%e, QUANTITY='TEMPERATURE'  /\n"%(i, x, -GB/2.0 - 1.0, OHB + OH - 0.5))
 
 f.write("&TAIL /\n")
 
