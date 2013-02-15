@@ -2,7 +2,7 @@ import numpy as np
 
 from helper import *
 
-grid_spacing = 0.500
+grid_spacing = 0.150
 nmeshes = 1
 ID = ('simple_station_g%.3f_n%03d'%(grid_spacing, nmeshes)).replace('.','')
 
@@ -23,10 +23,10 @@ TWW  = 0.2
 THRR = 10000
 
 UB = 10
-UL = 70
+UL = 80
 UH =  3
 BSB = 3
-TU = 5
+TU = 7
 UGH = 1
 
 GB = UB - 2*BSB
@@ -54,6 +54,7 @@ deff = d + minb*np.array([-1, 1, -1, 1, -1, 1])
 grid = np.zeros(3)
 
 grid  = (deff[1::2] - deff[::2]) / grid_spacing
+grid = grid.astype(int)
 
 while not div235(grid[0]): grid[0] += 1
 while not div235(grid[1]): grid[1] += 1
@@ -153,17 +154,26 @@ obst(f, [-OL/2., 0.0, UB/2.0, d[3], OHB, d[5]], color="ORANGE")
 # tunnel hole
 hole(f, [deff[0], 0, -GB/2., GB/2., d[4], UH+UGH])
 
-# ceiling above stairs
+# level connecting stairs
 nsteps = int(OH / grid_spacing)
-slope  = float(OH) / float(TL)
-dz     = float(OH) / nsteps
+slope  = float(OH) / float(TU)
+dz     = float(OH+OHB -UH-UGH) / nsteps
 for i in range(nsteps):
-    xmin = TL * i / float(nsteps-1)
-    xmax = TL
+    # top
+    xmin = TU * i / float(nsteps-1)
+    xmax = TU
     zmax = d[5] - i * dz
     zmin = d[5] - (i+1) * dz
-    obst(f, [xmin, xmax, -UB/2.0, -UB/2.0+BSB, zmin, zmax], color="ORANGE")
-    obst(f, [xmin, xmax, UB/2.0-BSB, UB/2.0, zmin, zmax], color="ORANGE")
+    obst(f, [xmin, xmax, -UB/2.0, -UB/2.0+BSB, zmin, zmax], color="MELON")
+    obst(f, [xmin, xmax, UB/2.0-BSB, UB/2.0, zmin, zmax], color="MELON")
+    # bottom
+    xmin = 0.0
+    xmax = TU * i / float(nsteps-1)
+    zmax = OHB - i * dz
+    zmin = OHB - (i+1) * dz
+    obst(f, [xmin, xmax, -UB/2.0, -UB/2.0+BSB, zmin, zmax], color="CHOCOLATE")
+    obst(f, [xmin, xmax, UB/2.0-BSB, UB/2.0, zmin, zmax], color="CHOCOLATE")
+
 
 # stair holes
 hole(f, [d[0], d[0]+T1B, deff[2], d[2], OHB, d[5]])
@@ -173,34 +183,43 @@ hole(f, [deff[0], d[0], d[3], d[3]-T2B, OHB, d[5]])
 # train
 
 # left
-obst(f, [TTP, TTP+TTL, 0.0, -TWW, 0.0, UH+UGH-TWW], color="MIDNIGHT BLUE")
+#obst(f, [TTP, TTP+TTL, 0.0, -TWW, 0.0, UH+UGH-TWW], color="MIDNIGHT BLUE")
 # right
-obst(f, [TTP, TTP+TTL, -GB/2.0, -GB/2.0+TWW, 0.0, UH+UGH-TWW], color="BLUE")
+#obst(f, [TTP, TTP+TTL, -GB/2.0, -GB/2.0+TWW, 0.0, UH+UGH-TWW], color="BLUE")
 # front
-obst(f, [TTP+TTL-TWW, TTP+TTL, -GB/2.0, 0.0, 0.0, UH+UGH-TWW], color="MIDNIGHT BLUE")
+#obst(f, [TTP+TTL-TWW, TTP+TTL, -GB/2.0, 0.0, 0.0, UH+UGH-TWW], color="MIDNIGHT BLUE")
 # back
-obst(f, [TTP-TWW, TTP, -GB/2.0, 0.0, 0.0, UH+UGH-TWW], color="MIDNIGHT BLUE")
+#obst(f, [TTP-TWW, TTP, -GB/2.0, 0.0, 0.0, UH+UGH-TWW], color="MIDNIGHT BLUE")
 # top
-obst(f, [TTP-TWW, TTP+TTL, -GB/2.0, 0.0, UH+UGH-TWW, UH+UGH], color="POWDER BLUE")
+#obst(f, [TTP-TWW, TTP+TTL, -GB/2.0, 0.0, UH+UGH-TWW, UH+UGH], color="POWDER BLUE")
 # bottom
-obst(f, [TTP, TTP+TTL, -GB/2.0, 0.0, d[4], UGH], color="BLACK")
+#obst(f, [TTP, TTP+TTL, -GB/2.0, 0.0, d[4], UGH], color="BLACK")
 
 
-dist_door = TTL / (TDN+1)
-for i in range(1,TDN+1):
-    hole(f, [TTP + i*dist_door - TDW/2.0, TTP + i*dist_door + TDW/2.0, -GB/2.0, -GB/2.0+TWW, UGH, UH+UGH-TWW-0.5])
+#dist_door = TTL / (TDN+1)
+#for i in range(1,TDN+1):
+#    hole(f, [TTP + i*dist_door - TDW/2.0, TTP + i*dist_door + TDW/2.0, -GB/2.0, -GB/2.0+TWW, UGH, UH+UGH-TWW-0.5])
 
 #hole(f, [TTP+TWW, TTP+TTL-TWW, -GB/2.0+TWW, -TWW, 1.0, UH-TWW])
+
+
+tf = open("input_train.fds", "r")
+
+for line in tf:
+    f.write(translate(line, 20, 1.0, UGH))
+
+tf.close()
+
 
 #####################################################################
 # sources
 
 # fire
-f.write("&REAC FUEL = 'METHANE' /\n")
-f.write("&SURF ID='fire', HRRPUA=%d /\n"%THRR)
-obst(f, [TFP-0.5, TFP+0.5, -1.0-TWW, -TWW, 1.0, 1.5], color="RED")
-f.write("&VENT XB= %e, %e, %e, %e, %e, %e, SURF_ID='fire' /\n"%
-        (TFP-0.5, TFP+0.5, -1.0-TWW, -TWW, 1.5, 1.5) )
+#f.write("&REAC FUEL = 'METHANE' /\n")
+#f.write("&SURF ID='fire', HRRPUA=%d /\n"%THRR)
+#obst(f, [TFP-0.5, TFP+0.5, -1.0-TWW, -TWW, 1.0, 1.5], color="RED")
+#f.write("&VENT XB= %e, %e, %e, %e, %e, %e, SURF_ID='fire' /\n"%
+#        (TFP-0.5, TFP+0.5, -1.0-TWW, -TWW, 1.5, 1.5) )
                 
 #vents
 #f.write("&SURF ID='inlet', VEL=-10.0 /\n")
@@ -224,37 +243,32 @@ f.write("&SLCF PBZ=%e,  QUANTITY='TEMPERATURE', VECTOR=.TRUE. /\n"%(UH+UGH-grid_
 f.write("&SLCF PBZ=%e,  QUANTITY='TEMPERATURE', VECTOR=.TRUE. /\n"%(OHB+OH-grid_spacing))
 f.write("&SLCF PBX=%e,  QUANTITY='TEMPERATURE', VECTOR=.TRUE. /\n"%(TU/2.0))
 
+# devices
 
 ndev = 10
-for i in range(1,ndev+1):
-    z = i * UH/float(ndev)
-    f.write("&DEVC ID='T1-%02d', XYZ=%e,%e,%e, QUANTITY='TEMPERATURE'  /\n"%(i, 5, -GB/2.0 - 1.0, UGH + z))
-    
-ndev = 10
-for i in range(1,ndev+1):
-    z = i * UH/float(ndev)    
-    f.write("&DEVC ID='T2-%02d', XYZ=%e,%e,%e, QUANTITY='TEMPERATURE'  /\n"%(i, 5, +GB/2.0 + 1.0, UGH + z))
-    
-ndev = 10
-for i in range(1,ndev+1):    
-    z = i * OH/float(ndev)
-    f.write("&DEVC ID='T3-%02d', XYZ=%e,%e,%e, QUANTITY='TEMPERATURE'  /\n"%(i, d[0]+T1B/2.0, d[2]+2.0, OHB + z))
-
-ndev = 10
-for i in range(1,ndev+1):    
-    z = i * OH/float(ndev)
-    f.write("&DEVC ID='T4-%02d', XYZ=%e,%e,%e, QUANTITY='TEMPERATURE'  /\n"%(i, d[0]+2.0, d[3]-T2B/2.0, OHB + z))
+b    = 0.2
+devc(f, "T1", 5.0, -GB/2.0 - 1.0, np.linspace(UGH + b, UGH + UH - b, ndev), "TEMPERATURE")
+devc(f, "S1", 5.0, -GB/2.0 - 1.0, np.linspace(UGH + b, UGH + UH - b, ndev), "MASS FRACTION", spec_id="SOOT")
+devc(f, "T2", 5.0,  GB/2.0 + 1.0, np.linspace(UGH + b, UGH + UH - b, ndev), "TEMPERATURE")
+devc(f, "S2", 5.0,  GB/2.0 + 1.0, np.linspace(UGH + b, UGH + UH - b, ndev), "MASS FRACTION", spec_id="SOOT")
+devc(f, "T3", d[0]+T1B/2.0, d[2]+2.0, np.linspace(OHB + b, OHB + OH - b, ndev), "TEMPERATURE")
+devc(f, "S3", d[0]+T1B/2.0, d[2]+2.0, np.linspace(OHB + b, OHB + OH - b, ndev), "MASS FRACTION", spec_id="SOOT")
+devc(f, "T4", d[0]+2.0, d[3]-T2B/2.0, np.linspace(OHB + b, OHB + OH - b, ndev), "TEMPERATURE")
+devc(f, "S4", d[0]+2.0, d[3]-T2B/2.0, np.linspace(OHB + b, OHB + OH - b, ndev), "MASS FRACTION", spec_id="SOOT")
 
 ndev = 30
-for i in range(1,ndev+1):    
-    x = i * UL/float(ndev)
-    f.write("&DEVC ID='T5-%02d', XYZ=%e,%e,%e, QUANTITY='TEMPERATURE'  /\n"%(i, x, -GB/2.0 - 1.0, UGH + UH - 0.5))
-    
+b    = 0.2
+devc(f, "T5", np.linspace(+b, UL-b, ndev), -GB/2.0 - 1.0, UGH + UH - b, "TEMPERATURE")
+devc(f, "S5", np.linspace(+b, UL-b, ndev), -GB/2.0 - 1.0, UGH + UH - b, "MASS FRACTION", spec_id="SOOT")
+
 ndev = 10
-for i in range(1,ndev+1):    
-    x = -i * OL/float(ndev)
-    f.write("&DEVC ID='T5-%02d', XYZ=%e,%e,%e, QUANTITY='TEMPERATURE'  /\n"%(i, x, -GB/2.0 - 1.0, OHB + OH - 0.5))
+b    = 0.2
+devc(f, "T6", np.linspace(-OL+b, -b, ndev), -GB/2.0 - 1.0, OHB + OH - b, "TEMPERATURE")
+devc(f, "S6", np.linspace(-OL+b, -b, ndev), -GB/2.0 - 1.0, OHB + OH - b, "MASS FRACTION", spec_id="SOOT")
+
+devc(f, "T", 1, 2, np.linspace(5,7,3), "TEMPERATURE")
 
 f.write("&TAIL /\n")
 
 f.close()
+
