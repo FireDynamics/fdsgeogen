@@ -49,7 +49,7 @@ d = np.array([
              0.0, (OH + OHB) 
              ])
 
-deff = d + minb*np.array([-1, 1, -1, 1, -1, 1])
+deff = d + minb*np.array([-1, 1, -1, 1, 0, 1])
 
 grid = np.zeros(3)
 
