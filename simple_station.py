@@ -63,8 +63,11 @@ while not div235(grid[2]): grid[2] += 1
 print "computational domain [m]:    ", d
 
 b = (grid_spacing * grid - (d[1::2] - d[::2])) * 0.5
-deff[::2]  -= b 
-deff[1::2] += b
+deff[0]  -= b 
+deff[1]  += b
+deff[2]  -= b 
+deff[3]  += b
+deff[5]  += 2*b
 
 print "adding boundary buffer [m]:  ", b
 print "corrected domain [m]:        ", deff
