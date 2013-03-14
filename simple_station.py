@@ -2,7 +2,7 @@ import numpy as np
 
 from helper import *
 
-grid_spacing = 0.100
+grid_spacing = 0.800
 nmeshes = 1
 ID = ('simple_station_g%.3f_n%03d'%(grid_spacing, nmeshes)).replace('.','')
 
@@ -22,30 +22,30 @@ TDN  = 4
 TWW  = 0.2
 THRR = 10000
 
-UB = 10
-UL = 80
-UH =  3
-BSB = 3
-TU = 7
-UGH = 1
+UB = 11.2
+UL = 80.0
+UH =  3.2
+BSB = 3.2
+TU = 9.6
+UGH = 0.8
 
 GB = UB - 2*BSB
 
-TL = 5
+TL = 5.6
 
-OB = 17
-OL = 17
-OH =  3
-OHB = 5
+OB = 16.0
+OL = 16.0
+OH =  3.2
+OHB = 5.6
 
-T1B = 8.5
-T2B = 8.5
+T1B = 8.0
+T2B = 8.0
 
-minb = 0.5
+minb = 0.8
 
 d = np.array([ 
             -(OL), (UL + TL),
-            -(OB/2.0), (OB/2.0),
+            -(OB/2.0), (OB/2.0)+T1B,
              0.0, (OH + OHB) 
              ])
 
@@ -53,7 +53,7 @@ deff = d + minb*np.array([-1, 1, -1, 1, 0, 1])
 
 grid = np.zeros(3)
 
-grid  = (deff[1::2] - deff[::2]) / grid_spacing
+grid  = (deff[1::2] - deff[::2]) / grid_spacing + np.array([1,1,1])
 grid = grid.astype(int)
 
 while not div235(grid[0]): grid[0] += 1
@@ -62,10 +62,10 @@ while not div235(grid[2]): grid[2] += 1
 
 print "computational domain [m]:    ", d
 
-b = (grid_spacing * grid - (d[1::2] - d[::2])) * 0.5
-deff[::2]  -= b 
-deff[1::2] += b
-deff[4:] += b[2]
+b = (grid_spacing * grid - (deff[1::2] - deff[::2]))
+deff[1]  += b[0]
+deff[3]  += b[1]
+deff[5]  += b[2]
 
 print "adding boundary buffer [m]:  ", b
 print "corrected domain [m]:        ", deff
@@ -103,12 +103,12 @@ obst(f, [deff[0], d[0], deff[2], deff[3], deff[4], deff[5]], color="INVISIBLE" )
 obst(f, [d[1], deff[1], deff[2], deff[3], deff[4], deff[5]], color="INVISIBLE" ) 
 
 # y min
-obst(f, [d[0], d[1], deff[2], d[2], deff[4], deff[5]], color="INVISIBLE" ) 
+obst(f, [d[0], d[1], deff[2], d[2], deff[4], deff[5]], color="GRAY" ) 
 # y max
 obst(f, [d[0], d[1], d[3], deff[3], deff[4], deff[5]], color="GRAY" ) 
 
 # z min
-obst(f, [d[0], d[1], d[2], d[3], deff[4], d[4]], color="GRAY" ) 
+#obst(f, [d[0], d[1], d[2], d[3], deff[4], d[4]], color="GRAY" ) 
 # z max
 obst(f, [d[0], d[1], d[2], d[3], d[5], deff[5]], color="INVISIBLE" ) 
 
@@ -156,15 +156,18 @@ obst(f, [-OL/2., 0.0, UB/2.0, d[3], OHB, d[5]], color="ORANGE")
 hole(f, [deff[0], 0, -GB/2., GB/2., d[4], UH+UGH])
 
 # level connecting stairs
-nsteps = int(OH / grid_spacing)
+nsteps = int((OH+OHB -UH-UGH) / grid_spacing)
 slope  = float(OH) / float(TU)
 dz     = float(OH+OHB -UH-UGH) / nsteps
 for i in range(nsteps):
     # top
-    xmin = TU * i / float(nsteps-1)
+    xmin = TU * i / float(nsteps)
     xmax = TU
     zmax = d[5] - i * dz
     zmin = d[5] - (i+1) * dz
+    
+    wzmax = zmin + dz
+    
     obst(f, [xmin, xmax, -UB/2.0, -UB/2.0+BSB, zmin, zmax], color="MELON")
     obst(f, [xmin, xmax, UB/2.0-BSB, UB/2.0, zmin, zmax], color="MELON")
     # bottom
@@ -172,8 +175,15 @@ for i in range(nsteps):
     xmax = TU * i / float(nsteps-1)
     zmax = OHB - i * dz
     zmin = OHB - (i+1) * dz
+    wzmin = zmax
+    wxmin = TU * (i-1) / float(nsteps-1)
+    if i == 0: wxmin = 0.0
+    wxmax = xmax
     obst(f, [xmin, xmax, -UB/2.0, -UB/2.0+BSB, zmin, zmax], color="CHOCOLATE")
     obst(f, [xmin, xmax, UB/2.0-BSB, UB/2.0, zmin, zmax], color="CHOCOLATE")
+    # wall
+    obst(f, [wxmin, wxmax, UB/2.0-BSB, UB/2.0-BSB+0.8, wzmin, wzmax], color="MELON")
+    obst(f, [wxmin, wxmax, -UB/2.0+BSB, -UB/2.0+BSB-0.8, wzmin, wzmax], color="MELON")
 
 
 # stair holes
@@ -248,10 +258,10 @@ f.write("&SLCF PBX=%e,  QUANTITY='TEMPERATURE', VECTOR=.TRUE. /\n"%(TU/2.0))
 
 ndev = 10
 b    = 0.2
-devc(f, "T1", 5.0, -GB/2.0 - 1.0, np.linspace(UGH + b, UGH + UH - b, ndev), "TEMPERATURE")
-devc(f, "S1", 5.0, -GB/2.0 - 1.0, np.linspace(UGH + b, UGH + UH - b, ndev), "MASS FRACTION", spec_id="SOOT")
-devc(f, "T2", 5.0,  GB/2.0 + 1.0, np.linspace(UGH + b, UGH + UH - b, ndev), "TEMPERATURE")
-devc(f, "S2", 5.0,  GB/2.0 + 1.0, np.linspace(UGH + b, UGH + UH - b, ndev), "MASS FRACTION", spec_id="SOOT")
+devc(f, "T1", 10.0, -GB/2.0 - 1.0, np.linspace(UGH + b, UGH + UH - b, ndev), "TEMPERATURE")
+devc(f, "S1", 10.0, -GB/2.0 - 1.0, np.linspace(UGH + b, UGH + UH - b, ndev), "MASS FRACTION", spec_id="SOOT")
+devc(f, "T2", 10.0,  GB/2.0 + 1.0, np.linspace(UGH + b, UGH + UH - b, ndev), "TEMPERATURE")
+devc(f, "S2", 10.0,  GB/2.0 + 1.0, np.linspace(UGH + b, UGH + UH - b, ndev), "MASS FRACTION", spec_id="SOOT")
 devc(f, "T3", d[0]+T1B/2.0, d[2]+2.0, np.linspace(OHB + b, OHB + OH - b, ndev), "TEMPERATURE")
 devc(f, "S3", d[0]+T1B/2.0, d[2]+2.0, np.linspace(OHB + b, OHB + OH - b, ndev), "MASS FRACTION", spec_id="SOOT")
 devc(f, "T4", d[0]+2.0, d[3]-T2B/2.0, np.linspace(OHB + b, OHB + OH - b, ndev), "TEMPERATURE")
@@ -267,7 +277,12 @@ b    = 0.2
 devc(f, "T6", np.linspace(-OL+b, -b, ndev), -GB/2.0 - 1.0, OHB + OH - b, "TEMPERATURE")
 devc(f, "S6", np.linspace(-OL+b, -b, ndev), -GB/2.0 - 1.0, OHB + OH - b, "MASS FRACTION", spec_id="SOOT")
 
-devc(f, "T", 1, 2, np.linspace(5,7,3), "TEMPERATURE")
+f.write("&DEVC ID='Soot Density Upper Level', QUANTITY='DENSITY', SPEC_ID='SOOT', STATISTICS='VOLUME MEAN', XB=%e,%e,%e,%e,%e,%e /\n"%(d[0], 0.0, d[2], d[3], OHB, OHB+OH))
+f.write("&DEVC XB= %e,%e,%e,%e,%e,%e, QUANTITY='MASS FLOW', ID='flow T1' /\n"%(d[0], d[0]+T1B, d[2], d[2], OHB, d[5]))
+f.write("&DEVC XB= %e,%e,%e,%e,%e,%e, QUANTITY='MASS FLOW', ID='flow T2' /\n"%(d[0], d[0], d[3], d[3]-T2B, OHB, d[5]))
+f.write("&DEVC XB= %e,%e,%e,%e,%e,%e, QUANTITY='MASS FLOW', ID='flow tunnel xmin' /\n"%(d[0], d[0], -GB/2., GB/2., d[4], UH+UGH))
+f.write("&DEVC XB= %e,%e,%e,%e,%e,%e, QUANTITY='MASS FLOW', ID='flow tunnel xmax' /\n"%(d[1], d[1], -GB/2., GB/2., d[4], UH+UGH))
+
 
 f.write("&TAIL /\n")
 
