@@ -3,7 +3,7 @@ import numpy as np
 from helper import *
 
 grid_spacing = 0.200
-nmeshes = 8
+nmeshes = 16
 ID = ('simple_station_g%.3f_n%03d'%(grid_spacing, nmeshes)).replace('.','')
 
 filename = ID + '.fds'
@@ -12,7 +12,7 @@ f = open(filename, 'w')
 print "constructing fds file:       ", filename
 
 
-t_end = 500.0
+t_end = 300.0
 
 TTP  = 15
 TTL  = 25 

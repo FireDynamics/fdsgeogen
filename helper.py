@@ -49,7 +49,8 @@ def translate(line, x, y, z):
 #    print "================="
 #    print line
     
-    lcs=line.rstrip('/\n').split(',')
+    #lcs=line.rstrip('/\n').split(',')
+    lcs=re.split(',|\/|\n|', line)
     
     first = -1
     for i in range(len(lcs)):
