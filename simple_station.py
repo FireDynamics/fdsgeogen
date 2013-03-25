@@ -189,7 +189,7 @@ for i in range(nsteps):
 
 # stair holes
 hole(f, [d[0], d[0]+T1B, deff[2], d[2], OHB, d[5]])
-hole(f, [deff[0], d[0], d[3], d[3]-T2B, OHB, d[5]])
+hole(f, [deff[0], d[0], d[3]-T2B, d[3], OHB, d[5]])
 
 #####################################################################
 # train
@@ -278,7 +278,7 @@ devc(f, "S6", np.linspace(-OL+b, -b, ndev), -GB/2.0 - 1.6, OHB + 2.4, "MASS FRAC
 
 f.write("&DEVC ID='Soot Density Upper Level', QUANTITY='DENSITY', SPEC_ID='SOOT', STATISTICS='VOLUME MEAN', XB=%e,%e,%e,%e,%e,%e /\n"%(d[0], 0.0, d[2], d[3], OHB, OHB+OH))
 f.write("&DEVC XB= %e,%e,%e,%e,%e,%e, QUANTITY='MASS FLOW', ID='flow T1' /\n"%(d[0], d[0]+T1B, d[2], d[2], OHB, d[5]))
-f.write("&DEVC XB= %e,%e,%e,%e,%e,%e, QUANTITY='MASS FLOW', ID='flow T2' /\n"%(d[0], d[0], d[3], d[3]-T2B, OHB, d[5]))
+f.write("&DEVC XB= %e,%e,%e,%e,%e,%e, QUANTITY='MASS FLOW', ID='flow T2' /\n"%(d[0], d[0], d[3]-T2B, d[3], OHB, d[5]))
 f.write("&DEVC XB= %e,%e,%e,%e,%e,%e, QUANTITY='MASS FLOW', ID='flow tunnel xmin' /\n"%(d[0], d[0], -GB/2., GB/2., d[4], UH+UGH))
 f.write("&DEVC XB= %e,%e,%e,%e,%e,%e, QUANTITY='MASS FLOW', ID='flow tunnel xmax' /\n"%(d[1], d[1], -GB/2., GB/2., d[4], UH+UGH))
 
