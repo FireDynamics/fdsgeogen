@@ -2,7 +2,7 @@ import numpy as np
 
 from helper import *
 
-grid_spacing = 0.200
+grid_spacing = 0.100
 nmeshes = 16
 ID = ('simple_station_g%.3f_n%03d'%(grid_spacing, nmeshes)).replace('.','')
 
@@ -12,7 +12,7 @@ f = open(filename, 'w')
 print "constructing fds file:       ", filename
 
 
-t_end = 300.0
+t_end = 0.0
 
 TTP  = 15
 TTL  = 25 
@@ -74,6 +74,7 @@ print "grid size:                   ", grid
 
 f.write("&HEAD CHID='%s', TITLE='Simple Metro Station Setup' /\n"%ID)
 f.write("&TIME T_END=%e /\n"%t_end)
+f.write("&PRES MAX_PRESSURE_ITERATIONS=1000 /\n")
 
 dnx = grid[0] / nmeshes
 rnx = 0
