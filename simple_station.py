@@ -74,6 +74,7 @@ print "grid size:                   ", grid
 
 f.write("&HEAD CHID='%s', TITLE='Simple Metro Station Setup' /\n"%ID)
 f.write("&TIME T_END=%e /\n"%t_end)
+f.write("&DUMP DT_RESTART=50.0 /\n")
 f.write("&PRES MAX_PRESSURE_ITERATIONS=1000 /\n")
 
 dnx = grid[0] / nmeshes
