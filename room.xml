@@ -1,0 +1,14 @@
+<fds>
+
+    <const pi="3.14" e="2.76" c="3e8"/>
+    <const h="1"/>
+    
+    <eval e1="pi * 2" e2 = "h+c / 2123.0"/>
+
+    <obst x1="e1" x2="4.3" y1="e1 * 2" y2="e" z1="3.2" z2="pi**2" />
+    
+    <loop var="i" start="1" stop="4">
+        <obsta x1="i" x2="i*i" y1="2" y2="2" z1="1" z2="2" />
+    </loop>
+
+</fds>
