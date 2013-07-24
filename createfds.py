@@ -1,55 +1,38 @@
 import sys
 import xml.etree.ElementTree as ET
 
+def obst(node, vars):
+    print "OBST XB=%f,%f,%f,%f,%f,%f"%(eval(node.attrib["x1"], {}, vars),
+                                       eval(node.attrib["x2"], {}, vars),
+                                       eval(node.attrib["y1"], {}, vars),
+                                       eval(node.attrib["y2"], {}, vars),
+                                       eval(node.attrib["z1"], {}, vars),
+                                       eval(node.attrib["z2"], {}, vars))
+
+def var(node, vars):
+    for att in node.attrib:
+        vars[att] = eval(node.attrib[att], {}, vars)
+
+def loop(node, vars):
+    start = int(node.attrib['start'])
+    stop  = int(node.attrib['stop'])
+    
+    for loop_i in range(start, stop):
+        local_vars = dict(vars.items() + {node.attrib['var'] : loop_i}.items())
+    
+        for local_node in node:
+            if local_node.tag == 'obst': obst(local_node, local_vars)
+            if local_node.tag == 'var': var(local_node, local_vars)
+            if local_node.tag == 'loop': loop(local_node, local_vars)
 
 tree = ET.parse(str(sys.argv[1]))
 root = tree.getroot()
 
-nodes = root.findall(".")
-
 vars = {}
 
-for node in root.iter('const'):
+for node in root:
     print node
-    print node.tag
-    print node.attrib
     
-    if node.tag == 'const':
-        for att in node.attrib:
-            print att
-            print node.attrib[att]
-            vars[att] = float(node.attrib[att])
-            
-
-for node in root.iter('eval'):
-    print node
-    print node.tag
-    print node.attrib
-    
-    for att in node.attrib:
-         vars[att] = eval(node.attrib[att], globals(), vars)
-
-print vars
-
-for node in root.iter('obst'):
-    print node
-    print node.tag
-    print node.attrib
-    
-    print "OBST XB=%f,%f,%f,%f,%f,%f"%(eval(node.attrib["x1"], globals(), vars),
-                                       eval(node.attrib["x2"], globals(), vars),
-                                       eval(node.attrib["y1"], globals(), vars),
-                                       eval(node.attrib["y2"], globals(), vars),
-                                       eval(node.attrib["z1"], globals(), vars),
-                                       eval(node.attrib["z2"], globals(), vars))
-
-for node in root.iter('loop'):
-    print node
-    print node.tag
-    print node.attrib
-    
-    loop_var = {node.attrib['var'] : int(node.attrib['start'])}
-    
-    print loop_var
-    print dict(vars.items() + loop_var.items())
-    print vars
+    if node.tag == 'obst': obst(node, vars)
+    if node.tag == 'var': var(node, vars)
+    if node.tag == 'loop': loop(node, vars)
