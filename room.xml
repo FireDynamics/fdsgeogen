@@ -1,21 +1,27 @@
 <fds>
 
-    <var pi="3.142" e="2.76" c="3e8"/>
-    <var h="1"/>
+    <var xmin = "-2.23"   xmax = "2.0"/>
+    <var ymin = "-2.0"   ymax = "2.0"/>
+    <var zmin = " 0.0"   zmax = "3.0"/>    
+
+    <var delta = "0.1" />
+    <var nx = "div235((xmax - xmin) / delta)" />
+    <var ny = "div235((ymax - ymin) / delta)" />
+    <var nz = "div235((zmax - zmin) / delta)" />
     
-    <var e1="pi * 2" e2 = "h+c / 2123.0"/>
 
-    <obst x1="e1" x2="4.3" y1="e1 * 2" y2="e" z1="3.2" z2="pi**2" />
+    <obst x1="1" 
+          x2="4.3" 
+          y1="2" 
+          y2="1" 
+          z1="3.2" 
+          z2="1**2" />
     
-    <loop var="i" start="1" stop="4">
-        <obst x1="i" x2="pi*i" y1="2" y2="2" z1="1" z2="2" />
-        <obst x1="3+i" x2="i*i" y1="2" y2="2" z1="1" z2="2" />
-    </loop>
+<!-- this is a simple comment -->
 
-    <loop var="i" start="10" stop="12">
-        <obst x1="i" x2="i*i" y1="2" y2="2" z1="1" z2="2" />
-        <obst x1="3+i" x2="i*i" y1="2" y2="2" z1="1" z2="2" />
+    <loop var="i" start="10" stop="20">
+        <var tt="i*0.1" />
+        <obst x1="tt" x2="0" y1="0" y2="0" z1="0" z2="0" />
     </loop>
-
 
 </fds>
