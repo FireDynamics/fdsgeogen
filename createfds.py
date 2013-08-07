@@ -137,7 +137,21 @@ def fire(node, vars):
         write_to_fds(vars, "&SURF ID='burningbox', HRRPUA=%f /\n"%hrrpua)
         write_to_fds(vars, "&VENT XB=%f,%f,%f,%f,%f,%f SURF_ID='burningbox' color='RED'/\n"%(cx-w2, cx+w2, cy-w2, cy+w2, lz+h, lz+h))
 
-
+def slice(node, vars):
+    q = "QUANTITY='%s'"%node.attrib['q']
+    v = ""
+    if 'v' in node.attrib:
+        if node.attrib['v'] == '1': v="VECTOR=.TRUE."
+    if 'x' in node.attrib:
+        pos = eval(node.attrib['x'], {}, vars)
+        write_to_fds(vars, "&SLCF PBX=%e, %s %s /\n"%(pos, q, v))
+    if 'y' in node.attrib:
+        pos = eval(node.attrib['y'], {}, vars)
+        write_to_fds(vars, "&SLCF PBY=%e, %s %s /\n"%(pos, q, v))
+    if 'z' in node.attrib:
+        pos = eval(node.attrib['z'], {}, vars)
+        write_to_fds(vars, "&SLCF PBZ=%e, %s %s /\n"%(pos, q, v))
+    
 tree = ET.parse(str(sys.argv[1]))
 root = tree.getroot()
 
@@ -156,5 +170,6 @@ for node in root:
     
     if node.tag == 'boundary': boundary(node, vars)
     if node.tag == 'fire': fire(node, vars)
+    if node.tag == 'slice': slice(node, vars)
 
 close_fds_file(vars)

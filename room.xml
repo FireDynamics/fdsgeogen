@@ -69,6 +69,9 @@
     <!-- fire -->
     <fire type="burningbox" cx = "1.0" cy = "roomly/2.0" lz = "wallthick" width="0.4" height="0.2" hrr="10" />
     
+    <!-- slices -->
+    <slice y="roomly/2.0" q="TEMPERATURE" v="1" />
+    
 <!-- this is a simple comment -->
 
 </fds>
