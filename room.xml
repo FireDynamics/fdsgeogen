@@ -1,27 +1,74 @@
 <fds>
 
-    <var xmin = "-2.23"   xmax = "2.0"/>
-    <var ymin = "-2.0"   ymax = "2.0"/>
-    <var zmin = " 0.0"   zmax = "3.0"/>    
+    <info chid="simpleroom" outfile="test.fds"/>
+
+    <var roomlx = "4.0" roomly="3.0" roomlz="2.5" />
+    <var bufferx = "1.0" bufferz = "1.0" />
+    <var wallthick = "0.2" />
+
+    <var windowwidth = "0.4" windowz = "1.8"/>
+    <var doorwidth = "0.6" doorheight = "1.0"/>
+
+    <var dxmin = "0.0"  dxmax = "roomlx + bufferx"/>
+    <var dymin = "0.0"  dymax = "roomly"/>
+    <var dzmin = "0.0"  dzmax = "roomlz + bufferz"/>    
 
     <var delta = "0.1" />
-    <var nx = "div235((xmax - xmin) / delta)" />
-    <var ny = "div235((ymax - ymin) / delta)" />
-    <var nz = "div235((zmax - zmin) / delta)" />
+    <var nx = "int(div235((dxmax - dxmin) / delta))" />
+    <var ny = "int(div235((dymax - dymin) / delta))" />
+    <var nz = "int(div235((dzmax - dzmin) / delta))" />
     
+    <var xmax = "dxmin + nx * delta" />
+    <var ymax = "dymin + ny * delta" />
+    <var zmax = "dzmin + nz * delta" />        
 
-    <obst x1="1" 
-          x2="4.3" 
-          y1="2" 
-          y2="1" 
-          z1="3.2" 
-          z2="1**2" />
+    <var xmin = "dxmin"  ymin = "dymin"  zmin = "dzmin" />
+
+    <boundary x="open" y="open" zmax="open"/>
+
+    <mesh xmin="xmin" xmax="xmax" ymin="ymin" ymax="ymax" zmin="zmin" zmax="zmax" nx="nx" ny="ny" nz="nz" />
+
+    <input text="TIME T_END=10.0" />
+
+    <!-- xmin wall -->
+    <obst x1="xmin" x2="xmin + wallthick" 
+          y1="ymin" y2="roomly" 
+          z1="zmin" z2="roomlz" />
+    <!-- xmax wall -->
+    <obst x1="roomlx - wallthick" x2="roomlx" 
+          y1="ymin" y2="roomly" 
+          z1="zmin" z2="roomlz" />
+    <!-- ymin wall -->
+    <obst x1="xmin" x2="roomlx" 
+          y1="ymin" y2="ymin + wallthick" 
+          z1="zmin" z2="roomlz" 
+          color="INVISIBLE"/>
+    <!-- ymax wall -->
+    <obst x1="xmin" x2="roomlx" 
+          y1="roomly - wallthick" y2="roomly" 
+          z1="zmin" z2="roomlz" />
+    <!-- zmin wall -->
+    <obst x1="xmin" x2="roomlx" 
+          y1="ymin" y2="roomly" 
+          z1="zmin" z2="zmin + wallthick" />
+    <!-- zmin wall -->
+    <obst x1="xmin" x2="roomlx" 
+          y1="ymin" y2="roomly" 
+          z1="roomlz - wallthick" z2="roomlz" />
+
+    <!-- window -->
+    <hole x1="roomlx-wallthick" x2="roomlx" 
+          y1="roomly/2.0 - windowwidth/2.0" y2="roomly/2.0 + windowwidth/2.0" 
+          z1="windowz - windowwidth/2.0" z2="windowz + windowwidth/2.0" />
+          
+    <!-- door -->
+    <hole x1="roomlx-wallthick" x2="roomlx" 
+          y1="roomly/2.0 - doorwidth/2.0" y2="roomly/2.0 + doorwidth/2.0" 
+          z1="wallthick" z2="wallthick + doorheight" />
+          
+    <!-- fire -->
+    <fire type="burningbox" cx = "1.0" cy = "roomly/2.0" lz = "wallthick" width="0.4" height="0.2" hrr="10" />
     
 <!-- this is a simple comment -->
-
-    <loop var="i" start="10" stop="20">
-        <var tt="i*0.1" />
-        <obst x1="tt" x2="0" y1="0" y2="0" z1="0" z2="0" />
-    </loop>
 
 </fds>
