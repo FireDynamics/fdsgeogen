@@ -1,8 +1,11 @@
 <fds>
 
-    <paradim name="px" list="2,4,6"
+    <para dim="domain" name="px" list="2,4,6" />
+    <para dim="domain" name="hrr" list="2.4,4.2,6.1" />    
 
-    <info chid="simpleroom" outfile="test.fds"/>
+    <para dim="time" name="tend" list="10.2, 40.2" />
+
+    <info chid="'simpleroom'" outfile="'test_%06d.fds'%(params_id)"/>
 
     <var roomlx = "4.0" roomly="3.0" roomlz="2.5" />
     <var bufferx = "1.0" bufferz = "1.0" />

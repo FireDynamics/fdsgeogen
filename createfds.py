@@ -1,4 +1,5 @@
 import sys
+from itertools import product
 import xml.etree.ElementTree as ET
 
 def div235(n):
@@ -34,11 +35,11 @@ def open_fds_file(vars):
 def info(node, vars):
 
     if 'chid' in node.attrib: 
-        vars['chid'] = node.attrib['chid']
+        vars['chid'] = eval(node.attrib["chid"], {}, vars)
         print "chid: %s"%vars['chid']
 
     if 'outfile' in node.attrib: 
-        vars['outfile'] = node.attrib['outfile']
+        vars['outfile'] = eval(node.attrib["outfile"], {}, vars)
         print "outfile: %s"%vars['outfile']
         open_fds_file(vars)
         
@@ -188,38 +189,60 @@ def slice(node, vars):
         pos = eval(node.attrib['z'], {}, vars)
         write_to_fds(vars, "&SLCF PBZ=%e, %s %s /\n"%(pos, q, v))
     
-def paradim(node):
-    pass
+def paradim(node, dirlist):
+    if 'name' in node.attrib:
+        paralist = node.attrib['list'].split(',')
+        np = len(paralist)
+        if len(dirlist) == 0:
+            for ip in paralist: dirlist.append({})
+
+        if len(dirlist) != np: 
+            print "wrong number of parameter!!"
+            sys.exit()
+        
+        for ip in range(np):
+            dirlist[ip][node.attrib['name']] = paralist[ip]
     
 tree = ET.parse(str(sys.argv[1]))
 root = tree.getroot()
 
-dparadim = 0
-
-para = []
+params = {}
 
 for node in root:
-    if node.tag == 'paradim':
-        dparadim += 1
-        para.append(paradim(node))
+    if node.tag == 'para':
+        if node.attrib['dim'] not in params:
+            params[node.attrib['dim']] = []
+        paradim(node, params[node.attrib['dim']])
 
-print para
+for ipd in params:
+    print "parameter dimension: %s"%ipd
+    print params[ipd]
 
-vars = {'outfile':"output.fds", 'chid':"chid", 'title':"title", 'fds_file_open':False, 'fds_file':0}
+params_dim = len(params)
 
-for node in root:
-    #print node
+params_id = 0
+for items in product(*[params[pd] for pd in params]):
+
+    params_id += 1
+    vars = {'outfile':"output.fds", 'chid':"chid", 'title':"title", 'fds_file_open':False, 'fds_file':0, 'params_id': params_id}
+    for v in items:
+        vars = dict(vars.items() + v.items())
     
-    if node.tag == 'obst': obst(node, vars)
-    if node.tag == 'hole': hole(node, vars)    
-    if node.tag == 'var': var(node, vars)
-    if node.tag == 'loop': loop(node, vars)
-    if node.tag == 'info': info(node, vars)
-    if node.tag == 'mesh': mesh(node, vars)
-    if node.tag == 'input': input(node, vars)
-    
-    if node.tag == 'boundary': boundary(node, vars)
-    if node.tag == 'fire': fire(node, vars)
-    if node.tag == 'slice': slice(node, vars)
+    print vars 
 
-close_fds_file(vars)
+    for node in root:
+        #print node
+    
+        if node.tag == 'obst': obst(node, vars)
+        if node.tag == 'hole': hole(node, vars)    
+        if node.tag == 'var': var(node, vars)
+        if node.tag == 'loop': loop(node, vars)
+        if node.tag == 'info': info(node, vars)
+        if node.tag == 'mesh': mesh(node, vars)
+        if node.tag == 'input': input(node, vars)
+    
+        if node.tag == 'boundary': boundary(node, vars)
+        if node.tag == 'fire': fire(node, vars)
+        if node.tag == 'slice': slice(node, vars)
+
+    close_fds_file(vars)
