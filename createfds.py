@@ -63,16 +63,52 @@ def hole(node, vars):
                                                         eval(node.attrib["z2"], {}, vars)))
                                                         
 def mesh(node, vars):
-    write_to_fds(vars,"&MESH IJK=%d,%d,%d, XB=%f,%f,%f,%f,%f,%f /\n"%(
-                        eval(node.attrib["nx"], {}, vars),
-                        eval(node.attrib["ny"], {}, vars),
-                        eval(node.attrib["nz"], {}, vars),
-                        eval(node.attrib["xmin"], {}, vars),
-                        eval(node.attrib["xmax"], {}, vars),
-                        eval(node.attrib["ymin"], {}, vars),
-                        eval(node.attrib["ymax"], {}, vars),
-                        eval(node.attrib["zmin"], {}, vars),
-                        eval(node.attrib["zmax"], {}, vars)))
+    nmeshes = 1
+    px = 1
+    py = 1
+    pz = 1
+    if 'px' in node.attrib: 
+        px = eval(node.attrib["px"], {}, vars)
+    if 'py' in node.attrib: 
+        py = eval(node.attrib["py"], {}, vars)
+    if 'pz' in node.attrib: 
+        pz = eval(node.attrib["pz"], {}, vars)                
+    
+    
+    nmeshes = px * py * pz
+        
+    gnx = eval(node.attrib["nx"], {}, vars)
+    gny = eval(node.attrib["ny"], {}, vars)
+    gnz = eval(node.attrib["nz"], {}, vars)
+
+    lnx = gnx / px
+    lny = gny / py                
+    lnz = gnz / pz
+        
+    gxmin = eval(node.attrib["xmin"], {}, vars)
+    gxmax = eval(node.attrib["xmax"], {}, vars)
+    gymin = eval(node.attrib["ymin"], {}, vars)
+    gymax = eval(node.attrib["ymax"], {}, vars)
+    gzmin = eval(node.attrib["zmin"], {}, vars)
+    gzmax = eval(node.attrib["zmax"], {}, vars)                                        
+
+    dx = (gxmax - gxmin) / px
+    dy = (gymax - gymin) / py
+    dz = (gzmax - gzmin) / pz        
+
+    for ix in range(px):
+        for iy in range(py):
+            for iz in range(pz):            
+                xmin = gxmin + ix*dx
+                xmax = gxmin + (ix+1)*dx                
+                ymin = gymin + iy*dy
+                ymax = gymin + (iy+1)*dy                
+                zmin = gzmin + iz*dz
+                zmax = gzmin + (iz+1)*dz                
+                
+                write_to_fds(vars,"&MESH IJK=%d,%d,%d, XB=%f,%f,%f,%f,%f,%f /\n"%(
+                             lnx, lny, lnz,
+                             xmin, xmax, ymin, ymax, zmin, zmax))
 
 def boundary(node, vars):
     if 'x' in node.attrib: 
@@ -152,8 +188,22 @@ def slice(node, vars):
         pos = eval(node.attrib['z'], {}, vars)
         write_to_fds(vars, "&SLCF PBZ=%e, %s %s /\n"%(pos, q, v))
     
+def paradim(node):
+    pass
+    
 tree = ET.parse(str(sys.argv[1]))
 root = tree.getroot()
+
+dparadim = 0
+
+para = []
+
+for node in root:
+    if node.tag == 'paradim':
+        dparadim += 1
+        para.append(paradim(node))
+
+print para
 
 vars = {'outfile':"output.fds", 'chid':"chid", 'title':"title", 'fds_file_open':False, 'fds_file':0}
 

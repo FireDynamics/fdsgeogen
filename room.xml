@@ -1,5 +1,7 @@
 <fds>
 
+    <paradim name="px" list="2,4,6"
+
     <info chid="simpleroom" outfile="test.fds"/>
 
     <var roomlx = "4.0" roomly="3.0" roomlz="2.5" />
@@ -26,7 +28,7 @@
 
     <boundary x="open" y="open" zmax="open"/>
 
-    <mesh xmin="xmin" xmax="xmax" ymin="ymin" ymax="ymax" zmin="zmin" zmax="zmax" nx="nx" ny="ny" nz="nz" />
+    <mesh xmin="xmin" xmax="xmax" ymin="ymin" ymax="ymax" zmin="zmin" zmax="zmax" nx="nx" ny="ny" nz="nz" px="2" />
 
     <input text="TIME T_END=10.0" />
 
@@ -71,6 +73,8 @@
     
     <!-- slices -->
     <slice y="roomly/2.0" q="TEMPERATURE" v="1" />
+    
+    <input text="DEVC ID='HRR00_2', QUANTITY='HRR', XB=0.0,4.0,0.0,3.0,0.0,2.5" />
     
 <!-- this is a simple comment -->
 
