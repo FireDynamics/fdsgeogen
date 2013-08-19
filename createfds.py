@@ -14,6 +14,15 @@ def div235(n):
         r_init += 1
     return r_init
 
+def get_val(node, name, opt=False):
+    if name in node.attrib:
+        return eval(node.attrib["nx"], {}, vars)
+    elif (opt) and (name in vars):
+        return vars[name]
+    else:
+        print "error reading attribute %s from node %s"%(name, node)
+        sys.exit()
+
 def write_to_fds(vars, text):
     if type(vars['fds_file']) != file:
         open_fds_file(vars)
@@ -77,22 +86,22 @@ def mesh(node, vars):
     
     
     nmeshes = px * py * pz
-        
-    gnx = eval(node.attrib["nx"], {}, vars)
-    gny = eval(node.attrib["ny"], {}, vars)
-    gnz = eval(node.attrib["nz"], {}, vars)
-
+    
+    gnx = get_val(node, "nx", opt=True)
+    gny = get_val(node, "ny", opt=True)
+    gnz = get_val(node, "nz", opt=True)
+    
     lnx = gnx / px
     lny = gny / py                
     lnz = gnz / pz
-        
-    gxmin = eval(node.attrib["xmin"], {}, vars)
-    gxmax = eval(node.attrib["xmax"], {}, vars)
-    gymin = eval(node.attrib["ymin"], {}, vars)
-    gymax = eval(node.attrib["ymax"], {}, vars)
-    gzmin = eval(node.attrib["zmin"], {}, vars)
-    gzmax = eval(node.attrib["zmax"], {}, vars)                                        
 
+    gxmin = get_val(node, "xmin", opt=True)
+    gxmax = get_val(node, "xmax", opt=True)    
+    gymin = get_val(node, "ymin", opt=True)
+    gymax = get_val(node, "ymax", opt=True)    
+    gzmin = get_val(node, "zmin", opt=True)
+    gzmax = get_val(node, "zmax", opt=True)    
+        
     dx = (gxmax - gxmin) / px
     dy = (gymax - gymin) / py
     dz = (gzmax - gzmin) / pz        
