@@ -7,7 +7,9 @@
 
 <!--    <info chid="'simpleroom'" outfile="'test_%06d.fds'%(params_id)"/> -->
 
-    <info chid="'ref_room'" outfile="'ref_room.fds'"/>
+    <var chid="'ref_room'" outfile="'ref_room.fds'" />
+    
+    <info chid="chid" outfile="outfile"/>
 
     <var delta = "0.1" />
 
@@ -59,20 +61,25 @@
 <!--    <obst x1="xmin" x2="roomlx" 
           y1="ymin" y2="roomly" 
           z1="zmin" z2="zmin + wallthick" /> -->
-    <!-- zmin wall -->
+    <!-- zmax wall -->
     <obst x1="xmin" x2="roomlx" 
           y1="ymin" y2="roomly" 
           z1="roomlz - wallthick" z2="roomlz" />
 
     <!-- window -->
-    <hole z1="roomlz-wallthick" z2="roomlz" 
-          y1="roomly/2.0 - windowwidth/2.0" y2="roomly/2.0 + windowwidth/2.0" 
-          x1="windowx - windowwidth/2.0" x2="windowx + windowwidth/2.0" />
+    <var window_x1 = "windowx - windowwidth/2.0" window_x2 = "windowx + windowwidth/2.0"/>
+    <var window_y1 = "roomly/2.0 - windowwidth/2.0" window_y2 = "roomly/2.0 + windowwidth/2.0" />
+    <var window_z  = "roomlz" />
+    <hole x1="window_x1" x2="window_x2" 
+          y1="window_y1" y2="window_y1" 
+          z1="window_z - wallthick" z2="window_z" />
           
     <!-- door -->
-    <hole x1="roomlx-wallthick" x2="roomlx" 
-          y1="roomly/2.0 - doorwidth/2.0" y2="roomly/2.0 + doorwidth/2.0" 
-          z1="wallthick" z2="wallthick + doorheight" />
+    <var door_x  = "roomlx" />
+    <var door_y1 = "roomly/2.0 - doorwidth/2.0" door_y2 = "roomly/2.0 + doorwidth/2.0" />
+    <var door_z1 = "0" door_z2="wallthick + doorheight" />
+    <hole x1="door_x-wallthick" x2="door_x" 
+          y1="door_y1" y2="door_y2" z1="door_z1" z2="door_z2" />
           
     <!-- fire -->
     <fire type="burningbox" cx = "1.0" cy = "roomly/2.0" lz = "wallthick" width="0.4" height="0.2" hrr="10" />
@@ -80,7 +87,13 @@
     <!-- slices -->
     <slice y="roomly/2.0" q="TEMPERATURE" v="1" />
     
-    <input text="DEVC ID='HRR00_2', QUANTITY='HRR', XB=0.0,4.0,0.0,3.0,0.0,2.5" />
+    <!-- devices -->
+    <loop var='q' list="VOLUME FLOW +, VOLUME FLOW -, MASS FLOW +, MASS FLOW -, HEAT FLOW +, HEAT FLOW -">
+        <device id="'DOOR %s'%q" x1="door_x" x2="door_x" 
+                y1="door_y1" y2="door_y2" z1="door_z1" z2="door_z2" q="q" />
+        <device id="'WINDOW %s'%q" x1="window_x1" x2="window_x2" 
+                y1="window_y1" y2="window_y2" z1="window_z" z2="window_z" q="q" />
+    </loop>
     
 <!-- this is a simple comment -->
 
