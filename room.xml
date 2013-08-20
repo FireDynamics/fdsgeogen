@@ -1,13 +1,10 @@
 <fds>
 
-<!--    <para dim="domain" name="px" list="2,4,6" />
-    <para dim="domain" name="hrr" list="2.4,4.2,6.1" />    
+    <para dim="decx" var="px" list="1, 2" />
+    <para dim="decy" var="py" list="1, 2" />
+    <para dim="decz" var="pz" list="1, 2" />
 
-    <para dim="time" name="tend" list="10.2, 40.2" /> -->
-
-<!--    <info chid="'simpleroom'" outfile="'test_%06d.fds'%(params_id)"/> -->
-
-    <var chid="'ref_room'" outfile="'ref_room.fds'" />
+    <var chid="'ref_room'" outfile="'ref_room_m%03d_id%03d.fds'%(int(px)*int(py)*int(pz),para_id)" />
     
     <info chid="chid" outfile="outfile"/>
 
@@ -57,10 +54,6 @@
     <obst x1="xmin" x2="roomlx" 
           y1="roomly - wallthick" y2="roomly" 
           z1="zmin" z2="roomlz" />
-    <!-- zmin wall -->
-<!--    <obst x1="xmin" x2="roomlx" 
-          y1="ymin" y2="roomly" 
-          z1="zmin" z2="zmin + wallthick" /> -->
     <!-- zmax wall -->
     <obst x1="xmin" x2="roomlx" 
           y1="ymin" y2="roomly" 
@@ -94,7 +87,5 @@
         <device id="'WINDOW %s'%q" x1="window_x1" x2="window_x2" 
                 y1="window_y1" y2="window_y2" z1="window_z" z2="window_z" q="q" />
     </loop>
-    
-<!-- this is a simple comment -->
 
 </fds>

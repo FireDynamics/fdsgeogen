@@ -170,7 +170,7 @@ def var(node):
     global vars
     for att in node.attrib:
         vars[att] = eval(node.attrib[att], globals(), vars)
-        print "added variable: %s = %s"%(att, str(vars[att]))
+        #print "added variable: %s = %s"%(att, str(vars[att]))
 
 def loop(node):
 
@@ -224,7 +224,8 @@ def slice(node):
         write_to_fds("&SLCF PBZ=%e, %s %s /\n"%(pos, q, v))
     
 def paradim(node, dirlist):
-    if 'name' in node.attrib:
+    check_val(node, ["var", "list"], req=True)
+    if 'var' in node.attrib:
         paralist = node.attrib['list'].split(',')
         np = len(paralist)
         if len(dirlist) == 0:
@@ -235,7 +236,7 @@ def paradim(node, dirlist):
             sys.exit()
         
         for ip in range(np):
-            dirlist[ip][node.attrib['name']] = paralist[ip]
+            dirlist[ip][node.attrib['var']] = paralist[ip]
 
 def traverse(root):
     for node in root:
@@ -264,7 +265,10 @@ def device(node):
         write_to_fds("&DEVC ID='%s' XYZ=%f,%f,%f QUANTITY='%s'/\n"%(id,x,y,z,q))
         return True
     return False
-     
+
+def para(node):
+    pass
+
 #################### MAIN LOOP
 tree = ET.parse(str(sys.argv[1]))
 root = tree.getroot()
@@ -277,14 +281,15 @@ for node in root:
             params[node.attrib['dim']] = []
         paradim(node, params[node.attrib['dim']])
 
-params_id = 0
+para_id = 0
 for items in product(*[params[pd] for pd in params]):
 
-    vars = {'outfile':"output.fds", 'chid':"chid", 'title':"title", 'fds_file_open':False, 'fds_file':0, 'params_id': params_id}
-    params_id += 1
+    vars = {'outfile':"output.fds", 'chid':"chid", 'title':"title", 'fds_file_open':False, 'fds_file':0, 'para_id': para_id}
+    para_id += 1
     
     for v in items:
         vars = dict(vars.items() + v.items())
+        print v
     
     traverse(root)
 
