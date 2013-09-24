@@ -1,0 +1,134 @@
+<fds>
+
+    <info chid="'DFG-room'" outfile="'DFG-room.fds'"/>
+
+    <var geo_delta = "0.1" />
+    <var wallthick = "geo_delta" />
+
+    <var roomlx = "3.6+2*wallthick" roomly="2.4+2*wallthick" roomlz="2.4+wallthick" />
+    <var bufferx = "0.6" bufferz = "0.6" />
+
+    <var doorwidth = "0.8" doorheight = "2.0"/>
+
+    <var dxmin = "0.0"  dxmax = "roomlx + bufferx"/>
+    <var dymin = "0.0"  dymax = "roomly"/>
+    <var dzmin = "0.0"  dzmax = "roomlz + bufferz"/>    
+
+    <var delta = "0.1" />
+    <var nx = "int(div235((dxmax - dxmin) / delta))" />
+    <var ny = "int(div235((dymax - dymin) / delta))" />
+    <var nz = "int(div235((dzmax - dzmin) / delta))" />
+    
+    <var xmax = "dxmin + nx * delta" />
+    <var ymax = "dymin + ny * delta" />
+    <var zmax = "dzmin + nz * delta" />        
+
+    <var xmin = "dxmin"  ymin = "dymin"  zmin = "dzmin" />
+
+    <boundary x="open" y="open" zmax="open"/>
+
+    <mesh px="2" />
+
+    <input text="TIME T_END=10.0" />
+
+    <!-- xmin wall -->
+    <obst x1="xmin" x2="xmin + wallthick" 
+          y1="ymin" y2="roomly" 
+          z1="zmin" z2="roomlz" 
+          color="INVISIBLE" />
+    <!-- xmax wall -->
+    <obst x1="roomlx - wallthick" x2="roomlx" 
+          y1="ymin" y2="roomly" 
+          z1="zmin" z2="roomlz" />
+    <!-- ymin wall -->
+    <obst x1="xmin" x2="roomlx" 
+          y1="ymin" y2="ymin + wallthick" 
+          z1="zmin" z2="roomlz" 
+          color="INVISIBLE"/>
+    <!-- ymax wall -->
+    <obst x1="xmin" x2="roomlx" 
+          y1="roomly - wallthick" y2="roomly" 
+          z1="zmin" z2="roomlz" />
+    <!-- zmax wall -->
+    <obst x1="xmin" x2="roomlx" 
+          y1="ymin" y2="roomly" 
+          z1="roomlz - wallthick" z2="roomlz" />
+
+          
+    <!-- door -->
+    <var door_x  = "roomlx" />
+    <var door_y1 = "roomly/2.0 - doorwidth/2.0" door_y2 = "roomly/2.0 + doorwidth/2.0" />
+    <var door_z1 = "0" door_z2="wallthick + doorheight" />
+    <hole x1="door_x-wallthick" x2="door_x" 
+          y1="door_y1" y2="door_y2" z1="door_z1" z2="door_z2" />
+          
+          
+    <!-- MDF cubes -->
+    <var cube_x="[2.3, 0.6, 0.6, 1.5]" />
+    <var cube_y="[0.2, 0.2, 1.6, 1.6]" />
+    <var cube_l="0.6" cube_th="wallthick" />
+    
+    <loop var="i" start="0" stop="len(cube_x)" >
+        <obst x1="cube_x[i]" x2="cube_x[i] + cube_l" 
+              y1="cube_y[i]" y2="cube_y[i] + cube_l"
+              z1="0.0" z2="cube_l" color="KHAKI"/>
+        <hole x1="cube_x[i]+cube_th" x2="cube_x[i] + cube_l-cube_th" 
+              y1="cube_y[i]+cube_th" y2="cube_y[i] + cube_l-cube_th"
+              z1="cube_th" z2="cube_l-cube_th" />
+    </loop>
+    
+    <!-- armchairs -->
+    <var arm_x="[1.4, 0.6]" />
+    <var arm_y="[0.2, 0.8]" />
+    <var arm_d="[2, 1]" arm_o="[1,1]" />
+    <var arm_xs="0.8" arm_ys="0.6" arm_ts="0.5" arm_ls="0.4" arm_th="wallthick+1e-5" />
+    
+    <loop var="i" start="0" stop="len(arm_x)" >
+
+        <var xwidth = "arm_xs if (arm_d[i] == 2) else arm_ys " />
+        <var ywidth = "arm_xs if (arm_d[i] == 1) else arm_ys " />        
+
+        <!-- seats -->
+        <obst x1="arm_x[i]" x2="arm_x[i] + xwidth" 
+              y1="arm_y[i]" y2="arm_y[i] + ywidth"
+              z1="arm_ls" z2="arm_ls+arm_ts" color="MELON"/>
+
+        <var hole_xmin = "arm_x[i] if (arm_d[i] == 1 and arm_o[i] == 0) else arm_x[i]+arm_th" />
+        <var hole_xmax = "arm_x[i]+xwidth if (arm_d[i] == 1 and arm_o[i] == 1) else arm_x[i]+xwidth-arm_th" />
+        <var hole_ymin = "arm_y[i] if (arm_d[i] == 2 and arm_o[i] == 0) else arm_y[i]+arm_th" />
+        <var hole_ymax = "arm_y[i]+ywidth if (arm_d[i] == 2 and arm_o[i] == 1) else arm_y[i]+ywidth-arm_th" />
+
+        <dbg print="hole_xmin, hole_xmax, hole_ymin, hole_ymax" />
+
+        <hole x1="hole_xmin" x2="hole_xmax" 
+              y1="hole_ymin" y2="hole_ymax"
+              z1="arm_ls+arm_th" z2="arm_ls+arm_ts" />
+
+        
+        <!-- legs -->
+        <obst x1="arm_x[i]" x2="arm_x[i] + arm_th" 
+              y1="arm_y[i]" y2="arm_y[i] + arm_th"
+              z1="0.0" z2="arm_ls" color="BLACK" />
+        <obst x1="arm_x[i]+xwidth - arm_th" x2="arm_x[i]+xwidth" 
+              y1="arm_y[i]" y2="arm_y[i] + arm_th"
+              z1="0.0" z2="arm_ls" color="BLACK" />
+        <obst x1="arm_x[i]" x2="arm_x[i] + arm_th" 
+              y1="arm_y[i]+ywidth - arm_th" y2="arm_y[i]+ywidth"
+              z1="0.0" z2="arm_ls" color="BLACK" />
+        <obst x1="arm_x[i]+xwidth - arm_th" x2="arm_x[i]+xwidth" 
+              y1="arm_y[i]+ywidth - arm_th" y2="arm_y[i]+ywidth"
+              z1="0.0" z2="arm_ls" color="BLACK" />   
+        
+    </loop>
+    
+    <!-- TV screen -->
+    <obst x1="1.5" x2="2.2" y1="1.8" y2="1.8+wallthick" z1="0.9" z2="1.5" color="BLACK" />
+    <obst x1="1.8" x2="1.8+wallthick" y1="1.8" y2="1.8+wallthick" z1="0.6" z2="0.9" color="BLACK" />    
+    
+    <!-- fire -->
+    <fire type="burningbox" cx = "roomlx/2.0" cy = "roomly/2.0" lz = "0.0" width="0.4" height="0.2" hrr="10" />
+    
+    <!-- slices -->
+    <slice y="roomly/2.0" q="TEMPERATURE" v="1" />
+    
+</fds>
