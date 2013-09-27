@@ -1,16 +1,18 @@
 <fds>
 
-    <para dim="decx" var="px" list="1, 2" />
-    <para dim="decy" var="py" list="1, 2" />
-    <para dim="decz" var="pz" list="1, 2" />
+    <var px="1" pz="1" />
 
-    <var chid="'ref_room'" outfile="'ref_room_m%03d_id%03d.fds'%(int(px)*int(py)*int(pz),para_id)" />
+    <para dim="decomp_y" var="py" list="1, 2" />
+    <para dim="comb" var="hrr" file="room.plist" col="0" />
+    <para dim="comb" var="roomlz" file="room.plist" col="1" />    
+
+    <var chid="'ref_room'" outfile="'ref_room_m%03d_id%03d.fds'%(px*py*pz,para_id)" />
     
     <info chid="chid" outfile="outfile"/>
 
     <var delta = "0.1" />
 
-    <var roomlx = "6.0" roomly="4.0" roomlz="3.0" />
+    <var roomlx = "6.0" roomly="4.0" />
     <var bufferx = "1.0" bufferz = "1.5" />
     <var wallthick = "delta" />
 
@@ -33,7 +35,7 @@
 
     <boundary x="open" y="open" zmax="open"/>
 
-    <mesh px="2" />
+    <mesh />
 
     <input text="TIME T_END=10.0" />
 

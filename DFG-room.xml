@@ -27,7 +27,7 @@
 
     <boundary x="open" y="open" zmax="open"/>
 
-    <mesh px="2" />
+    <mesh />
 
     <input text="TIME T_END=10.0" />
 
