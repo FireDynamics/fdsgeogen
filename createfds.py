@@ -1,5 +1,6 @@
 import sys
 import ast
+import numpy
 from itertools import product
 import xml.etree.ElementTree as ET
 
@@ -225,19 +226,27 @@ def slice(node):
         write_to_fds("&SLCF PBZ=%e, %s %s /\n"%(pos, q, v))
     
 def paradim(node, dirlist):
-    check_val(node, ["var", "list"], req=True)
-    if 'var' in node.attrib:
-        paralist = ast.literal_eval(node.attrib['list'])
-        np = len(paralist)
-        if len(dirlist) == 0:
-            for ip in paralist: dirlist.append({})
+    check_val(node, ["var"], req=True)
 
-        if len(dirlist) != np: 
-            print "wrong number of parameter!!"
-            sys.exit()
+    if check_val(node, ["list"]):
+        paralist = ast.literal_eval(node.attrib['list'])
         
-        for ip in range(np):
-            dirlist[ip][node.attrib['var']] = paralist[ip]
+    if check_val(node, ["file"]):
+        col=0
+        if check_val(node, ["col"]):
+            col = get_val(node, "col")
+        paralist = numpy.loadtxt(node.attrib["file"], usecols=(col,), delimiter=',')
+        
+    np = len(paralist)
+    if len(dirlist) == 0:
+        for ip in paralist: dirlist.append({})
+
+    if len(dirlist) != np: 
+        print "wrong number of parameter!!"
+        sys.exit()
+    
+    for ip in range(np):
+        dirlist[ip][node.attrib['var']] = paralist[ip]
 
 def traverse(root):
     for node in root:
@@ -275,6 +284,7 @@ tree = ET.parse(str(sys.argv[1]))
 root = tree.getroot()
 
 params = {}
+vars = {}
 
 for node in root:
     if node.tag == 'para':
