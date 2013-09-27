@@ -1,4 +1,5 @@
 import sys
+import ast
 from itertools import product
 import xml.etree.ElementTree as ET
 
@@ -226,7 +227,7 @@ def slice(node):
 def paradim(node, dirlist):
     check_val(node, ["var", "list"], req=True)
     if 'var' in node.attrib:
-        paralist = node.attrib['list'].split(',')
+        paralist = ast.literal_eval(node.attrib['list'])
         np = len(paralist)
         if len(dirlist) == 0:
             for ip in paralist: dirlist.append({})
