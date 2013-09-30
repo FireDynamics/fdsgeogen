@@ -25,6 +25,8 @@ def del_var(key):
     del vars[key]
 
 def check_val(node, lst, req=False):
+    if type(lst) is not list: 
+        lst = [ lst ]
     for item in lst:
         if not item in node.attrib: 
             if req:
@@ -166,13 +168,13 @@ def input(node):
     if check_val(node, 'text'):
         write_to_fds("&%s /\n"%(node.attrib["text"]))
     if check_val(node, 'str'):
-        write_to_fds("&%s /\n"%(get_val(node,["str"])))
+        write_to_fds("&%s /\n"%(get_val(node,"str")))
 
 def dump(node):
     if check_val(node, 'text'):
         write_to_fds("%s\n"%(node.attrib["text"]))
     if check_val(node, 'str'):
-        write_to_fds("%s\n"%(get_val(node,["str"])))
+        write_to_fds("%s\n"%(get_val(node,"str")))
 
 def var(node):
     global vars
