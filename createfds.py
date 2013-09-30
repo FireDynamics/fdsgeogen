@@ -163,12 +163,16 @@ def boundary(node):
 
 
 def input(node):
-    if 'text' in node.attrib: 
+    if check_val(node, 'text'):
         write_to_fds("&%s /\n"%(node.attrib["text"]))
-    if 'str' in node.attrib: 
-        write_to_fds("&%s /\n"%(eval(node.attrib["text"], {}, vars)))
-    if check_val(node, 'raw'):
-        write_to_fds("%s\n"%(node.attrib["raw"]))
+    if check_val(node, 'str'):
+        write_to_fds("&%s /\n"%(get_val(node,["str"])))
+
+def dump(node):
+    if check_val(node, 'text'):
+        write_to_fds("%s\n"%(node.attrib["text"]))
+    if check_val(node, 'str'):
+        write_to_fds("%s\n"%(get_val(node,["str"])))
 
 def var(node):
     global vars
