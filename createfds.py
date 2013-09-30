@@ -62,13 +62,13 @@ def open_fds_file():
 
 def info(node):
 
-    if 'chid' in node.attrib: 
-        vars['chid'] = eval(node.attrib["chid"], {}, vars)
-        print "chid: %s"%vars['chid']
-
-    if 'outfile' in node.attrib: 
-        vars['outfile'] = eval(node.attrib["outfile"], {}, vars)
-        print "outfile: %s"%vars['outfile']
+    if check_val(node, ['chid','outfile'], req=True):
+        vars['chid'] = get_val(node,"chid")
+        vars['title'] = get_val(node,"title", opt=True)
+        vars['outfile'] = get_val(node,"outfile")                
+        print "chid    : %s"%vars['chid']
+        print "title   : %s"%vars['title']        
+        print "outfile : %s"%vars['outfile']
         open_fds_file()
         
 def obst(node):
