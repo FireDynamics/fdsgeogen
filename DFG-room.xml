@@ -31,6 +31,47 @@
 
     <input text="TIME T_END=10.0" />
 
+
+
+	<!-- Definition der Materialien -->
+	<matl	id="'MDF'"
+			specific_heat="3.0"
+			conductivity="0.14"
+			density="620.0"
+			heat_of_combustion="1.22E4"
+			n_reactions="1"
+			heat_of_reaction="1750.0"
+			nu_fuel="1.0"
+			reference_temperature="410.0" />
+
+	<matl	id="'PUR'"
+			specific_heat="1.7"
+			conductivity="0.05"
+			density="32.0"
+			heat_of_combustion="2.49E4"
+			n_reactions="1"
+			heat_of_reaction="1750.0"
+			nu_fuel="1.0"
+			reference_temperature="390.0" />
+
+	<matl	id="'ABS'"
+			specific_heat="2.0"
+			conductivity="0.16"
+			density="1050.0"
+			heat_of_combustion="2.88E4"
+			n_reactions="1"
+			heat_of_reaction="1750.0"
+			nu_fuel="1.0"
+			reference_temperature="400.0" />
+
+
+	<!-- Definition der Oberflaechen -->
+	<surf	id="'MDFSurf'"
+			matl_id="'MDF'"
+			matl_mass_fraction="1.0"
+			thickness="0.1" />
+
+
     <!-- xmin wall -->
     <obst x1="xmin" x2="xmin + wallthick" 
           y1="ymin" y2="roomly" 
