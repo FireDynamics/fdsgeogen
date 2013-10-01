@@ -85,7 +85,7 @@ def obst(node):
         line += " COLOR='%s'"%node.attrib["color"]
         
     if check_val(node, 'surf_id'):
-        line += " SURF_ID='%s'"%node.attrib["color"]
+        line += " SURF_ID='%s'"%node.attrib["surf_id"]
 
     comment=""
     if check_val(node, 'comment'):
