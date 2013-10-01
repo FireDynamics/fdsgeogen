@@ -74,16 +74,24 @@ def info(node):
         open_fds_file()
         
 def obst(node):
-    geometry = "XB=%f,%f,%f,%f,%f,%f"%(eval(node.attrib["x1"], {}, vars),
+    line = "XB=%f,%f,%f,%f,%f,%f"%(eval(node.attrib["x1"], {}, vars),
                                        eval(node.attrib["x2"], {}, vars),
                                        eval(node.attrib["y1"], {}, vars),
                                        eval(node.attrib["y2"], {}, vars),
                                        eval(node.attrib["z1"], {}, vars),
                                        eval(node.attrib["z2"], {}, vars))
-    color = ""
-    if 'color' in node.attrib:
-        color = "COLOR='%s'"%node.attrib["color"]
-    write_to_fds("&OBST %s %s/\n"%(geometry, color))
+    
+    if check_val(node, 'color'):
+        line += " COLOR='%s'"%node.attrib["color"]
+        
+    if check_val(node, 'surf_id'):
+        line += " SURF_ID='%s'"%node.attrib["color"]
+
+    comment=""
+    if check_val(node, 'comment'):
+        comment = node.attrib["comment"]
+
+    write_to_fds("&OBST %s / %s\n"%(line, comment))
     
 def hole(node):
     write_to_fds("&HOLE XB=%f,%f,%f,%f,%f,%f /\n"%(eval(node.attrib["x1"], {}, vars),
@@ -181,6 +189,61 @@ def var(node):
     for att in node.attrib:
         vars[att] = eval(node.attrib[att], globals(), vars)
         #print "added variable: %s = %s"%(att, str(vars[att]))
+
+def matl(node):
+    global vars
+    check_val(node, 'id', req=True)
+    
+    line = "ID='%s'"%get_val(node, 'id')
+    
+    args = ['specific_heat', 'conductivity', 'density', 'heat_of_combustion', 
+            'n_reactions', 'heat_of_reaction', 'nu_fuel', 'reference_temperature']
+    for arg in args:
+        if check_val(node, arg):
+            line += ", %s=%f"%(arg.upper(),get_val(node, arg))
+    
+    all_args = args
+    all_args.extend(['id', 'comment'])
+
+    for att in node.attrib:
+        #print "checking attribute %s"%att
+        if att not in all_args:
+            print "WARNING: unknown argument %s"%att
+    
+    comment = ''
+    if check_val(node, 'comment'):
+        comment = node.attrib['comment']
+    
+    write_to_fds("&MATL %s/ %s\n"%(line, comment))
+
+def surf(node):
+    global vars
+    check_val(node, 'id', req=True)
+    
+    line = "ID='%s'"%get_val(node, 'id')
+    
+    args = ['rgb', 'matl_id', 'matl_mass_fraction', 'thickness']
+    for arg in args:
+        if check_val(node, arg):
+            val = get_val(node, arg)
+            if isinstance(val, basestring):
+                line += ", %s='%s'"%(arg.upper(),val)
+            else:
+                line += ", %s=%f"%(arg.upper(),val)
+    
+    all_args = args
+    all_args.extend(['id', 'comment'])
+
+    for att in node.attrib:
+        #print "checking attribute %s"%att
+        if att not in all_args:
+            print "WARNING: unknown argument %s"%att
+    
+    comment = ''
+    if check_val(node, 'comment'):
+        comment = node.attrib['comment']
+    
+    write_to_fds("&SURF %s/ %s\n"%(line, comment))
 
 def loop(node):
 
