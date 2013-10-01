@@ -69,7 +69,17 @@
 	<surf	id="'MDFSurf'"
 			matl_id="'MDF'"
 			matl_mass_fraction="1.0"
+			thickness="0.018" />
+
+	<surf	id="'PURSurf'"
+			matl_id="'PUR'"
+			matl_mass_fraction="1.0"
 			thickness="0.1" />
+
+	<surf	id="'ABSSurf'"
+			matl_id="'ABS'"
+			matl_mass_fraction="1.0"
+			thickness="0.003" />
 
 
     <!-- xmin wall -->
