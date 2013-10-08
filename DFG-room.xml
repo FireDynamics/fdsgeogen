@@ -32,7 +32,6 @@
     <input text="TIME T_END=300.0" />
 
 
-
 	<!-- Definition der Materialien -->
 	<matl	id="'MDF'"
 			specific_heat="3.0"
