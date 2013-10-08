@@ -222,7 +222,7 @@ def surf(node):
     
     line = "ID='%s'"%get_val(node, 'id')
     
-    args = ['rgb', 'matl_id', 'matl_mass_fraction', 'thickness']
+    args = ['rgb', 'hrrpua','heat_of_vaporization', 'ignition_temperature', 'burn_away', 'matl_id', 'matl_mass_fraction', 'thickness']
     for arg in args:
         if check_val(node, arg):
             val = get_val(node, arg)
