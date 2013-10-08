@@ -29,7 +29,8 @@
 
     <mesh />
 
-    <input text="TIME T_END=300.0" />
+    <input text="TIME T_END=600.0" />
+    <input text="MISC RESTART=.FALSE." />
 
 
 	<!-- Definition der Materialien -->
@@ -37,48 +38,48 @@
 			specific_heat="3.0"
 			conductivity="0.14"
 			density="620.0"
-			heat_of_combustion="1.22E4"
-			n_reactions="1"
-			heat_of_reaction="1750.0"
-			nu_fuel="1.0"
-			reference_temperature="410.0" />
+			heat_of_combustion="1.22E4" />
 
 	<matl	id="'PUR'"
 			specific_heat="1.7"
 			conductivity="0.05"
 			density="32.0"
-			heat_of_combustion="2.49E4"
-			n_reactions="1"
-			heat_of_reaction="1750.0"
-			nu_fuel="1.0"
-			reference_temperature="390.0" />
+			heat_of_combustion="2.49E4" />
 
 	<matl	id="'ABS'"
 			specific_heat="2.0"
 			conductivity="0.16"
 			density="1050.0"
-			heat_of_combustion="2.88E4"
-			n_reactions="1"
-			heat_of_reaction="1750.0"
-			nu_fuel="1.0"
-			reference_temperature="400.0" />
+			heat_of_combustion="2.88E4" />
 
 
 	<!-- Definition der Oberflaechen -->
 	<surf	id="'MDFSurf'"
+			hrrpua="252.0"
+			heat_of_vaporization="1200.0"
+			ignition_temperature="410.0"
+			burn_away="'.TRUE.'"
 			matl_id="'MDF'"
 			matl_mass_fraction="1.0"
 			thickness="0.018" />
 
 	<surf	id="'PURSurf'"
+			hrrpua="800.0"
+			heat_of_vaporization="1200.0"
+			ignition_temperature="410.0"
+			burn_away="'.TRUE.'"
 			matl_id="'PUR'"
 			matl_mass_fraction="1.0"
 			thickness="0.1" />
 
 	<surf	id="'ABSSurf'"
+			hrrpua="1077.0"
+			heat_of_vaporization="1200.0"
+			ignition_temperature="380.0"
+			burn_away="'.TRUE.'"
 			matl_id="'ABS'"
 			matl_mass_fraction="1.0"
-			thickness="0.003" />
+			thickness="0.006" />
 
 
     <!-- xmin wall -->
