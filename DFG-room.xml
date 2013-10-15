@@ -29,8 +29,8 @@
 
     <mesh />
 
-    <input text="TIME T_END=10.0" />
-
+    <input text="TIME T_END=600.0" />
+    <input text="MISC RESTART=.FALSE." />
 
 
 	<!-- Definition der Materialien -->
@@ -38,48 +38,48 @@
 			specific_heat="3.0"
 			conductivity="0.14"
 			density="620.0"
-			heat_of_combustion="1.22E4"
-			n_reactions="1"
-			heat_of_reaction="1750.0"
-			nu_fuel="1.0"
-			reference_temperature="410.0" />
+			heat_of_combustion="1.22E4" />
 
 	<matl	id="'PUR'"
 			specific_heat="1.7"
 			conductivity="0.05"
 			density="32.0"
-			heat_of_combustion="2.49E4"
-			n_reactions="1"
-			heat_of_reaction="1750.0"
-			nu_fuel="1.0"
-			reference_temperature="390.0" />
+			heat_of_combustion="2.49E4" />
 
 	<matl	id="'ABS'"
 			specific_heat="2.0"
 			conductivity="0.16"
 			density="1050.0"
-			heat_of_combustion="2.88E4"
-			n_reactions="1"
-			heat_of_reaction="1750.0"
-			nu_fuel="1.0"
-			reference_temperature="400.0" />
+			heat_of_combustion="2.88E4" />
 
 
 	<!-- Definition der Oberflaechen -->
 	<surf	id="'MDFSurf'"
+			hrrpua="252.0"
+			heat_of_vaporization="1200.0"
+			ignition_temperature="410.0"
+			burn_away="'.TRUE.'"
 			matl_id="'MDF'"
 			matl_mass_fraction="1.0"
 			thickness="0.018" />
 
 	<surf	id="'PURSurf'"
+			hrrpua="800.0"
+			heat_of_vaporization="1200.0"
+			ignition_temperature="410.0"
+			burn_away="'.TRUE.'"
 			matl_id="'PUR'"
 			matl_mass_fraction="1.0"
 			thickness="0.1" />
 
 	<surf	id="'ABSSurf'"
+			hrrpua="1077.0"
+			heat_of_vaporization="1200.0"
+			ignition_temperature="380.0"
+			burn_away="'.TRUE.'"
 			matl_id="'ABS'"
 			matl_mass_fraction="1.0"
-			thickness="0.003" />
+			thickness="0.006" />
 
 
     <!-- xmin wall -->
@@ -110,7 +110,7 @@
     <var door_x  = "roomlx" />
     <var door_y1 = "roomly/2.0 - doorwidth/2.0" door_y2 = "roomly/2.0 + doorwidth/2.0" />
     <var door_z1 = "0" door_z2="wallthick + doorheight" />
-    <hole x1="door_x-wallthick" x2="door_x" 
+    <hole x1="door_x-2*wallthick" x2="door_x+wallthick" 
           y1="door_y1" y2="door_y2" z1="door_z1" z2="door_z2" />
           
           
@@ -122,7 +122,7 @@
     <loop var="i" start="0" stop="len(cube_x)" >
         <obst x1="cube_x[i]" x2="cube_x[i] + cube_l" 
               y1="cube_y[i]" y2="cube_y[i] + cube_l"
-              z1="0.0" z2="cube_l" color="KHAKI"/>
+              z1="0.0" z2="cube_l" color="KHAKI" surf_id="MDFSurf" comment="MDF cube"/>
         <hole x1="cube_x[i]+cube_th" x2="cube_x[i] + cube_l-cube_th" 
               y1="cube_y[i]+cube_th" y2="cube_y[i] + cube_l-cube_th"
               z1="cube_th" z2="cube_l-cube_th" />
@@ -142,7 +142,7 @@
         <!-- seats -->
         <obst x1="arm_x[i]" x2="arm_x[i] + xwidth" 
               y1="arm_y[i]" y2="arm_y[i] + ywidth"
-              z1="arm_ls" z2="arm_ls+arm_ts" color="MELON"/>
+              z1="arm_ls" z2="arm_ls+arm_ts" color="MELON" surf_id="PURSurf" comment="seat"/>
 
         <var hole_xmin = "arm_x[i] if (arm_d[i] == 1 and arm_o[i] == 0) else arm_x[i]+arm_th" />
         <var hole_xmax = "arm_x[i]+xwidth if (arm_d[i] == 1 and arm_o[i] == 1) else arm_x[i]+xwidth-arm_th" />
@@ -159,25 +159,25 @@
         <!-- legs -->
         <obst x1="arm_x[i]" x2="arm_x[i] + arm_th" 
               y1="arm_y[i]" y2="arm_y[i] + arm_th"
-              z1="0.0" z2="arm_ls" color="BLACK" />
+              z1="0.0" z2="arm_ls" color="BLACK" comment="seat leg"/>
         <obst x1="arm_x[i]+xwidth - arm_th" x2="arm_x[i]+xwidth" 
               y1="arm_y[i]" y2="arm_y[i] + arm_th"
-              z1="0.0" z2="arm_ls" color="BLACK" />
+              z1="0.0" z2="arm_ls" color="BLACK" comment="seat leg"/>
         <obst x1="arm_x[i]" x2="arm_x[i] + arm_th" 
               y1="arm_y[i]+ywidth - arm_th" y2="arm_y[i]+ywidth"
-              z1="0.0" z2="arm_ls" color="BLACK" />
+              z1="0.0" z2="arm_ls" color="BLACK" comment="seat leg"/>
         <obst x1="arm_x[i]+xwidth - arm_th" x2="arm_x[i]+xwidth" 
               y1="arm_y[i]+ywidth - arm_th" y2="arm_y[i]+ywidth"
-              z1="0.0" z2="arm_ls" color="BLACK" />   
+              z1="0.0" z2="arm_ls" color="BLACK" comment="seat leg"/>   
         
     </loop>
     
     <!-- TV screen -->
-    <obst x1="1.5" x2="2.2" y1="1.8" y2="1.8+wallthick" z1="0.9" z2="1.5" color="BLACK" />
-    <obst x1="1.8" x2="1.8+wallthick" y1="1.8" y2="1.8+wallthick" z1="0.6" z2="0.9" color="BLACK" />    
+    <obst x1="1.5" x2="2.2" y1="1.8" y2="1.8+wallthick" z1="0.9" z2="1.5" color="BLACK" surf_id="ABSSurf" comment="TV screen" />
+    <obst x1="1.8" x2="1.8+wallthick" y1="1.8" y2="1.8+wallthick" z1="0.6" z2="0.9" color="BLACK" comment="TV stand"/>    
     
     <!-- fire -->
-    <fire type="burningbox" cx = "roomlx/2.0" cy = "roomly/2.0" lz = "0.0" width="0.4" height="0.2" hrr="10" />
+    <fire type="burningbox" cx = "1.8" cy = "1.1" lz = "0.0" width="0.2" height="0.3" hrr="100" comment="burningbox"/>
     
     <!-- slices -->
     <slice y="roomly/2.0" q="TEMPERATURE" v="1" />
