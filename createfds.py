@@ -183,6 +183,11 @@ def dump(node):
         write_to_fds("%s\n"%(node.attrib["text"]))
     if check_val(node, 'str'):
         write_to_fds("%s\n"%(get_val(node,"str")))
+    if check_val(node, 'file'):
+        f = open(node.attrib["file"], 'r')
+        for line in f:
+            write_to_fds("%s\n"%line.rstrip('\n'))
+        f.close()
 
 def var(node):
     global vars
