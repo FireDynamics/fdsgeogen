@@ -1,0 +1,38 @@
+<fds>
+
+    <para dim="vec" var="tmpa" list="[20.0]" />
+    <para dim="vec" var="zul_vel" list="[1.0]" />
+    <para dim="vec" var="soot_yield" list="[0.01]" />
+    <para dim="vec" var="hrrpua" list="[400.0]" />
+    <para dim="vec" var="door_y2" list="[20.0]" />
+    <para dim="vec" var="window_x1" list="[20.0]" />
+    
+    <info chid="'ffb_room'" outfile="'ffb_room_%03d.fds'%para_id"/>
+
+    <input str="'MISC RESTART=.FALSE., TMPA=%f'%tmpa" />
+
+    <surf   id="'Zuluft'"
+            color="'BLUE'"
+            vel="-zul_vel" />
+
+    <reac   id="'PROPAN'"
+            heat_of_combustion="46400."
+            soot_yield="soot_yield"
+            C="3.0"
+            H="8.0" />
+
+    <surf   id="'Gasbrenner'"
+            hrrpua="hrrpua"
+            color="'RED'" />
+            
+    <hole   x1="2.3" x2="2.6"
+            y1="6.3" y2="door_y2"
+            z1="0.0" z2="0.9" />
+            
+    <hole   x1="window_x1" x2="5.5"
+            y1="2.3" y2="2.6"
+            z1="1.8" z2="2.6" />
+
+    <dump   file="ffb.fdsinput" />
+
+</fds>
