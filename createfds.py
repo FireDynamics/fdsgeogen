@@ -1,6 +1,6 @@
 import sys
 import ast
-import numpy
+import numpy as np
 from itertools import product
 import xml.etree.ElementTree as ET
 
@@ -227,7 +227,7 @@ def surf(node):
     
     line = "ID='%s'"%get_val(node, 'id')
     
-    args = ['rgb', 'hrrpua','heat_of_vaporization', 'ignition_temperature', 'burn_away', 'matl_id', 'matl_mass_fraction', 'thickness']
+    args = ['rgb', 'color', 'vel', 'hrrpua','heat_of_vaporization', 'ignition_temperature', 'burn_away', 'matl_id', 'matl_mass_fraction', 'thickness']
     for arg in args:
         if check_val(node, arg):
             val = get_val(node, arg)
@@ -249,6 +249,35 @@ def surf(node):
         comment = node.attrib['comment']
     
     write_to_fds("&SURF %s/ %s\n"%(line, comment))
+
+def reac(node):
+    global vars
+    check_val(node, 'id', req=True)
+    
+    line = "ID='%s'"%get_val(node, 'id')
+    
+    args = ['heat_of_combustion', 'soot_yield','C', 'H']
+    for arg in args:
+        if check_val(node, arg):
+            val = get_val(node, arg)
+            if isinstance(val, basestring):
+                line += ", %s='%s'"%(arg.upper(),val)
+            else:
+                line += ", %s=%f"%(arg.upper(),val)
+    
+    all_args = args
+    all_args.extend(['id', 'comment'])
+
+    for att in node.attrib:
+        #print "checking attribute %s"%att
+        if att not in all_args:
+            print "WARNING: unknown argument %s"%att
+    
+    comment = ''
+    if check_val(node, 'comment'):
+        comment = node.attrib['comment']
+    
+    write_to_fds("&REAC %s/ %s\n"%(line, comment))
 
 def loop(node):
 
@@ -305,13 +334,14 @@ def paradim(node, dirlist):
     check_val(node, ["var"], req=True)
 
     if check_val(node, ["list"]):
-        paralist = ast.literal_eval(node.attrib['list'])
+        #paralist = ast.literal_eval(node.attrib['list'])
+        paralist = eval(node.attrib['list'])
         
     if check_val(node, ["file"]):
         col=0
         if check_val(node, ["col"]):
             col = get_val(node, "col")
-        paralist = numpy.loadtxt(node.attrib["file"], usecols=(col,), delimiter=',')
+        paralist = np.loadtxt(node.attrib["file"], usecols=(col,), delimiter=',')
         
     np = len(paralist)
     if len(dirlist) == 0:
