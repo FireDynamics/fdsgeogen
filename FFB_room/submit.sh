@@ -1,6 +1,6 @@
 for id in id*; do
     cd $id
     pwd
-    msub fds.job
+    sh ./chain.sh
     cd -
 done

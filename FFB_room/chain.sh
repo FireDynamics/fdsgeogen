@@ -2,7 +2,7 @@
 # submit a chain of jobs with dependency
 
 # number of jobs to submit
-NO_OF_JOBS=1
+NO_OF_JOBS=6
 
 # define jobscript
 JOB_SCRIPT=fds.job

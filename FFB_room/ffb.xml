@@ -1,13 +1,22 @@
 <fds>
 
     <para dim="vec" var="tmpa" list="np.linspace(10.0,30.0,20)" />
-    <para dim="vec" var="zul_vel" list="np.linspace(10.0,10.0,20)" />
+    <para dim="vec" var="zul_vel" list="np.linspace(0.22,0.32,20)" />
     <para dim="vec" var="soot_yield" list="np.linspace(0.01,0.05,20)" />
     <para dim="vec" var="hrrpua" list="np.linspace(640.0,960.0,20)" />
     <para dim="vec" var="door_y2" list="np.linspace(6.3,8.0,20)" />
     <para dim="vec" var="window_x1" list="np.linspace(3.0,5.5,20)" />
     
     <info chid="'ffb_room'" outfile="'ffb_room_%03d.fds'%para_id"/>
+
+    <dump str="'!! ################'" />
+    <dump str="'!! TMPA       = %f'%tmpa" />
+    <dump str="'!! VEL        = %f'%zul_vel" />
+    <dump str="'!! SOOT_YIELD = %f'%soot_yield" />
+    <dump str="'!! DOOR_Y     = %f'%door_y2" />
+    <dump str="'!! WINDOW_X   = %f'%window_x1" />
+    <dump str="'!! ################'" />
+    
 
     <input str="'MISC RESTART=.FALSE., TMPA=%f'%tmpa" />
 
