@@ -1,0 +1,40 @@
+strategy
+#  graphics
+  tabular_graphics_data
+    tabular_graphics_file = 'cone_dakota.dat' 
+  single_method
+
+method
+  max_iterations = 10
+  convergence_tolerance = 1e-4
+  conmin_frcg       
+#    multidim_parameter_study
+#        partitions = 1 1 1
+
+model
+  single
+
+variables
+  continuous_design = 3      
+    initial_point   2.0       0.05     0.85
+    lower_bounds    1.8       0.02     0.75
+    upper_bounds    3.5       0.09     0.95
+    descriptors     "C_P"       "K"     "EPSILON"
+
+interface
+#  analysis_driver = 'rosenbrock'
+#    direct
+  analysis_driver = 'cone_run.sh'
+    fork
+    parameters_file = 'params.in'
+    results_file    = 'results.out'  
+
+responses
+  objective_functions = 1    
+#  no_gradients
+  numerical_gradients
+    method_source dakota
+    interval_type forward
+    fd_gradient_step_size = 1.e-3
+  no_hessians
+
