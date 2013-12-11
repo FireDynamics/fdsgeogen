@@ -202,11 +202,35 @@ def matl(node):
     line = "ID='%s'"%get_val(node, 'id')
     
     args = ['specific_heat', 'conductivity', 'density', 'heat_of_combustion', 
-            'n_reactions', 'heat_of_reaction', 'nu_fuel', 'reference_temperature']
+            'n_reactions', 'heat_of_reaction', 'nu_spec', 'reference_temperature',
+            'a', 'e', 'n_s', 'spec_id', 'emissivity']
     for arg in args:
         if check_val(node, arg):
-            line += ", %s=%f"%(arg.upper(),get_val(node, arg))
-    
+
+            vec_post=''
+            if node.attrib[arg].find(';') != -1:
+                vec_post = '(' + node.attrib[arg].split(';')[0] + ')'
+                node.attrib[arg] = node.attrib[arg].split(';')[1]
+                    
+            val = get_val(node, arg)
+            #print type(val)
+            if isinstance(val, tuple):
+                #print "MATL vector value for %s="%arg, val, "with %d elements"%len(val)
+                line += ", %s%s="%(arg.upper(),vec_post)
+                first = True
+                for el in val:
+                    if not first:
+                        line += ", "
+                    first = False
+                    
+                    if isinstance(el, basestring):
+                        line += "'%s'"%(el)
+                    else:
+                        line += "%f"%(el)
+            else:
+                #print "MATL scalar value for %s="%arg, val
+                line += ", %s=%f"%(arg.upper(),val)
+
     all_args = args
     all_args.extend(['id', 'comment'])
 
@@ -227,7 +251,7 @@ def surf(node):
     
     line = "ID='%s'"%get_val(node, 'id')
     
-    args = ['rgb', 'color', 'vel', 'hrrpua','heat_of_vaporization', 'ignition_temperature', 'burn_away', 'matl_id', 'matl_mass_fraction', 'thickness']
+    args = ['rgb', 'color', 'vel', 'hrrpua','heat_of_vaporization', 'ignition_temperature', 'burn_away', 'matl_id', 'matl_mass_fraction', 'thickness', 'external_flux', 'backing']
     for arg in args:
         if check_val(node, arg):
             val = get_val(node, arg)
