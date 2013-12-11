@@ -22,9 +22,7 @@ variables
     descriptors     "C_P"       "K"     "EPSILON"
 
 interface
-#  analysis_driver = 'rosenbrock'
-#    direct
-  analysis_driver = 'cone_run.sh'
+  analysis_driver = '../cone_evaluate.sh'
     fork
     parameters_file = 'params.in'
     results_file    = 'results.out'  

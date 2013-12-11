@@ -12,10 +12,13 @@ global_args['matl'] = ['specific_heat', 'conductivity', 'density', 'heat_of_comb
 global_args['surf'] = ['rgb', 'color', 'vel', 'hrrpua','heat_of_vaporization', 
                         'ignition_temperature', 'burn_away', 'matl_id', 'matl_mass_fraction', 
                         'thickness', 'external_flux', 'backing']
+global_args['obst'] = ['x1', 'x2', 'y1', 'y2', 'z1', 'z2', 'xb', 'surf_ids']
+
 global_keys = {}
 global_keys['reac']  = 'REAC'
 global_keys['matl']  = 'MATL'
 global_keys['surf']  = 'SURF'
+global_keys['obst']  = 'OBST'
 
 def div235(n):
     r_init = int(n)
@@ -211,7 +214,8 @@ def var(node):
 def process_node(node):
 
     global vars
-    check_val(node, 'id', req=True)
+    if not check_val(node, 'id', req=False):
+        node.attrib['id'] = "'no_id'"
     
     args = global_args[node.tag]
 

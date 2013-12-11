@@ -52,7 +52,12 @@ def compute_ignition(t, hrr_data):
     b1 = best_par[4]
     
     #t_ign = (t1-t0)*0.5 + t0
-    t_ign = t[np.where(hrr_model(t, *best_par)>0.2*b1)[0][0]]
+    threshold_hrr = 0.2*b1
+    model_data = hrr_model(t, *best_par)
+    if np.max(model_data) > threshold_hrr:
+        t_ign = t[np.where(model_data>threshold_hrr)[0][0]]
+    else:
+        t_ign = -1.0
 
 
     t_end = t[-1]
@@ -60,6 +65,7 @@ def compute_ignition(t, hrr_data):
         
     if t1>0.8*t_end: trust = 0
     if (t1-t0)<0.1: trust = 0
+    if b1 < 1e-6: trust = 0
 
     #print "ignition time: ", t_ign
     #print "trust: ", trust

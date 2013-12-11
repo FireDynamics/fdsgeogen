@@ -3,20 +3,24 @@ echo "running dakota shell script"
 echo "input file content:"
 cat $1
 
+BASE_DIR=$PWD/..
+RUN_BASE=runs
+
+SETUP_DIR=foam_simple
+
 FLUX_FILE=fluxes.dat
 XML_FILE=cone.xml
-FDS_FILE=cone_test.fds
-RUN_BASE=run_1
+CREATEFDS=~/fdsgeogen/createfds.py
 
-ID=`cat $RUN_BASE/id`
+ID=`cat $RUN_BASE/count`
 let ID=ID+1
 
-echo $ID > $RUN_BASE/id
+echo $ID > $RUN_BASE/count
 
-EVAL_DIR=run_1/id_$ID
+EVAL_DIR=$PWD/$RUN_BASE/id$ID
 mkdir $EVAL_DIR
 
-echo "ASIM: evalutaion ID: $ID"
+echo "INFO: evalutaion ID: $ID"
 
 #### execute various radiation simulations
 
@@ -29,20 +33,19 @@ while [ $FLUX_ID -lt $FLUX_ID_MAX ]; do
     RUN_DIR=$EVAL_DIR/flux_$FLUX_ID
     mkdir $RUN_DIR
 
-    echo "ASIM: prepare input for flux_id: $FLUX_ID (out of $FLUX_ID_MAX)"
+    echo "INFO: prepare input for flux_id: $FLUX_ID (out of $FLUX_ID_MAX)"
 
-    python extract_replace_dakota_values.py $1 $XML_FILE > $RUN_DIR/cone_rad_template.xml
-    python extract_replace_flux.py $FLUX_FILE $FLUX_ID $RUN_DIR/cone_rad_template.xml > $RUN_DIR/$XML_FILE
-    cp cone.input $RUN_DIR
+    python $BASE_DIR/extract_replace_dakota_values.py $1 $XML_FILE > $RUN_DIR/cone_rad_template.xml
+    python $BASE_DIR/extract_replace_flux.py $FLUX_FILE $FLUX_ID $RUN_DIR/cone_rad_template.xml > $RUN_DIR/$XML_FILE
 
     cd $RUN_DIR
 
-    python ~/fdsgeogen/createfds.py $XML_FILE > createfds.out
+    python $CREATEFDS $XML_FILE &> createfds.out
 
-    echo "ASIM: running FDS"
+    echo "INFO: running FDS"
     ~/soft/bin/fds_intel_linux_64 cone_test.fds &> fds_stdout.out
 
-    python ../../../compute_ignition.py cone_test_hrr.csv >> ../ignition_times.dat
+    python $BASE_DIR/compute_ignition.py cone_test_hrr.csv >> $EVAL_DIR/ignition_times.dat
 
     cd -
 
@@ -52,4 +55,4 @@ done
 
 pr -m -t -s\  $FLUX_FILE $EVAL_DIR/ignition_times.dat > $EVAL_DIR/result_table.dat
 
-python compute_errorfunction.py $EVAL_DIR/result_table.dat > $2
+python $BASE_DIR/compute_errorfunction.py $EVAL_DIR/result_table.dat > $2

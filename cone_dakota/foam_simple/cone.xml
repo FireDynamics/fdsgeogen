@@ -1,16 +1,16 @@
 <fds>
-<!--
+
     <var epsilon      = "#EPSILON#" /> 
     <var conductivity = "#K#" />
     <var capacity     = "#C_P#" />
     <var rad_flux     = "#RAD_FLUX#" />
- -->
-     
+ 
+  <!--   
     <var epsilon      = "0.1" /> 
     <var conductivity = "0.2" />
     <var capacity     = "0.3" />
     <var rad_flux     = "0.4" />
-   
+  --> 
 
     <var delta    = "0.05" />
 
@@ -71,7 +71,7 @@
         matl_mass_fraction="1.0"
         thickness="0.1" />
 
-    <obst x1="xymin" x2="xymax" y1="xymin" y2="xymax" z1="0.0" z2="0.05" 
+    <obst xb="xymin, xymax, xymin, xymax, 0.0, 0.05" 
         surf_ids="'FoamSurfHeatFlux','FoamSurf','FoamSurf'" />
 
     <input text="BNDF QUANTITY='BURNING RATE'" />
