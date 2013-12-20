@@ -33,8 +33,8 @@ def compute_ignition(t, hrr_data):
     best_par = init_par
     min_val  = 1e16
 
-    for gt0 in np.linspace(t[10], t[-10], 25):
-        for gt1 in np.linspace(t[0], gt0, 25):
+    for gt1 in np.linspace(t[10], t[-10], 25):
+        for gt0 in np.linspace(t[0], gt1, 25):
 
             init_par = [gt0, gt1, 1, 2, 1]
 
@@ -58,7 +58,6 @@ def compute_ignition(t, hrr_data):
         t_ign = t[np.where(model_data>threshold_hrr)[0][0]]
     else:
         t_ign = -1.0
-
 
     t_end = t[-1]
     trust = 1

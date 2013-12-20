@@ -12,7 +12,7 @@
     <var rad_flux     = "0.4" />
   --> 
 
-    <var delta    = "0.05" />
+    <var delta    = "0.025" />
 
     <var chid="'cone_test'" outfile="'cone_test.fds'" />
     
@@ -25,7 +25,7 @@
     <dump str="'!! RAD_FLUX = %f'%rad_flux" />
     <dump str="'!! ################'" />
 
-    <input text="TIME T_END=25.0" />
+    <input text="TIME T_END=150.0" />
     <input text="MISC RESTART=.FALSE." />
     <input text="DUMP DT_BNDF=0.1, DT_RESTART=300.0" />
 

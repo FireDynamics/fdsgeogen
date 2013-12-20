@@ -8,7 +8,7 @@ global_args = {}
 global_args['reac'] = ['heat_of_combustion', 'soot_yield','C', 'H', 'fuel']
 global_args['matl'] = ['specific_heat', 'conductivity', 'density', 'heat_of_combustion', 
                         'n_reactions', 'heat_of_reaction', 'nu_spec', 'reference_temperature',
-                        'a', 'e', 'n_s', 'spec_id', 'emissivity']
+                        'a', 'e', 'n_s', 'spec_id', 'emissivity', 'heating_rate', 'pyrolysis_range']
 global_args['surf'] = ['rgb', 'color', 'vel', 'hrrpua','heat_of_vaporization', 
                         'ignition_temperature', 'burn_away', 'matl_id', 'matl_mass_fraction', 
                         'thickness', 'external_flux', 'backing']
@@ -220,17 +220,16 @@ def process_node(node):
     args = global_args[node.tag]
 
     line = "ID='%s'"%get_val(node, 'id')    
-    comment = ''
-    
+
     for arg in args:
         if check_val(node, arg):
 
             vec_post=''
             if node.attrib[arg].find(';') != -1:
                 vec_post = '(' + node.attrib[arg].split(';')[0] + ')'
-                node.attrib[arg] = node.attrib[arg].split(';')[1]
-                    
-            val = get_val(node, arg)
+                val = eval(node.attrib[arg].split(';')[1], globals(), vars)
+            else:
+                val = get_val(node, arg)
             if isinstance(val, tuple):
                 line += ", %s%s="%(arg.upper(),vec_post)
                 first = True
@@ -249,7 +248,7 @@ def process_node(node):
                 else:
                     line += ", %s=%f"%(arg.upper(),val)
                 
-    all_args = args
+    all_args = args[:]
     all_args.extend(['id', 'comment'])
 
     for att in node.attrib:
@@ -325,18 +324,18 @@ def paradim(node, dirlist):
     if check_val(node, ["file"]):
         col=0
         if check_val(node, ["col"]):
-            col = get_val(node, "col")
+            col = int(get_val(node, "col"))
         paralist = np.loadtxt(node.attrib["file"], usecols=(col,), delimiter=',')
         
-    np = len(paralist)
+    nump = len(paralist)
     if len(dirlist) == 0:
         for ip in paralist: dirlist.append({})
 
-    if len(dirlist) != np: 
+    if len(dirlist) != nump: 
         print "wrong number of parameter!!"
         sys.exit()
     
-    for ip in range(np):
+    for ip in range(nump):
         dirlist[ip][node.attrib['var']] = paralist[ip]
 
 def traverse(root):

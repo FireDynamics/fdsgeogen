@@ -33,6 +33,6 @@ responses
   numerical_gradients
     method_source dakota
     interval_type forward
-    fd_gradient_step_size = 1.e-3
+    fd_gradient_step_size = 5.0e-2
   no_hessians
 
