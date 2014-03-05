@@ -221,6 +221,8 @@ def process_node(node):
     line=''
     if check_val(node, 'id', req=False):
         line += "ID='%s'"%get_val(node, 'id') 
+    else:
+        line += "ID='none'"
     
     args = global_args[node.tag]
 
