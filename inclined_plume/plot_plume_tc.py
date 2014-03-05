@@ -1,5 +1,8 @@
 import sys
 import numpy as np
+
+import matplotlib as mpl
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 
 devc_fn = sys.argv[1]
@@ -21,7 +24,7 @@ for idx, devc in enumerate(devc_list):
         coords = line.split(".")
         tc_index_coord.append([int(coords[0]), int(coords[1]), idx])
 
-print len(tc_index_coord), tc_num, tc_num**2
+#print len(tc_index_coord), tc_num, tc_num**2
 if len(tc_index_coord) != tc_num**2:
     print "wrong number of devices found!"
     sys.exit()
@@ -33,7 +36,11 @@ tc_plane = np.zeros([tc_num, tc_num])
 devc_data = np.loadtxt(devc_fn, skiprows=2, delimiter=',')
 #print devc_data
 
-for it in range(1,len(devc_data[:])):
+its = np.linspace(1, len(devc_data[:])-1, 25)
+its = its.astype(int)
+#print its
+
+for it in its:
     print "plot time index: ", it
     for tc in tc_index_coord:
         i1 = tc[0]
@@ -41,7 +48,7 @@ for it in range(1,len(devc_data[:])):
         di = tc[2]
         tc_plane[i1, i2] = devc_data[it, di]
     
-    print tc_plane
+    #print tc_plane
     
     cp = plt.contour(tc_plane)
     plt.clabel(cp)
