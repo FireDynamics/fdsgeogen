@@ -11,14 +11,18 @@ global_args['matl'] = ['specific_heat', 'conductivity', 'density', 'heat_of_comb
                         'a', 'e', 'n_s', 'spec_id', 'emissivity', 'heating_rate', 'pyrolysis_range']
 global_args['surf'] = ['rgb', 'color', 'vel', 'hrrpua','heat_of_vaporization', 
                         'ignition_temperature', 'burn_away', 'matl_id', 'matl_mass_fraction', 
-                        'thickness', 'external_flux', 'backing']
-global_args['obst'] = ['x1', 'x2', 'y1', 'y2', 'z1', 'z2', 'xb', 'surf_ids']
+                        'thickness', 'external_flux', 'backing', 'hrrupa']
+global_args['obst'] = ['x1', 'x2', 'y1', 'y2', 'z1', 'z2', 'xb', 'surf_ids', 'surf_id', 'color']
+global_args['hole'] = ['xb']
+global_args['vent'] = ['xb', 'surf_id', 'color']
 
 global_keys = {}
 global_keys['reac']  = 'REAC'
 global_keys['matl']  = 'MATL'
 global_keys['surf']  = 'SURF'
 global_keys['obst']  = 'OBST'
+global_keys['hole']  = 'HOLE'
+global_keys['vent']  = 'VENT'
 
 def div235(n):
     r_init = int(n)
@@ -214,12 +218,11 @@ def var(node):
 def process_node(node):
 
     global vars
-    if not check_val(node, 'id', req=False):
-        node.attrib['id'] = "'no_id'"
+    line=''
+    if check_val(node, 'id', req=False):
+        line += "ID='%s'"%get_val(node, 'id') 
     
     args = global_args[node.tag]
-
-    line = "ID='%s'"%get_val(node, 'id')    
 
     for arg in args:
         if check_val(node, arg):
@@ -350,6 +353,8 @@ def dbg(node):
 
 def device(node):
     check_val(node, ["q" ,"id"], req=True)
+    q = get_val(node, "q", opt=True)
+    id = get_val(node, "id", opt=True)
     if check_val(node, ["x1", "x2", "y1", "y2", "z1", "z2"]):
         x1 = get_val(node, "x1", opt=True)
         x2 = get_val(node, "x2", opt=True)
@@ -357,8 +362,6 @@ def device(node):
         y2 = get_val(node, "y2", opt=True)
         z1 = get_val(node, "z1", opt=True)
         z2 = get_val(node, "z2", opt=True)
-        q = get_val(node, "q", opt=True)
-        id = get_val(node, "id", opt=True)
         write_to_fds("&DEVC ID='%s' XB=%f,%f,%f,%f,%f,%f QUANTITY='%s'/\n"%(id,x1,x2,y1,y2,z1,z2,q))
         return True
     if check_val(node, ["x", "y", "z"]):
