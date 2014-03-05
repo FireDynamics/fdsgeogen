@@ -10,7 +10,7 @@
     <info chid="chid" outfile="outfile"/>
 
     <!-- fixed input parameter -->
-    <input text="TIME T_END=1.0" />
+    <input text="TIME T_END=5.0" />
     <input text="MISC RESTART=.FALSE." />
     <input text="PART ID='smoke', MASSLESS=.TRUE., SAMPLING_FACTOR=1" />
 
@@ -93,7 +93,7 @@
         C = "1."
         H = "4." />
           
-    <surf id="'FIRE'" hrrupa="698" color="'RED'" />
+    <surf id="'FIRE'" hrrpua="698" color="'RED'" />
           
     <var fire_radius = "0.15" />
     <obst 
@@ -134,7 +134,7 @@
         <loop var="ixy" start="0" stop="ndev">
             <var z="wallthick + iz/ndev * len" />
             <var xy="fire_pos-0.25 + ixy/ndev * len" />
-            <device id="'FIRE TC %d.%d'%(iz,ixy)" x="xy" y="xy" z="z" q="'THERMOCOUPLE'" /> 
+            <device id="'FIRE-TC-GRID %d.%d'%(iz,ixy)" x="xy" y="xy" z="z" q="'THERMOCOUPLE'" /> 
         </loop>    
     </loop>            
     
