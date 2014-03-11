@@ -1,0 +1,54 @@
+<fds>
+
+    <!-- file naming -->
+    <var chid="'metro_1A'" outfile="'metro_1A.fds'" />
+    <info chid="chid" outfile="outfile"/>
+
+    <!-- fixed input parameter -->
+    <input text="TIME T_END=0.0" />
+    <input text="MISC RESTART=.FALSE." />
+
+    <!-- cell size -->
+    <var delta="0.10" />
+    
+    <section id="lower platform domain">
+    
+        <!-- lower volume and walls -->
+        <var low_ceiling_height="3.00" />
+        <var low_platform_length="60.00" />
+        <var low_platform_width="6.00" />    
+        <var low_platform_height="1.00" />
+    
+        <var low_wall_thickness="2*delta" />
+    
+        <var low_min_x="0.0" />
+        <var low_max_x="low_platform_length" />
+        <var low_min_y="0.0" />
+        <var low_max_y="low_platform_width" />
+        <var low_min_z="0.0" />
+        <var low_max_z="low_ceiling_height" />
+    
+        <var low_dom_min_x="low_min_x - low_wall_thickness" />
+        <var low_dom_max_x="low_min_x + low_wall_thickness" />
+        <var low_dom_min_y="low_min_y - low_wall_thickness" />
+        <var low_dom_max_y="low_min_y + low_wall_thickness" />
+        <var low_dom_min_z="low_min_z - low_platform_height - low_wall_thickness" />
+        <var low_dom_max_z="low_min_z + low_wall_thickness" />
+
+        <var nx = "int(div235((low_dom_max_x - low_dom_min_x) / delta))" />
+        <var ny = "int(div235((low_dom_max_y - low_dom_min_y) / delta))" />
+        <var nz = "int(div235((low_dom_max_z - low_dom_min_z) / delta))" />
+
+        <var low_dom_max_x="low_dom_min_x + nx*delta" />
+        <var low_dom_max_x="low_dom_min_y + ny*delta" />
+        <var low_dom_max_x="low_dom_min_z + nz*delta" />
+
+        <boundary x="open" y="open" zmax="open"/>
+
+        <mesh xmin="low_dom_min_x" xmax="low_dom_max_x" 
+            ymin="low_dom_min_y" ymax="low_dom_max_y" 
+            zmin="low_dom_min_z" zmax="low_dom_max_z"/>
+    
+    </section>
+
+</fds>
