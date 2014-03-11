@@ -343,6 +343,9 @@ def paradim(node, dirlist):
     for ip in range(nump):
         dirlist[ip][node.attrib['var']] = paralist[ip]
 
+def section(node):
+    traverse(node)
+
 def traverse(root):
     for node in root:
         if node.tag in global_keys:
