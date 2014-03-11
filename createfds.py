@@ -44,6 +44,12 @@ def del_var(key):
     global vars
     del vars[key]
 
+def check_get_val(node, name, default):
+    if check_val(node, name):
+        return get_val(node, name)
+    else:
+        return default
+
 def check_val(node, lst, req=False):
     if type(lst) is not list: 
         lst = [ lst ]
@@ -120,6 +126,66 @@ def hole(node):
                                                         eval(node.attrib["y2"], {}, vars),
                                                         eval(node.attrib["z1"], {}, vars),
                                                         eval(node.attrib["z2"], {}, vars)))
+
+def my_room(node):
+    x1 = get_val(node, "x1", opt=True)
+    x2 = get_val(node, "x2", opt=True)
+    y1 = get_val(node, "y1", opt=True)
+    y2 = get_val(node, "y2", opt=True)
+    z1 = get_val(node, "z1", opt=True)
+    z2 = get_val(node, "z2", opt=True)                    
+      
+    bx1 = check_get_val(node, "bx1", 0)
+    bx2 = check_get_val(node, "bx2", 0)
+    by1 = check_get_val(node, "by1", 0)
+    by2 = check_get_val(node, "by2", 0)
+    bz1 = check_get_val(node, "bz1", 0)
+    bz2 = check_get_val(node, "bz2", 0)                    
+    
+    wt = check_get_val(node, "wt", 0.0)
+
+    ax = check_get_val(node, "ax", 1)
+    ay = check_get_val(node, "ay", 1)
+    az = check_get_val(node, "az", 1)
+    
+    delta = get_val(node, "delta", opt=True)
+    
+    dxmin = x1 - bx1*wt  
+    dxmax = x2 + bx2*wt      
+    dymin = y1 - by1*wt  
+    dymax = y2 + by2*wt      
+    dzmin = z1 - bz1*wt  
+    dzmax = z2 + bz2*wt      
+
+    nx = int(div235((dxmax - dxmin) / delta))
+    ny = int(div235((dymax - dymin) / delta))
+    nz = int(div235((dzmax - dzmin) / delta))        
+      
+    if ax==1:
+        dxmax = dxmin + nx*delta
+    else:
+        dxmin = dxmax - nx*delta
+
+    if ay==1:
+        dymax = dymin + ny*delta
+    else:
+        dymin = dymax - ny*delta
+
+    if az==1:
+        dzmax = dzmin + nz*delta
+    else:
+        dzmin = dzmax - nz*delta
+
+    add_var("xmin", dxmin)
+    add_var("xmax", dxmax)
+    add_var("ymin", dymin)
+    add_var("ymax", dymax)
+    add_var("zmin", dzmin)
+    add_var("zmax", dzmax)                    
+               
+    add_var("nx", nx)
+    add_var("ny", ny)
+    add_var("nz", nz)        
                                                         
 def mesh(node):
     nmeshes = 1
