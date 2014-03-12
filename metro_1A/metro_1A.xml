@@ -210,6 +210,17 @@
         <my_room wt="low_wall_thickness" bx1="1" bx2="1" by1="1" by2="1" bz1="1" bz2="1" ax="0" />
         <mesh />
         
+        <obst xb="xmin, xmax, ymin, y1, zmin, zmax" color="'INVISIBLE'" />
+        <obst xb="xmin, xmax, y2, ymax, zmin, zmax" color="'INVISIBLE'"/>            
+        <obst xb="xmin, x1, ymin, ymax, zmin, zmax" color="'RED'"/>
+        <obst xb="x2, xmax, ymin, ymax, zmin, zmax" color="'RED'"/>            
+        <obst xb="xmin, xmax, ymin, ymax, zmin, z1" color="'RED'"/>
+        <obst xb="xmin, xmax, ymin, ymax, z2, zmax" color="'RED'"/>
+
+        <!-- stairs openings to lower level -->
+        <var ymid="ymin + 0.5*high_width" />
+        <hole xb="x2-delta, xmax+delta, ymid-0.5*low_stairs_width, ymid+0.5*low_stairs_width, z1, z2" />
+        
         <var high_min_x = "x1" />
         <var high_max_x = "x2" />
         <var high_min_y = "y1" />
@@ -275,7 +286,7 @@
     
     </section>
     
-        <section id="upper level at xmax">
+    <section id="upper level at xmax">
     
         <!-- xmax upper room -->
         <var x1="low_max_x + low_stairs_length" />
