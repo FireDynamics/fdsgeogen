@@ -5,11 +5,11 @@
     <info chid="chid" outfile="outfile"/>
 
     <!-- fixed input parameter -->
-    <input text="TIME T_END=0.0" />
+    <input text="TIME T_END=10.0" />
     <input text="MISC RESTART=.FALSE." />
 
     <!-- cell size -->
-    <var delta="0.10" />
+    <var delta="0.25" />
 
     <!-- gemetrical parameter -->    
     <var low_ceiling_height="3.00" />
@@ -122,6 +122,8 @@
             <obst xb="xmin, xmax, ymin, ymax, zmin, z1" />
             <obst xb="xmin, xmax, ymin, ymax, z2, zmax" />            
  
+            <vent xb="xmin, xmin, y1, y2, z1, z2" surf_id="'OPEN'" dynamic_pressure="press_low_xmin" />
+ 
             <!-- xmax + ymin tunnel -->
             <var x1 = "low_dom_max_x" />
             <var x2 = "low_dom_max_x+tunnel_length" /> 
@@ -156,6 +158,7 @@
             <obst xb="xmin, xmax, ymin, ymax, zmin, z1" />
             <obst xb="xmin, xmax, ymin, ymax, z2, zmax" />            
 
+            <vent xb="xmax, xmax, y1, y2, z1, z2" surf_id="'OPEN'" dynamic_pressure="press_low_xmax" />
     
         </section>
     
@@ -439,7 +442,7 @@
         <mesh />
     
         <obst xb="x2, xmax, ymin, ymax, zmin, zmax" color="'RED'"/>
-        <hole xb="x2-0.5*delta, xmax+0.5*delta, high_xmin_xstairs_mid_y-0.5*high_stairs_width, high_xmin_xstairs_mid_y+0.5*high_stairs_width, z1, z1 + high_stairs_height" />
+        <!--<hole xb="x2-0.5*delta, xmax+0.5*delta, high_xmin_xstairs_mid_y-0.5*high_stairs_width, high_xmin_xstairs_mid_y+0.5*high_stairs_width, z1, z1 + high_stairs_height" /> -->
         <obst xb="xmin, xmax, ymin, ymax, zmin, z1" color="'BLACK'"/>
     
         <!-- xmin-outdoors in y-direction -->
@@ -454,7 +457,7 @@
         <mesh />
     
         <obst xb="xmin, xmax, y2, ymax, zmin, zmax" color="'RED'"/>
-        <hole xb="high_xmin_ystairs_mid_x-0.5*high_stairs_width, high_xmin_ystairs_mid_x+0.5*high_stairs_width, y2-0.5*delta, ymax+0.5*delta, z1, z1 + high_stairs_height" />
+        <!--<hole xb="high_xmin_ystairs_mid_x-0.5*high_stairs_width, high_xmin_ystairs_mid_x+0.5*high_stairs_width, y2-0.5*delta, ymax+0.5*delta, z1, z1 + high_stairs_height" />-->
         <obst xb="xmin, xmax, ymin, ymax, zmin, z1" color="'BLACK'"/>
     
     </section>
@@ -473,7 +476,7 @@
         <mesh />
     
         <obst xb="xmin, x1, ymin, ymax, zmin, zmax" color="'RED'"/>
-        <hole xb="xmin-0.5*delta, x1+0.5*delta, high_xmax_xstairs_mid_y-0.5*high_stairs_width, high_xmax_xstairs_mid_y+0.5*high_stairs_width, z1, z1 + high_stairs_height" />
+        <!--<hole xb="xmin-0.5*delta, x1+0.5*delta, high_xmax_xstairs_mid_y-0.5*high_stairs_width, high_xmax_xstairs_mid_y+0.5*high_stairs_width, z1, z1 + high_stairs_height" />-->
         <obst xb="xmin, xmax, ymin, ymax, zmin, z1" color="'BLACK'"/>
     
         <!-- xmax-outdoors in y-direction -->
@@ -488,9 +491,20 @@
         <mesh />
     
         <obst xb="xmin, xmax, y2, ymax, zmin, zmax" color="'RED'"/>
-        <hole xb="high_xmax_ystairs_mid_x-0.5*high_stairs_width, high_xmax_ystairs_mid_x+0.5*high_stairs_width, y2-0.5*delta, ymax+0.5*delta, z1, z1 + high_stairs_height" />
+        <!--<hole xb="high_xmax_ystairs_mid_x-0.5*high_stairs_width, high_xmax_ystairs_mid_x+0.5*high_stairs_width, y2-0.5*delta, ymax+0.5*delta, z1, z1 + high_stairs_height" />-->
         <obst xb="xmin, xmax, ymin, ymax, zmin, z1" color="'BLACK'"/>
     
+    </section>
+
+    <section id="diagnostics" >
+    
+        <slcf pby="low_rail_width + 0.5*low_platform_width" quantity="'U-VELOCITY'"/>
+        <slcf pby="low_rail_width + 0.5*low_platform_width" quantity="'V-VELOCITY'"/>
+        <slcf pby="low_rail_width + 0.5*low_platform_width" quantity="'W-VELOCITY'"/>                
+
+        <slcf pbz="0.5*low_ceiling_height" quantity="'U-VELOCITY'"/>
+
+            
     </section>
 
 </fds>
