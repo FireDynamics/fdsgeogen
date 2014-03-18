@@ -34,6 +34,13 @@
     <var high_stairs_height="3.0" />
     <var high_stairs_width="2.0" />
     
+    <var out_width="5.0" />
+    <var out_hight="5.0" />
+    
+    <!-- ventilation parameter -->
+    <var press_low_xmin="-10.0" />
+    <var press_low_xmax=" 10.0" />
+    
     <section id="lower platform domain">
     
         <var low_min_x="0.0" />
@@ -47,7 +54,7 @@
                  y1="low_min_y" y2="low_max_y"
                  z1="low_min_z" z2="low_max_z"
                  wt="low_wall_thickness"
-                 by1="1" by2="1" bz1="1" bz2="1" />
+                 bx1="1" bx2="1" by1="1" by2="1" bz1="1" bz2="1" />
     
         <var low_dom_min_x="xmin" />
         <var low_dom_max_x="xmax" />
@@ -58,14 +65,20 @@
 
         <mesh />
 
-        <boundary x="open" y="open" zmax="open"/>
-
-        <section id="x+z walls">
+        <section id="y+z walls">
             <obst xb="low_dom_min_x, low_dom_max_x, low_dom_min_y, low_min_y, low_dom_min_z, low_dom_max_z" 
                   color="'INVISIBLE'" />
             <obst xb="low_dom_min_x, low_dom_max_x, low_max_y, low_dom_max_y, low_dom_min_z, low_dom_max_z" />
-            <obst xb="low_dom_min_x, low_dom_max_x, low_dom_min_y, low_dom_max_y, low_dom_min_z, low_min_z - low_platform_height" />            
+            <obst xb="low_dom_min_x, low_dom_max_x, low_dom_min_y, low_dom_max_y, low_dom_min_z, low_min_z" color="'BLACK'"/>            
             <obst xb="low_dom_min_x, low_dom_max_x, low_dom_min_y, low_dom_max_y, low_max_z, low_dom_max_z" />                        
+        </section>
+    
+        <section id="x walls and holes">
+            <var ymid="low_min_x + 0.5*low_platform_width + low_rail_width" />
+            <obst xb="low_dom_min_x, low_min_x, low_rail_width, ymid-0.5*low_stairs_width, low_dom_min_z, low_dom_max_z" color="'RED'" />
+            <obst xb="low_dom_min_x, low_min_x, ymid+0.5*low_stairs_width, low_max_y-low_rail_width, low_dom_min_z, low_dom_max_z" color="'RED'" />
+            <obst xb="low_max_x, low_dom_max_x, low_rail_width, ymid-0.5*low_stairs_width, low_dom_min_z, low_dom_max_z" color="'RED'" />
+            <obst xb="low_max_x, low_dom_max_x, ymid+0.5*low_stairs_width, low_max_y-low_rail_width, low_dom_min_z, low_dom_max_z" color="'RED'" />
         </section>
     
         <section id="platform">
@@ -90,6 +103,8 @@
             <obst xb="xmin, xmax, y2, ymax, zmin, zmax" color="'INVISIBLE'"/>            
             <obst xb="xmin, xmax, ymin, ymax, zmin, z1" />
             <obst xb="xmin, xmax, ymin, ymax, z2, zmax" />            
+
+            <vent xb="xmin, xmin, y1, y2, z1, z2" surf_id="'OPEN'" dynamic_pressure="press_low_xmin" />
 
             <!-- xmin + ymax tunnel -->
             <var x1 = "-tunnel_length" />
@@ -122,6 +137,8 @@
             <obst xb="xmin, xmax, y2, ymax, zmin, zmax" color="'INVISIBLE'"/>            
             <obst xb="xmin, xmax, ymin, ymax, zmin, z1" />
             <obst xb="xmin, xmax, ymin, ymax, z2, zmax" />            
+
+            <vent xb="xmax, xmax, y1, y2, z1, z2" surf_id="'OPEN'" dynamic_pressure="press_low_xmax" />
 
             <!-- xmax + ymax tunnel -->
             <var x1 = "low_dom_max_x" />
@@ -210,16 +227,16 @@
         <my_room wt="low_wall_thickness" bx1="1" bx2="1" by1="1" by2="1" bz1="1" bz2="1" ax="0" />
         <mesh />
         
-        <obst xb="xmin, xmax, ymin, y1, zmin, zmax" color="'INVISIBLE'" />
-        <obst xb="xmin, xmax, y2, ymax, zmin, zmax" color="'INVISIBLE'"/>            
+        <obst xb="xmin, xmax, ymin, y1, zmin, zmax" color="'RED'" />
+        <obst xb="xmin, xmax, y2, ymax, zmin, zmax" color="'RED'"/>            
         <obst xb="xmin, x1, ymin, ymax, zmin, zmax" color="'RED'"/>
         <obst xb="x2, xmax, ymin, ymax, zmin, zmax" color="'RED'"/>            
-        <obst xb="xmin, xmax, ymin, ymax, zmin, z1" color="'RED'"/>
-        <obst xb="xmin, xmax, ymin, ymax, z2, zmax" color="'RED'"/>
+        <obst xb="xmin, xmax, ymin, ymax, zmin, z1" color="'BLACK'"/>
+        <obst xb="xmin, xmax, ymin, ymax, z2, zmax" color="'BLUE'"/>
 
         <!-- stairs openings to lower level -->
         <var ymid="ymin + 0.5*high_width" />
-        <hole xb="x2-delta, xmax+delta, ymid-0.5*low_stairs_width, ymid+0.5*low_stairs_width, z1, z2" />
+        <hole xb="x2-0.5*delta, xmax+0.5*delta, ymid-0.5*low_stairs_width, ymid+0.5*low_stairs_width, z1, z2" />
         
         <var high_min_x = "x1" />
         <var high_max_x = "x2" />
@@ -260,6 +277,14 @@
             <obst xb="x, x+delta, y1, y2, z+high_stairs_height, z2" />        
         </loop>
         
+        <var high_xmin_xstairs_dom_min_x = "xmin" />
+        <var high_xmin_xstairs_mid_y = "y1 + 0.5*high_stairs_width" />       
+        <var high_xmin_xstairs_upper_level = "z1 + high_stairs_elevation" />
+        
+        <!-- stairs openings to xdirection stairs -->
+        <hole xb="high_dom_min_x-0.5*delta, high_min_x+0.5*delta, high_max_y - high_stairs_width, high_max_y, high_min_z, high_max_z" />
+
+                
         <!-- ydirection stairs -->
         <var x1="high_min_x" />
         <var x2="x1+high_stairs_width" />
@@ -283,6 +308,15 @@
             <obst xb="x1, x2, y, y+delta, z1, z" />
             <obst xb="x1, x2, y, y+delta, z+high_stairs_height, z2" />        
         </loop>
+    
+        <var high_xmin_ystairs_dom_min_y = "ymin" />
+        <var high_xmin_ystairs_mid_x = "x1 + 0.5*high_stairs_width" />       
+        <var high_xmin_ystairs_upper_level = "z1 + high_stairs_elevation" />
+
+    
+        <!-- stairs openings to ydirection stairs -->
+        <hole xb="high_min_x, high_min_x+high_stairs_width, high_dom_min_y-0.5*delta, high_min_y+0.5*delta, high_min_z, high_max_z" />
+
     
     </section>
     
@@ -313,6 +347,16 @@
         <var high_dom_min_z = "zmin" />
         <var high_dom_max_z = "zmax" />                                        
 
+        <obst xb="xmin, xmax, ymin, y1, zmin, zmax" color="'RED'" />
+        <obst xb="xmin, xmax, y2, ymax, zmin, zmax" color="'RED'"/>            
+        <obst xb="xmin, x1, ymin, ymax, zmin, zmax" color="'RED'"/>
+        <obst xb="x2, xmax, ymin, ymax, zmin, zmax" color="'RED'"/>            
+        <obst xb="xmin, xmax, ymin, ymax, zmin, z1" color="'BLACK'"/>
+        <obst xb="xmin, xmax, ymin, ymax, z2, zmax" color="'BLUE'"/>
+
+        <!-- stairs openings to lower level -->
+        <var ymid="high_min_y + 0.5*high_width" />
+        <hole xb="high_dom_min_x-0.5*delta, high_min_x+0.5*delta, ymid-0.5*low_stairs_width, ymid+0.5*low_stairs_width, high_min_z, high_max_z" />
         
         <!-- xdirection stairs -->
         <var x1="high_max_x" />
@@ -338,9 +382,17 @@
             <obst xb="x, x+delta, y1, y2, z+high_stairs_height, z2" />        
         </loop>
         
+        <var high_xmax_xstairs_dom_max_x = "xmax" />
+        <var high_xmax_xstairs_mid_y = "y1 + 0.5*high_stairs_width" />       
+        <var high_xmax_xstairs_upper_level = "z1 + high_stairs_elevation" />
+
+        
+        <!-- stairs openings to xdirection stairs -->
+        <hole xb="high_max_x-0.5*delta, high_dom_max_x+0.5*delta, high_max_y - high_stairs_width, high_max_y, high_min_z, high_max_z" />
+        
         <!-- ydirection stairs -->
-        <var x1="high_min_x" />
-        <var x2="x1+high_stairs_width" />
+        <var x2="high_max_x" />
+        <var x1="x2-high_stairs_width" />
         <var y2="high_min_y" />
         <var y1="y2 - high_stairs_length" />        
         <var z1="high_min_z" />
@@ -361,6 +413,83 @@
             <obst xb="x1, x2, y, y+delta, z1, z" />
             <obst xb="x1, x2, y, y+delta, z+high_stairs_height, z2" />        
         </loop>
+ 
+        <var high_xmax_ystairs_dom_min_y = "ymin" />
+        <var high_xmax_ystairs_mid_x = "x1 + 0.5*high_stairs_width" />       
+        <var high_xmax_ystairs_upper_level = "z1 + high_stairs_elevation" />
+
+ 
+    
+        <!-- stairs openings to ydirection stairs -->
+        <hole xb="high_max_x-high_stairs_width, high_max_x, high_dom_min_y-0.5*delta, high_min_y+0.5*delta, high_min_z, high_max_z" />
+    
+    </section>
+
+    <section id="outdoor at xmin" >
+    
+        <!-- xmin-outdoors in x-direction -->
+        <var x2 = "high_xmin_xstairs_dom_min_x" />
+        <var x1 = "x2 - out_width" />
+        <var y1 = "high_xmin_xstairs_mid_y - 0.5*out_width" />
+        <var y2 = "high_xmin_xstairs_mid_y + 0.5*out_width" />        
+        <var z1 = "high_xmin_xstairs_upper_level" />
+        <var z2 = "z1 + out_hight" />        
+    
+        <my_room wt="low_wall_thickness" bx2="1" bz1="1" ax="0" />
+        <mesh />
+    
+        <obst xb="x2, xmax, ymin, ymax, zmin, zmax" color="'RED'"/>
+        <hole xb="x2-0.5*delta, xmax+0.5*delta, high_xmin_xstairs_mid_y-0.5*high_stairs_width, high_xmin_xstairs_mid_y+0.5*high_stairs_width, z1, z1 + high_stairs_height" />
+        <obst xb="xmin, xmax, ymin, ymax, zmin, z1" color="'BLACK'"/>
+    
+        <!-- xmin-outdoors in y-direction -->
+        <var x1 = "high_xmin_ystairs_mid_x - 0.5*out_width" />
+        <var x2 = "high_xmin_ystairs_mid_x + 0.5*out_width" />        
+        <var y2 = "high_xmin_ystairs_dom_min_y" />
+        <var y1 = "y2 - out_width" />
+        <var z1 = "high_xmin_ystairs_upper_level" />
+        <var z2 = "z1 + out_hight" />        
+    
+        <my_room wt="low_wall_thickness" by2="1" bz1="1" ax="0" />
+        <mesh />
+    
+        <obst xb="xmin, xmax, y2, ymax, zmin, zmax" color="'RED'"/>
+        <hole xb="high_xmin_ystairs_mid_x-0.5*high_stairs_width, high_xmin_ystairs_mid_x+0.5*high_stairs_width, y2-0.5*delta, ymax+0.5*delta, z1, z1 + high_stairs_height" />
+        <obst xb="xmin, xmax, ymin, ymax, zmin, z1" color="'BLACK'"/>
+    
+    </section>
+    
+    <section id="outdoor at xmax" >
+    
+        <!-- xmax-outdoors in x-direction -->
+        <var x1 = "high_xmax_xstairs_dom_max_x" />
+        <var x2 = "x1 + out_width" />
+        <var y1 = "high_xmax_xstairs_mid_y - 0.5*out_width" />
+        <var y2 = "high_xmax_xstairs_mid_y + 0.5*out_width" />        
+        <var z1 = "high_xmax_xstairs_upper_level" />
+        <var z2 = "z1 + out_hight" />        
+    
+        <my_room wt="low_wall_thickness" bx1="1" bz1="1" ax="1" />
+        <mesh />
+    
+        <obst xb="xmin, x1, ymin, ymax, zmin, zmax" color="'RED'"/>
+        <hole xb="xmin-0.5*delta, x1+0.5*delta, high_xmax_xstairs_mid_y-0.5*high_stairs_width, high_xmax_xstairs_mid_y+0.5*high_stairs_width, z1, z1 + high_stairs_height" />
+        <obst xb="xmin, xmax, ymin, ymax, zmin, z1" color="'BLACK'"/>
+    
+        <!-- xmax-outdoors in y-direction -->
+        <var x1 = "high_xmax_ystairs_mid_x - 0.5*out_width" />
+        <var x2 = "high_xmax_ystairs_mid_x + 0.5*out_width" />        
+        <var y2 = "high_xmax_ystairs_dom_min_y" />
+        <var y1 = "y2 - out_width" />
+        <var z1 = "high_xmax_ystairs_upper_level" />
+        <var z2 = "z1 + out_hight" />        
+    
+        <my_room wt="low_wall_thickness" by2="1" bz1="1" ax="0" />
+        <mesh />
+    
+        <obst xb="xmin, xmax, y2, ymax, zmin, zmax" color="'RED'"/>
+        <hole xb="high_xmax_ystairs_mid_x-0.5*high_stairs_width, high_xmax_ystairs_mid_x+0.5*high_stairs_width, y2-0.5*delta, ymax+0.5*delta, z1, z1 + high_stairs_height" />
+        <obst xb="xmin, xmax, ymin, ymax, zmin, z1" color="'BLACK'"/>
     
     </section>
 
