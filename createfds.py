@@ -4,6 +4,8 @@ import numpy as np
 from itertools import product
 import xml.etree.ElementTree as ET
 
+#Testkommentar
+
 global_args = {}
 global_args['reac'] = ['heat_of_combustion', 'soot_yield','C', 'H', 'fuel']
 global_args['matl'] = ['specific_heat', 'conductivity', 'density', 'heat_of_combustion', 
