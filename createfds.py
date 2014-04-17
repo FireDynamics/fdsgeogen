@@ -4,16 +4,15 @@ import numpy as np
 from itertools import product
 import xml.etree.ElementTree as ET
 
-#Testkommentar
 
 global_args = {}
 global_args['reac'] = ['heat_of_combustion', 'soot_yield','C', 'H', 'fuel']
 global_args['matl'] = ['specific_heat', 'conductivity', 'density', 'heat_of_combustion', 
                         'n_reactions', 'heat_of_reaction', 'nu_spec', 'reference_temperature',
-                        'a', 'e', 'n_s', 'spec_id', 'emissivity', 'heating_rate', 'pyrolysis_range']
+                        'a', 'e', 'n_s', 'spec_id', 'emissivity', 'heating_rate', 'pyrolysis_range', 'matl_id', 'nu_matl']
 global_args['surf'] = ['rgb', 'color', 'vel', 'hrrpua','heat_of_vaporization', 
                         'ignition_temperature', 'burn_away', 'matl_id', 'matl_mass_fraction', 
-                        'thickness', 'external_flux', 'backing', 'hrrupa']
+                        'thickness', 'external_flux', 'backing', 'hrrupa', 'stretch_factor', 'cell_size_factor']
 global_args['obst'] = ['x1', 'x2', 'y1', 'y2', 'z1', 'z2', 'xb', 'surf_ids', 'surf_id', 'color']
 global_args['hole'] = ['xb']
 global_args['vent'] = ['xb', 'surf_id', 'color', 'dynamic_pressure']
