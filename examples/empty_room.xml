@@ -1,0 +1,23 @@
+<fds>
+
+    <!-- file naming -->
+    <info chid="'empty_room'" outfile="'empty_room.fds'"/>
+
+    <!-- fixed input parameter -->
+    <input text="TIME T_END=0.0" />
+
+    <section id="mesh">
+        
+        <!-- grid spacing of 0.2 m -->
+        <var delta = "0.2" />
+        
+        <!-- spacial dimensions -->
+        <var lx = "2.4" ly = "3.6" lz = "1.8" />
+        
+        <my_room x1="0" x2="lx" y1="0" y2="ly" z1="0" z2="lz" />
+        
+        <mesh />
+    
+    </section>
+
+</fds>
