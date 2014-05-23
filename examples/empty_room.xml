@@ -14,8 +14,11 @@
         <!-- spacial dimensions -->
         <var lx = "2.4" ly = "3.6" lz = "1.8" />
         
+        <!-- compute parameters like gird dimensions, implicit setting
+             of accoridng variables -->
         <my_room x1="0" x2="lx" y1="0" y2="ly" z1="0" z2="lz" />
         
+        <!-- generate the mesh, here based on implicit variables -->
         <mesh />
     
     </section>
