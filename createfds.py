@@ -260,7 +260,20 @@ def boundary(node):
         if node.attrib['zmax'] == "open":
             write_to_fds("&VENT MB='ZMAX' ,SURF_ID='OPEN' /\n")  
 
-
+def init(node):
+    line = "TEMPERATURE=%f XB=%f,%f,%f,%f,%f,%f"%(eval(node.attrib["temperature"], {}, vars), 
+									   eval(node.attrib["x1"], {}, vars),
+                                       eval(node.attrib["x2"], {}, vars),
+                                       eval(node.attrib["y1"], {}, vars),
+                                       eval(node.attrib["y2"], {}, vars),
+                                       eval(node.attrib["z1"], {}, vars),
+                                       eval(node.attrib["z2"], {}, vars))
+    comment=""
+    if check_val(node, 'comment'):
+        comment = node.attrib["comment"]
+		
+    write_to_fds("&INIT %s / %s \n"%(line, comment))   
+	
 def input(node):
     if check_val(node, 'text'):
         write_to_fds("&%s /\n"%(node.attrib["text"]))
