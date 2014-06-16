@@ -369,6 +369,21 @@ def loop(node):
             traverse(node)
             del_var(node.attrib['var'])
 
+            
+def ramp(node):
+	if 'id' in node.attrib:
+		id = eval(node.attrib['id'], {}, vars)
+		ramp = "&RAMP ID='RAMP_%s'"%id
+		
+	if 't' in node.attrib:
+		t = eval(node.attrib['t'], {}, vars)
+	if 'f' in node.attrib:
+		f = eval(node.attrib['f'], {}, vars)
+	
+		ramp += "T=%f, F=%f /\n"%(t, f)
+
+		write_to_fds(ramp)
+
 def fire(node):
     if node.attrib['type'] == "burningbox":
         cx = eval(node.attrib['cx'], {}, vars)
