@@ -384,6 +384,17 @@ def ramp(node):
 
 		write_to_fds(ramp)
 
+
+def radi(node):
+		
+	if 'radiative_fraction' in node.attrib:
+		rf = eval(node.attrib['radiative_fraction'], {}, vars)
+		radi = "&RADI RADIATIVE_FRACTION = %f /\n"%rf
+
+		write_to_fds(radi)
+
+
+
 def fire(node):
     if node.attrib['type'] == "burningbox":
         cx = eval(node.attrib['cx'], {}, vars)
