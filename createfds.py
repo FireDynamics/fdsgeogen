@@ -1,3 +1,5 @@
+#! /usr/bin/python
+
 import sys
 import ast
 import numpy as np
@@ -295,14 +297,14 @@ def bounded_room(node):
     z1 = get_val(node, "z1", opt=True)
     z2 = get_val(node, "z2", opt=True)
 
-    bx1 = check_get_val(node, "bx1", 1)
-    bx2 = check_get_val(node, "bx2", 1)
-    by1 = check_get_val(node, "by1", 1)
+    bx1 = check_get_val(node, "bx1", 0)
+    bx2 = check_get_val(node, "bx2", 0)
+    by1 = check_get_val(node, "by1", 0)
     by2 = check_get_val(node, "by2", 0)
     bz1 = check_get_val(node, "bz1", 0)
     bz2 = check_get_val(node, "bz2", 0)
 
-    wt = check_get_val(node, "wt", 1.0)
+    wt = check_get_val(node, "wt", 0.0)
 
     ax = check_get_val(node, "ax", 1)
     ay = check_get_val(node, "ay", 1)
