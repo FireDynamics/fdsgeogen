@@ -719,7 +719,10 @@ def device(node):
         x = get_val(node, "x", opt=True)
         y = get_val(node, "y", opt=True)
         z = get_val(node, "z", opt=True)
-        write_to_fds("&DEVC ID='%s' XYZ=%f,%f,%f QUANTITY='%s'/\n"%(id,x,y,z,q))
+        ior_s = ''
+        if check_val(node, ["ior"], opt=True):
+            ior_s = "IOR=%s"%get_val(node, "ior", opt=True)
+        write_to_fds("&DEVC ID='%s', XYZ=%f,%f,%f, QUANTITY='%s', %s/\n"%(id,x,y,z,q,ior_s))
         return True
     return False
 
