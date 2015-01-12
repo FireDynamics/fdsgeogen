@@ -2,6 +2,7 @@
 
 import sys
 import ast
+import re
 import numpy as np
 from itertools import product
 import xml.etree.ElementTree as ET
@@ -19,7 +20,7 @@ global_args['surf'] = ['rgb', 'color', 'vel', 'hrrpua','heat_of_vaporization',
                        'thickness', 'external_flux', 'backing', 'hrrupa', 'stretch_factor', 'cell_size_factor']
 global_args['obst'] = ['x1', 'x2', 'y1', 'y2', 'z1', 'z2', 'xb', 'surf_ids', 'surf_id', 'color', 'bulk_density']
 global_args['hole'] = ['xb', 'color']
-global_args['vent'] = ['xb', 'surf_id', 'color', 'dynamic_pressure', 'tmp_exterior']
+global_args['vent'] = ['xb', 'surf_id', 'color', 'dynamic_pressure', 'tmp_exterior', 'mb', 'transparency']
 global_args['slcf'] = ['pbx', 'pby', 'pbz', 'quantity', 'vector']
 
 #########################
@@ -57,6 +58,7 @@ def div235(n):
 ###############################
 ##### VARIABLE MANAGEMENT #####
 ###############################
+
 def add_var(key, value):
     # DESCRIPTION:
     #  adds a new variable
@@ -79,6 +81,7 @@ def del_var(key):
 ###########################
 ##### NODE EVALUATION #####
 ###########################
+
 def check_get_val(node, name, default):
     # DESCRIPTION:
     #  checks via check_val if name is an attribute of node
@@ -133,6 +136,7 @@ def get_val(node, name, opt=False):
 ###############################
 ##### FDS FILE MANAGEMENT #####
 ###############################
+
 def open_fds_file():
     # DESCRIPTION:
     #  checks if an FDS file is already open, closes it if necessary and opens a new one
@@ -164,6 +168,7 @@ def close_fds_file():
 ###############################
 ##### FDS FILE GENERATION #####
 ###############################
+
 def info(node):
     # DESCRIPTION:
     #  writes a short info about the job to standard output and creates a new FDS file via open_fds_file
@@ -277,6 +282,7 @@ def hole(node):
 #############################
 ##### COMBINED COMMANDS #####
 #############################
+
 def bounded_room(node):
     # DESCRIPTION:
     #  creates a simple rectangular room with walls and a fitting mesh created via mesh
@@ -287,6 +293,8 @@ def bounded_room(node):
     #  wt                               - reference value for wall thickness (default: 0.0)
     #  ax, ay, az                       - number of meshes in the x, y or z direction (default: 1)
     #  delta                            - cell width of the mesh? (optional)
+    #  wall_color                       - color of room walls (optional)
+    #  wall_transparancy                - transparancy of walls (optional)
 
     # get input values from node (if possible)
     x1 = get_val(node, "x1", opt=True)
@@ -355,27 +363,28 @@ def bounded_room(node):
     # call the mesh method
     mesh(node)
 
+    wall_color = check_get_val(node, "wall_color", "FIREBRICK")
+    wall_transparancy = check_get_val(node, "wall_transparancy", 0.5)
+
     # draw the walls if the wall is thicker than 0
-    write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='WHITE', TRANSPARENCY=0.75 /\n"%(
-                             x1, x2, y1, y2, z1, z2))
     if wt*bx1>epsilon:
-         write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='FIREBRICK', TRANSPARENCY=0.5 /\n"%(
-                             x1-wt*bx1, x1, y1-wt*by1, y2+wt*by2, z1-wt*bz1, z2+wt*bz2))
+         write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='%s', TRANSPARENCY=%f /\n"%(
+                             x1-wt*bx1, x1, y1-wt*by1, y2+wt*by2, z1-wt*bz1, z2+wt*bz2, wall_color, wall_transparancy))
     if wt*bx2>epsilon:
-         write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='FIREBRICK', TRANSPARENCY=0.5 /\n"%(
-                             x2, x2+wt*bx2, y1-wt*by1, y2+wt*by2, z1-wt*bz1, z2+wt*bz2))
+         write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='%s', TRANSPARENCY=%f /\n"%(
+                             x2, x2+wt*bx2, y1-wt*by1, y2+wt*by2, z1-wt*bz1, z2+wt*bz2, wall_color, wall_transparancy))
     if wt*by1>epsilon:
-         write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='FIREBRICK', TRANSPARENCY=0.5 /\n"%(
-                             x1-wt*bx1, x2+wt*bx2, y1-wt*by1, y1, z1-wt*bz1, z2+wt*bz2))
+         write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='%s', TRANSPARENCY=%f /\n"%(
+                             x1-wt*bx1, x2+wt*bx2, y1-wt*by1, y1, z1-wt*bz1, z2+wt*bz2, wall_color, wall_transparancy))
     if wt*by2>epsilon:
-         write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='FIREBRICK', TRANSPARENCY=0.5 /\n"%(
-                             x1-wt*bx1, x2+wt*bx2, y2, y2+wt*by2, z1-wt*bz1, z2+wt*bz2))
+         write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='%s', TRANSPARENCY=%f /\n"%(
+                             x1-wt*bx1, x2+wt*bx2, y2, y2+wt*by2, z1-wt*bz1, z2+wt*bz2, wall_color, wall_transparancy))
     if wt*bz1>epsilon:
-         write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='FIREBRICK', TRANSPARENCY=0.5 /\n"%(
-                             x1-wt*bx1, x2+wt*bx2, y1-wt*by1, y2+wt*by2, z1-wt*bz1, z1))
+         write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='%s', TRANSPARENCY=%f /\n"%(
+                             x1-wt*bx1, x2+wt*bx2, y1-wt*by1, y2+wt*by2, z1-wt*bz1, z1, wall_color, wall_transparancy))
     if wt*bz2>epsilon:
-         write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='FIREBRICK', TRANSPARENCY=0.5 /\n"%(
-                             x1-wt*bx1, x2+wt*bx2, y1-wt*by1, y2+wt*by2, z2, z2+wt*bz2))
+         write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='%s', TRANSPARENCY=%f /\n"%(
+                             x1-wt*bx1, x2+wt*bx2, y1-wt*by1, y2+wt*by2, z2, z2+wt*bz2, wall_color, wall_transparancy))
     # end bounded_room
 
 def my_room(node):
@@ -500,6 +509,54 @@ def input(node):
         write_to_fds("&%s /\n"%(node.attrib["text"]))
     if check_val(node, 'str'):
         write_to_fds("&%s /\n"%(get_val(node,"str")))
+    if check_val(node, "from_file"):
+
+        excl = []
+        excl_tmp = check_get_val(node, 'excl', None)
+        if excl_tmp:
+            if type(excl_tmp) == type('str'): excl.append(excl_tmp)
+            else:
+                for e in excl_tmp: excl.append(e)
+        incl = []
+        incl_tmp = check_get_val(node, 'incl', None)
+        if incl_tmp:
+            if type(incl_tmp) == type('str'): excl.append(incl_tmp)
+            else:
+                for e in incl_tmp: incl.append(e)
+
+
+
+        if incl != []: incl = [e.upper() for e in incl]
+        if excl != []: excl = [e.upper() for e in excl]
+
+        if incl != [] and excl != []:
+            print "!! exclusion and inclusion of FDS key words at the same time is not possible "
+            sys.exit()
+
+
+        in_file_name = get_val(node, "from_file")
+        in_file = open(in_file_name, 'r')
+        in_file_raw = in_file.read()
+        in_file.close()
+
+        in_file_contents = re.findall('&.*?/', in_file_raw.replace('\n' , ' '))
+
+        write_to_fds("\n == insertion from file: %s == \n"%in_file_name)
+        for line in in_file_contents:
+
+            # looking for FDS keyword
+            m = re.search('\A\s*&\D{4}', line)
+            fds_key = m.group(0).strip().strip('&').upper()
+
+            print " -- found FDS key: ", fds_key
+
+            if (incl!=[] and fds_key in incl) or (incl==[] and not fds_key in excl):
+                write_to_fds("%s\n"%line)
+            else:
+                print "  - ignoring key ", fds_key
+
+        write_to_fds("== end of insertion == \n\n")
+
 
 def dump(node):
     if check_val(node, 'text'):
@@ -515,8 +572,27 @@ def dump(node):
 def var(node):
     global vars
     for att in node.attrib:
+        if att == 'from_file': continue
         vars[att] = eval(node.attrib[att], globals(), vars)
         #print "added variable: %s = %s"%(att, str(vars[att]))
+
+    if check_val(node, 'from_file'):
+        print "adding variables from file: "
+        in_file = open(node.attrib["from_file"], 'r')
+        for line in in_file:
+            if line.isspace(): continue
+            contents = line.split()
+            key = contents[0]
+            val = eval(contents[1], globals(), vars)
+            print "  found variable name:  ", key
+            print "  found variable value: ", val
+            add_var(key, val)
+
+def cond(node):
+    for att in node.attrib:
+        if get_val(node, att) == True: continue
+        print "!! condition was not met: ", node.attrib[att]
+        sys.exit()
 
 def process_node(node):
 
@@ -570,7 +646,6 @@ def process_node(node):
 
     write_to_fds("&%s %s/ %s\n"%(global_keys[node.tag], line, comment))
 
-
 def loop(node):
 
     # integer iteration from start to stop
@@ -590,7 +665,6 @@ def loop(node):
             traverse(node)
             del_var(node.attrib['var'])
 
-
 def ramp(node):
 	if 'id' in node.attrib:
 		id = eval(node.attrib['id'], {}, vars)
@@ -605,7 +679,6 @@ def ramp(node):
 
 		write_to_fds(ramp)
 
-
 def radi(node):
 
 	if 'radiative_fraction' in node.attrib:
@@ -613,8 +686,6 @@ def radi(node):
 		radi = "&RADI RADIATIVE_FRACTION = %f /\n"%rf
 
 		write_to_fds(radi)
-
-
 
 def fire(node):
     if node.attrib['type'] == "burningbox":
@@ -702,7 +773,10 @@ def device(node):
         x = get_val(node, "x", opt=True)
         y = get_val(node, "y", opt=True)
         z = get_val(node, "z", opt=True)
-        write_to_fds("&DEVC ID='%s' XYZ=%f,%f,%f QUANTITY='%s'/\n"%(id,x,y,z,q))
+        ior_s = ''
+        if check_val(node, ["ior"], opt=True):
+            ior_s = "IOR=%s"%get_val(node, "ior", opt=True)
+        write_to_fds("&DEVC ID='%s', XYZ=%f,%f,%f, QUANTITY='%s', %s/\n"%(id,x,y,z,q,ior_s))
         return True
     return False
 
