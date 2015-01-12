@@ -244,19 +244,18 @@ def obst(node):
     #  surf_id          - surface of the obstacle
     #  comment          - comment to be written after the OBST statement
 
-    line = "XB=%f,%f,%f,%f,%f,%f"%(eval(node.attrib["x1"], {}, vars),
-                                   eval(node.attrib["x2"], {}, vars),
-                                   eval(node.attrib["y1"], {}, vars),
-                                   eval(node.attrib["y2"], {}, vars),
-                                   eval(node.attrib["z1"], {}, vars),
-                                   eval(node.attrib["z2"], {}, vars))
+    line = "XB=%f,%f,%f,%f,%f,%f"%(get_val(node, "x1"),
+                                   get_val(node, "x2"),
+                                   get_val(node, "y1"),
+                                   get_val(node, "y2"),
+                                   get_val(node, "z1"),
+                                   get_val(node, "z2"))
     if check_val(node, 'color'):
-        line += " COLOR='%s'"%node.attrib["color"]
+        line += " COLOR='%s'"%get_val(node, "color")
     if check_val(node, 'surf_id'):
-        line += " SURF_ID='%s'"%node.attrib["surf_id"]
+        line += " SURF_ID='%s'"%get_val(node, "surf_id")
     comment=""
-    if check_val(node, 'comment'):
-        comment = node.attrib["comment"]
+    check_get_val(node, 'comment', "")
     write_to_fds("&OBST %s / %s\n"%(line, comment))
     # end obst
 
@@ -267,12 +266,12 @@ def hole(node):
     #  x1, y1, z1       - coordinates of one corner of the hole
     #  x2, y2, z2       - coordinates of the opposing corner of the hole
 
-    write_to_fds("&HOLE XB=%f,%f,%f,%f,%f,%f /\n"%(eval(node.attrib["x1"], {}, vars),
-                                                   eval(node.attrib["x2"], {}, vars),
-                                                   eval(node.attrib["y1"], {}, vars),
-                                                   eval(node.attrib["y2"], {}, vars),
-                                                   eval(node.attrib["z1"], {}, vars),
-                                                   eval(node.attrib["z2"], {}, vars)))
+    write_to_fds("&HOLE XB=%f,%f,%f,%f,%f,%f /\n"%(get_val(node, "x1"),
+                                   get_val(node, "x2"),
+                                   get_val(node, "y1"),
+                                   get_val(node, "y2"),
+                                   get_val(node, "z1"),
+                                   get_val(node, "z2")))
     # end hole
 
 #############################
@@ -455,6 +454,11 @@ def my_room(node):
 ############
 
 def boundary(node):
+    # DESCRIPTION:
+    #  defines an rectangular hole in an obstacle and writes the HOLE statement via write_to_fds
+    # INPUT (arguments of node):
+    #  x1, y1, z1       - coordinates of one corner of the hole
+    #  x2, y2, z2       - coordinates of the opposing corner of the hole
     if 'x' in node.attrib:
         if node.attrib['x'] == "open":
             write_to_fds("&VENT MB='XMIN' ,SURF_ID='OPEN' /\n")
@@ -475,15 +479,16 @@ def boundary(node):
     if 'zmax' in node.attrib:
         if node.attrib['zmax'] == "open":
             write_to_fds("&VENT MB='ZMAX' ,SURF_ID='OPEN' /\n")
+    #end boundary
 
 def init(node):
-    line = "TEMPERATURE=%f XB=%f,%f,%f,%f,%f,%f"%(eval(node.attrib["temperature"], {}, vars),
-									   eval(node.attrib["x1"], {}, vars),
-                                       eval(node.attrib["x2"], {}, vars),
-                                       eval(node.attrib["y1"], {}, vars),
-                                       eval(node.attrib["y2"], {}, vars),
-                                       eval(node.attrib["z1"], {}, vars),
-                                       eval(node.attrib["z2"], {}, vars))
+    line = "TEMPERATURE=%f XB=%f,%f,%f,%f,%f,%f"%(get_val(node, "temperature"),
+							       get_val(node, "x1"),
+                                   get_val(node, "x2"),
+                                   get_val(node, "y1"),
+                                   get_val(node, "y2"),
+                                   get_val(node, "z1"),
+                                   get_val(node, "z2"))
     comment=""
     if check_val(node, 'comment'):
         comment = node.attrib["comment"]
