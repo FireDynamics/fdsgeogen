@@ -288,6 +288,8 @@ def bounded_room(node):
     #  wt                               - reference value for wall thickness (default: 0.0)
     #  ax, ay, az                       - number of meshes in the x, y or z direction (default: 1)
     #  delta                            - cell width of the mesh? (optional)
+    #  wall_color                       - color of room walls (optional)
+    #  wall_transparancy                - transparancy of walls (optional)
 
     # get input values from node (if possible)
     x1 = get_val(node, "x1", opt=True)
@@ -356,27 +358,28 @@ def bounded_room(node):
     # call the mesh method
     mesh(node)
 
+    wall_color = check_get_val(node, "wall_color", "FIREBRICK")
+    wall_transparancy = check_get_val(node, "wall_transparancy", 0.5)
+
     # draw the walls if the wall is thicker than 0
-    write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='WHITE', TRANSPARENCY=0.75 /\n"%(
-                             x1, x2, y1, y2, z1, z2))
     if wt*bx1>epsilon:
-         write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='FIREBRICK', TRANSPARENCY=0.5 /\n"%(
-                             x1-wt*bx1, x1, y1-wt*by1, y2+wt*by2, z1-wt*bz1, z2+wt*bz2))
+         write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='%s', TRANSPARENCY=%f /\n"%(
+                             x1-wt*bx1, x1, y1-wt*by1, y2+wt*by2, z1-wt*bz1, z2+wt*bz2, wall_color, wall_transparancy))
     if wt*bx2>epsilon:
-         write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='FIREBRICK', TRANSPARENCY=0.5 /\n"%(
-                             x2, x2+wt*bx2, y1-wt*by1, y2+wt*by2, z1-wt*bz1, z2+wt*bz2))
+         write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='%s', TRANSPARENCY=%f /\n"%(
+                             x2, x2+wt*bx2, y1-wt*by1, y2+wt*by2, z1-wt*bz1, z2+wt*bz2, wall_color, wall_transparancy))
     if wt*by1>epsilon:
-         write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='FIREBRICK', TRANSPARENCY=0.5 /\n"%(
-                             x1-wt*bx1, x2+wt*bx2, y1-wt*by1, y1, z1-wt*bz1, z2+wt*bz2))
+         write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='%s', TRANSPARENCY=%f /\n"%(
+                             x1-wt*bx1, x2+wt*bx2, y1-wt*by1, y1, z1-wt*bz1, z2+wt*bz2, wall_color, wall_transparancy))
     if wt*by2>epsilon:
-         write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='FIREBRICK', TRANSPARENCY=0.5 /\n"%(
-                             x1-wt*bx1, x2+wt*bx2, y2, y2+wt*by2, z1-wt*bz1, z2+wt*bz2))
+         write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='%s', TRANSPARENCY=%f /\n"%(
+                             x1-wt*bx1, x2+wt*bx2, y2, y2+wt*by2, z1-wt*bz1, z2+wt*bz2, wall_color, wall_transparancy))
     if wt*bz1>epsilon:
-         write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='FIREBRICK', TRANSPARENCY=0.5 /\n"%(
-                             x1-wt*bx1, x2+wt*bx2, y1-wt*by1, y2+wt*by2, z1-wt*bz1, z1))
+         write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='%s', TRANSPARENCY=%f /\n"%(
+                             x1-wt*bx1, x2+wt*bx2, y1-wt*by1, y2+wt*by2, z1-wt*bz1, z1, wall_color, wall_transparancy))
     if wt*bz2>epsilon:
-         write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='FIREBRICK', TRANSPARENCY=0.5 /\n"%(
-                             x1-wt*bx1, x2+wt*bx2, y1-wt*by1, y2+wt*by2, z2, z2+wt*bz2))
+         write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='%s', TRANSPARENCY=%f /\n"%(
+                             x1-wt*bx1, x2+wt*bx2, y1-wt*by1, y2+wt*by2, z2, z2+wt*bz2, wall_color, wall_transparancy))
     # end bounded_room
 
 def my_room(node):
