@@ -528,6 +528,13 @@ def var(node):
             print "  found variable value: ", val
             add_var(key, val)
 
+def cond(node):
+    for att in node.attrib:
+        if get_val(node, att) == True: continue
+        print "!! condition was not met: ", node.attrib[att]
+        sys.exit()
+
+
 def process_node(node):
 
     global vars
