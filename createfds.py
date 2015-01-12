@@ -513,6 +513,7 @@ def dump(node):
 def var(node):
     global vars
     for att in node.attrib:
+        if att == 'from_file': continue
         vars[att] = eval(node.attrib[att], globals(), vars)
         #print "added variable: %s = %s"%(att, str(vars[att]))
 
