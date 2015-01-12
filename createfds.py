@@ -17,7 +17,7 @@ global_args['surf'] = ['rgb', 'color', 'vel', 'hrrpua','heat_of_vaporization',
                        'thickness', 'external_flux', 'backing', 'hrrupa', 'stretch_factor', 'cell_size_factor']
 global_args['obst'] = ['x1', 'x2', 'y1', 'y2', 'z1', 'z2', 'xb', 'surf_ids', 'surf_id', 'color', 'bulk_density']
 global_args['hole'] = ['xb', 'color']
-global_args['vent'] = ['xb', 'surf_id', 'color', 'dynamic_pressure', 'tmp_exterior']
+global_args['vent'] = ['xb', 'surf_id', 'color', 'dynamic_pressure', 'tmp_exterior', 'mb', 'transparency']
 global_args['slcf'] = ['pbx', 'pby', 'pbz', 'quantity', 'vector']
 
 #########################
