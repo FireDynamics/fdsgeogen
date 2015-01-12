@@ -507,11 +507,21 @@ def input(node):
     if check_val(node, "from_file"):
 
         excl = []
-        if check_val(node, 'excl'): excl.append(get_val(node, 'excl'))
+        excl_tmp = check_get_val(node, 'excl', None)
+        if excl_tmp:
+            if type(excl_tmp) == type('str'): excl.append(excl_tmp)
+            else:
+                for e in excl_tmp: excl.append(e)
         incl = []
-        if check_val(node, 'incl'): incl.append(get_val(node, 'incl'))
+        incl_tmp = check_get_val(node, 'incl', None)
+        if incl_tmp:
+            if type(incl_tmp) == type('str'): excl.append(incl_tmp)
+            else:
+                for e in incl_tmp: incl.append(e)
 
-        incl = [e.upper() for e in incl]
+
+
+        if incl != []: incl = [e.upper() for e in incl]
         if excl != []: excl = [e.upper() for e in excl]
 
         if incl != [] and excl != []:
