@@ -2,6 +2,7 @@
 
 import sys
 import ast
+import re
 import numpy as np
 from itertools import product
 import xml.etree.ElementTree as ET
@@ -57,6 +58,7 @@ def div235(n):
 ###############################
 ##### VARIABLE MANAGEMENT #####
 ###############################
+
 def add_var(key, value):
     # DESCRIPTION:
     #  adds a new variable
@@ -79,6 +81,7 @@ def del_var(key):
 ###########################
 ##### NODE EVALUATION #####
 ###########################
+
 def check_get_val(node, name, default):
     # DESCRIPTION:
     #  checks via check_val if name is an attribute of node
@@ -133,6 +136,7 @@ def get_val(node, name, opt=False):
 ###############################
 ##### FDS FILE MANAGEMENT #####
 ###############################
+
 def open_fds_file():
     # DESCRIPTION:
     #  checks if an FDS file is already open, closes it if necessary and opens a new one
@@ -164,6 +168,7 @@ def close_fds_file():
 ###############################
 ##### FDS FILE GENERATION #####
 ###############################
+
 def info(node):
     # DESCRIPTION:
     #  writes a short info about the job to standard output and creates a new FDS file via open_fds_file
@@ -278,6 +283,7 @@ def hole(node):
 #############################
 ##### COMBINED COMMANDS #####
 #############################
+
 def bounded_room(node):
     # DESCRIPTION:
     #  creates a simple rectangular room with walls and a fitting mesh created via mesh
@@ -498,6 +504,44 @@ def input(node):
         write_to_fds("&%s /\n"%(node.attrib["text"]))
     if check_val(node, 'str'):
         write_to_fds("&%s /\n"%(get_val(node,"str")))
+    if check_val(node, "from_file"):
+
+        excl = []
+        if check_val(node, 'excl'): excl.append(get_val(node, 'excl'))
+        incl = []
+        if check_val(node, 'incl'): incl.append(get_val(node, 'incl'))
+
+        incl = [e.upper() for e in incl]
+        if excl != []: excl = [e.upper() for e in excl]
+
+        if incl != [] and excl != []:
+            print "!! exclusion and inclusion of FDS key words at the same time is not possible "
+            sys.exit()
+
+
+        in_file_name = get_val(node, "from_file")
+        in_file = open(in_file_name, 'r')
+        in_file_raw = in_file.read()
+        in_file.close()
+
+        in_file_contents = re.findall('&.*?/', in_file_raw.replace('\n' , ' '))
+
+        write_to_fds("\n == insertion from file: %s == \n"%in_file_name)
+        for line in in_file_contents:
+
+            # looking for FDS keyword
+            m = re.search('\A\s*&\D{4}', line)
+            fds_key = m.group(0).strip().strip('&').upper()
+
+            print " -- found FDS key: ", fds_key
+
+            if (incl!=[] and fds_key in incl) or (incl==[] and not fds_key in excl):
+                write_to_fds("%s\n"%line)
+            else:
+                print "  - ignoring key ", fds_key
+
+        write_to_fds("== end of insertion == \n\n")
+
 
 def dump(node):
     if check_val(node, 'text'):
@@ -534,7 +578,6 @@ def cond(node):
         if get_val(node, att) == True: continue
         print "!! condition was not met: ", node.attrib[att]
         sys.exit()
-
 
 def process_node(node):
 
@@ -588,7 +631,6 @@ def process_node(node):
 
     write_to_fds("&%s %s/ %s\n"%(global_keys[node.tag], line, comment))
 
-
 def loop(node):
 
     # integer iteration from start to stop
@@ -608,7 +650,6 @@ def loop(node):
             traverse(node)
             del_var(node.attrib['var'])
 
-
 def ramp(node):
 	if 'id' in node.attrib:
 		id = eval(node.attrib['id'], {}, vars)
@@ -623,7 +664,6 @@ def ramp(node):
 
 		write_to_fds(ramp)
 
-
 def radi(node):
 
 	if 'radiative_fraction' in node.attrib:
@@ -631,8 +671,6 @@ def radi(node):
 		radi = "&RADI RADIATIVE_FRACTION = %f /\n"%rf
 
 		write_to_fds(radi)
-
-
 
 def fire(node):
     if node.attrib['type'] == "burningbox":
