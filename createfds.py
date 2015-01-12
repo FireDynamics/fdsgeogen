@@ -24,6 +24,7 @@ global_args['obst'] = ['x1', 'x2', 'y1', 'y2', 'z1', 'z2', 'xb', 'surf_ids', 'su
 global_args['hole'] = ['xb', 'color']
 global_args['vent'] = ['xb', 'surf_id', 'color', 'dynamic_pressure', 'tmp_exterior', 'mb', 'transparency']
 global_args['slcf'] = ['pbx', 'pby', 'pbz', 'quantity', 'vector']
+global_args['pers'] = ['avatar_color', 'color_method', 'default_properties', 'det_mean', 'pre_mean', 'dens_init', 'l_non_sp']
 
 #########################
 ##### FDS key words #####
@@ -36,6 +37,8 @@ global_keys['obst']  = 'OBST'
 global_keys['hole']  = 'HOLE'
 global_keys['vent']  = 'VENT'
 global_keys['slcf']  = 'SLCF'
+global_keys['pers']  = 'PERS'
+
 
 # accepted deviation when dealing with float arithmetic
 epsilon = 0.0001
@@ -536,8 +539,6 @@ def input(node):  # TODO Unterschied verstehen?
             else:
                 for e in incl_tmp: incl.append(e)
 
-
-
         if incl != []: incl = [e.upper() for e in incl]
         if excl != []: excl = [e.upper() for e in excl]
 
@@ -568,7 +569,6 @@ def input(node):  # TODO Unterschied verstehen?
                 print "  - ignoring key ", fds_key
 
         write_to_fds("== end of insertion == \n\n")
-
 
 def dump(node):
     if check_val(node, 'text'):
