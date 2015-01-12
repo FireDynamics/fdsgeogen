@@ -516,6 +516,18 @@ def var(node):
         vars[att] = eval(node.attrib[att], globals(), vars)
         #print "added variable: %s = %s"%(att, str(vars[att]))
 
+    if check_val(node, 'from_file'):
+        print "adding variables from file: "
+        in_file = open(node.attrib["from_file"], 'r')
+        for line in in_file:
+            if line.isspace(): continue
+            contents = line.split()
+            key = contents[0]
+            val = eval(contents[1], globals(), vars)
+            print "  found variable name:  ", key
+            print "  found variable value: ", val
+            add_var(key, val)
+
 def process_node(node):
 
     global vars
