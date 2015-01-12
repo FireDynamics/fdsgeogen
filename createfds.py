@@ -1,11 +1,13 @@
 #! /usr/bin/python
 
 import sys
-import ast
 import re
-import numpy as np
 from itertools import product
 import xml.etree.ElementTree as ET
+
+import numpy as np
+
+
 
 #########################
 ##### FDS arguments #####
@@ -279,6 +281,55 @@ def hole(node):
                                    get_val(node, "z2")))
     # end hole
 
+
+def boundary(node):
+    # DESCRIPTION:
+    # defines open surfaces and writes the VENT statements via write_to_fds
+    # INPUT (arguments of node):
+    # x, y, z          - surfaces in the corresponding direction ? (optional)
+    #  zmin, zmax       - allows choosing only one of the surfaces of z ? (optional)
+    if check_get_val(node, "x", "") == "open":
+        write_to_fds("&VENT MB='XMIN' ,SURF_ID='OPEN' /\n")
+        write_to_fds("&VENT MB='XMAX' ,SURF_ID='OPEN' /\n")
+
+    if check_get_val(node, "y", "") == "open":
+        write_to_fds("&VENT MB='YMIN' ,SURF_ID='OPEN' /\n")
+        write_to_fds("&VENT MB='YMAX' ,SURF_ID='OPEN' /\n")
+
+    if check_get_val(node, "z", "") == " open":
+        write_to_fds("&VENT MB='ZMIN' ,SURF_ID='OPEN' /\n")
+        write_to_fds("&VENT MB='ZMAX' ,SURF_ID='OPEN' /\n")
+
+    if check_get_val(node, "zmin", "") == "open":
+        write_to_fds("&VENT MB='ZMIN' ,SURF_ID='OPEN' /\n")
+    if check_get_val(node, "zmax", "") == "open":
+        write_to_fds("&VENT MB='ZMAX' ,SURF_ID='OPEN' /\n")
+        # end boundary
+
+
+def init(node):
+    # DESCRIPTION:
+    # initializes temperature in a defined area and writes the INIT statement via write_to_fds
+    # INPUT (arguments of node):
+    # temperature      - temperature in the defined area
+    #  x1, y1, z1       - coordinates of one corner of the defined area
+    #  x2, y2, z2       - coordinates of the opposing corner of the defined area
+    #  comment          - comment to be written after the INIT statement
+    line = "TEMPERATURE=%f XB=%f,%f,%f,%f,%f,%f" % (get_val(node, "temperature"),
+                                                    get_val(node, "x1"),
+                                                    get_val(node, "x2"),
+                                                    get_val(node, "y1"),
+                                                    get_val(node, "y2"),
+                                                    get_val(node, "z1"),
+                                                    get_val(node, "z2"))
+    comment = ""
+    if check_val(node, 'comment'):
+        comment = node.attrib["comment"]
+
+    write_to_fds("&INIT %s / %s \n" % (line, comment))
+    # end init
+
+
 #############################
 ##### COMBINED COMMANDS #####
 #############################
@@ -461,56 +512,17 @@ def my_room(node):
 ############
 # UNSORTED #
 ############
-
-def boundary(node):
+def input(node):  # TODO Unterschied verstehen?
     # DESCRIPTION:
-    #  defines an rectangular hole in an obstacle and writes the HOLE statement via write_to_fds
+    # writes a given string via write_to_fds
     # INPUT (arguments of node):
-    #  x1, y1, z1       - coordinates of one corner of the hole
-    #  x2, y2, z2       - coordinates of the opposing corner of the hole
-    if 'x' in node.attrib:
-        if node.attrib['x'] == "open":
-            write_to_fds("&VENT MB='XMIN' ,SURF_ID='OPEN' /\n")
-            write_to_fds("&VENT MB='XMAX' ,SURF_ID='OPEN' /\n")
-
-    if 'y' in node.attrib:
-        if node.attrib['x'] == "open":
-            write_to_fds("&VENT MB='YMIN' ,SURF_ID='OPEN' /\n")
-            write_to_fds("&VENT MB='YMAX' ,SURF_ID='OPEN' /\n")
-
-    if 'z' in node.attrib:
-        if node.attrib['z'] == "open":
-            write_to_fds("&VENT MB='ZMIN' ,SURF_ID='OPEN' /\n")
-            write_to_fds("&VENT MB='ZMAX' ,SURF_ID='OPEN' /\n")
-    if 'zmin' in node.attrib:
-        if node.attrib['zmin'] == "open":
-            write_to_fds("&VENT MB='ZMIN' ,SURF_ID='OPEN' /\n")
-    if 'zmax' in node.attrib:
-        if node.attrib['zmax'] == "open":
-            write_to_fds("&VENT MB='ZMAX' ,SURF_ID='OPEN' /\n")
-    #end boundary
-
-def init(node):
-    line = "TEMPERATURE=%f XB=%f,%f,%f,%f,%f,%f"%(get_val(node, "temperature"),
-							       get_val(node, "x1"),
-                                   get_val(node, "x2"),
-                                   get_val(node, "y1"),
-                                   get_val(node, "y2"),
-                                   get_val(node, "z1"),
-                                   get_val(node, "z2"))
-    comment=""
-    if check_val(node, 'comment'):
-        comment = node.attrib["comment"]
-
-    write_to_fds("&INIT %s / %s \n"%(line, comment))
-
-def input(node):
+    # text, str      - text to write to the FDS file
     if check_val(node, 'text'):
         write_to_fds("&%s /\n"%(node.attrib["text"]))
     if check_val(node, 'str'):
         write_to_fds("&%s /\n"%(get_val(node,"str")))
-    if check_val(node, "from_file"):
 
+    if check_val(node, "from_file"):
         excl = []
         excl_tmp = check_get_val(node, 'excl', None)
         if excl_tmp:
