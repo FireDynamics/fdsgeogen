@@ -23,8 +23,10 @@ global_args['surf'] = ['rgb', 'color', 'vel', 'hrrpua','heat_of_vaporization',
 global_args['obst'] = ['x1', 'x2', 'y1', 'y2', 'z1', 'z2', 'xb', 'surf_ids', 'surf_id', 'color', 'bulk_density']
 global_args['hole'] = ['xb', 'color']
 global_args['vent'] = ['xb', 'surf_id', 'color', 'dynamic_pressure', 'tmp_exterior', 'mb', 'transparency']
-global_args['slcf'] = ['pbx', 'pby', 'pbz', 'quantity', 'vector']
+global_args['slcf'] = ['pbx', 'pby', 'pbz', 'quantity', 'vector', 'evacuation']
 global_args['pers'] = ['avatar_color', 'color_method', 'default_properties', 'det_mean', 'pre_mean', 'dens_init', 'l_non_sp']
+global_args['exit'] = ['ior', 'xyz', 'xb']
+global_args['evac'] = ['number_initial_persons', 'xb', 'agent_type', 'pers_id']
 
 #########################
 ##### FDS key words #####
@@ -38,6 +40,8 @@ global_keys['hole']  = 'HOLE'
 global_keys['vent']  = 'VENT'
 global_keys['slcf']  = 'SLCF'
 global_keys['pers']  = 'PERS'
+global_keys['exit']  = 'EXIT'
+global_keys['evac']  = 'EVAC'
 
 
 # accepted deviation when dealing with float arithmetic
