@@ -645,6 +645,9 @@ def process_node(node):
             else:
                 if isinstance(val, basestring):
                     line += ", %s='%s'"%(arg.upper(),val)
+                elif isinstance(val, bool):
+                    if val==True: line += ", %s=%s"%(arg.upper(),'.TRUE.')
+                    else: line += ", %s=%s"%(arg.upper(),'.FALSE.')
                 else:
                     line += ", %s=%f"%(arg.upper(),val)
 
