@@ -445,6 +445,24 @@ def bounded_room(node):
                              x1-wt*bx1, x2+wt*bx2, y1-wt*by1, y2+wt*by2, z2, z2+wt*bz2, wall_color, wall_transparancy))
     # end bounded_room
 
+def evac_mesh(node):
+
+    xmin = get_val(node, "xmin", opt=True)
+    xmax = get_val(node, "xmax", opt=True)
+    ymin = get_val(node, "ymin", opt=True)
+    ymax = get_val(node, "ymax", opt=True)
+    zmin = get_val(node, "zmin", opt=True)
+    zmax = get_val(node, "zmax", opt=True)
+
+    nx = get_val(node, "nx", opt=True)
+    ny = get_val(node, "ny", opt=True)
+
+    evac_zmin = 0.25 * (zmax - zmin)
+    evac_zmax = 0.75 * (zmax - zmin)
+
+    write_to_fds("&MESH ID='evac_mesh' IJK=%d,%d,%d, XB=%f,%f,%f,%f,%f,%f, EVACUATION=.TRUE., EVAC_HUMANS=.TRUE. /\n"%(
+        nx, ny, 1, xmin, xmax, ymin, ymax, evac_zmin, evac_zmax))
+
 def my_room(node):
     # DESCRIPTION:
     #  subset of bounded_room
