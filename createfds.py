@@ -9,6 +9,7 @@ import numpy as np
 
 
 
+
 #########################
 ##### FDS arguments #####
 #########################
@@ -515,9 +516,9 @@ def my_room(node):
 ############
 # UNSORTED #
 ############
-def input(node):  # TODO Unterschied verstehen?
+def input(node):  # TODO Verstehen?
     # DESCRIPTION:
-    # writes a given string via write_to_fds
+    # ?
     # INPUT (arguments of node):
     # text, str      - text to write to the FDS file
     if check_val(node, 'text'):
@@ -569,8 +570,14 @@ def input(node):  # TODO Unterschied verstehen?
                 print "  - ignoring key ", fds_key
 
         write_to_fds("== end of insertion == \n\n")
+        # end input
 
 def dump(node):
+    # DESCRIPTION:
+    # writes a given string or the content of a given file via write_to_fds
+    # INPUT (arguments of node):
+    # text, str     - text to be written to the FDS file
+    # file          - file whose content is to be written to the FDS File
     if check_val(node, 'text'):
         write_to_fds("%s\n"%(node.attrib["text"]))
     if check_val(node, 'str'):
@@ -580,13 +587,18 @@ def dump(node):
         for line in f:
             write_to_fds("%s\n"%line.rstrip('\n'))
         f.close()
+        # end dump
 
 def var(node):
+    # DESCRIPTION:
+    # adds new global variables either passed as node arguments or from file via add_var
+    # INPUT (arguments of node):
+    # from_file        -
     global vars
-    for att in node.attrib:
-        if att == 'from_file': continue
-        vars[att] = eval(node.attrib[att], globals(), vars)
-        #print "added variable: %s = %s"%(att, str(vars[att]))
+    for key in node.attrib:
+        if key != 'from_file':
+            add_var(key, eval(node.attrib[key], globals(), vars))
+            # print "added variable: %s = %s"%(key, str(vars[key]))
 
     if check_val(node, 'from_file'):
         print "adding variables from file: "
@@ -599,15 +611,20 @@ def var(node):
             print "  found variable name:  ", key
             print "  found variable value: ", val
             add_var(key, val)
+            # end var
 
 def cond(node):
+    # DESCRIPTION:
+    # checks if the requirements passed as node arguments are fulfilled and exits the program with an error message
+    #  to standard output otherwise   -
     for att in node.attrib:
-        if get_val(node, att) == True: continue
-        print "!! condition was not met: ", node.attrib[att]
-        sys.exit()
+        if not get_val(node, att):
+            print "!! condition was not met: ", node.attrib[att]
+            sys.exit()
+            # end cond
+
 
 def process_node(node):
-
     global vars
     line=''
     if check_val(node, 'id', opt=True):
