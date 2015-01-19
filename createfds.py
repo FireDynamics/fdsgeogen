@@ -24,8 +24,10 @@ global_args['surf'] = ['rgb', 'color', 'vel', 'hrrpua','heat_of_vaporization',
 global_args['obst'] = ['x1', 'x2', 'y1', 'y2', 'z1', 'z2', 'xb', 'surf_ids', 'surf_id', 'color', 'bulk_density']
 global_args['hole'] = ['xb', 'color']
 global_args['vent'] = ['xb', 'surf_id', 'color', 'dynamic_pressure', 'tmp_exterior', 'mb', 'transparency']
-global_args['slcf'] = ['pbx', 'pby', 'pbz', 'quantity', 'vector']
+global_args['slcf'] = ['pbx', 'pby', 'pbz', 'quantity', 'vector', 'evacuation']
 global_args['pers'] = ['avatar_color', 'color_method', 'default_properties', 'det_mean', 'pre_mean', 'dens_init', 'l_non_sp']
+global_args['exit'] = ['ior', 'xyz', 'xb']
+global_args['evac'] = ['number_initial_persons', 'xb', 'agent_type', 'pers_id']
 
 #########################
 ##### FDS key words #####
@@ -39,6 +41,8 @@ global_keys['hole']  = 'HOLE'
 global_keys['vent']  = 'VENT'
 global_keys['slcf']  = 'SLCF'
 global_keys['pers']  = 'PERS'
+global_keys['exit']  = 'EXIT'
+global_keys['evac']  = 'EVAC'
 
 
 # accepted deviation when dealing with float arithmetic
@@ -442,6 +446,24 @@ def bounded_room(node):
                              x1-wt*bx1, x2+wt*bx2, y1-wt*by1, y2+wt*by2, z2, z2+wt*bz2, wall_color, wall_transparancy))
     # end bounded_room
 
+def evac_mesh(node):
+
+    xmin = get_val(node, "xmin", opt=True)
+    xmax = get_val(node, "xmax", opt=True)
+    ymin = get_val(node, "ymin", opt=True)
+    ymax = get_val(node, "ymax", opt=True)
+    zmin = get_val(node, "zmin", opt=True)
+    zmax = get_val(node, "zmax", opt=True)
+
+    nx = get_val(node, "nx", opt=True)
+    ny = get_val(node, "ny", opt=True)
+
+    evac_zmin = 0.25 * (zmax - zmin)
+    evac_zmax = 0.75 * (zmax - zmin)
+
+    write_to_fds("&MESH ID='evac_mesh' IJK=%d,%d,%d, XB=%f,%f,%f,%f,%f,%f, EVACUATION=.TRUE., EVAC_HUMANS=.TRUE. /\n"%(
+        nx, ny, 1, xmin, xmax, ymin, ymax, evac_zmin, evac_zmax))
+
 def my_room(node):
     # DESCRIPTION:
     #  subset of bounded_room
@@ -658,6 +680,9 @@ def process_node(node):
             else:
                 if isinstance(val, basestring):
                     line += ", %s='%s'"%(arg.upper(),val)
+                elif isinstance(val, bool):
+                    if val==True: line += ", %s=%s"%(arg.upper(),'.TRUE.')
+                    else: line += ", %s=%s"%(arg.upper(),'.FALSE.')
                 else:
                     line += ", %s=%f"%(arg.upper(),val)
 
