@@ -10,6 +10,7 @@ import numpy as np
 
 
 
+
 #########################
 ##### FDS arguments #####
 #########################
@@ -88,6 +89,32 @@ def del_var(key):
     del vars[key]
     # end del_var
 
+
+def var(node):
+    # DESCRIPTION:
+    # adds new global variables either passed as node arguments or from file via add_var
+    # INPUT (arguments of node):
+    # from_file        -
+    global vars
+    for key in node.attrib:
+        if key != 'from_file':
+            add_var(key, eval(node.attrib[key], globals(), vars))
+            # print "added variable: %s = %s"%(key, str(vars[key]))
+
+    if check_val(node, 'from_file'):
+        print "adding variables from file: "
+        in_file = open(node.attrib["from_file"], 'r')
+        for line in in_file:
+            if line.isspace(): continue
+            contents = line.split()
+            key = contents[0]
+            val = eval(contents[1], globals(), vars)
+            print "  found variable name:  ", key
+            print "  found variable value: ", val
+            add_var(key, val)
+            # end var
+
+
 ###########################
 ##### NODE EVALUATION #####
 ###########################
@@ -143,6 +170,18 @@ def get_val(node, name, opt=False):
         sys.exit()
     # end get_val
 
+
+def cond(node):
+    # DESCRIPTION:
+    # checks if the requirements passed as node arguments are fulfilled and exits the program with an error message
+    # to standard output otherwise   -
+    for att in node.attrib:
+        if not get_val(node, att):
+            print "!! condition was not met: ", node.attrib[att]
+            sys.exit()
+            # end cond
+
+
 ###############################
 ##### FDS FILE MANAGEMENT #####
 ###############################
@@ -195,6 +234,24 @@ def info(node):
         print "outfile : %s"%vars['outfile']
         open_fds_file()
     # end info
+
+def dump(node):
+    # DESCRIPTION:
+    # writes a given string or the content of a given file via write_to_fds
+    # INPUT (arguments of node):
+    # text, str     - text to be written to the FDS file
+    # file          - file whose content is to be written to the FDS File
+    if check_val(node, 'text'):
+        write_to_fds("%s\n" % (node.attrib["text"]))
+    if check_val(node, 'str'):
+        write_to_fds("%s\n" % (get_val(node, "str")))
+    if check_val(node, 'file'):
+        f = open(node.attrib["file"], 'r')
+        for line in f:
+            write_to_fds("%s\n" % line.rstrip('\n'))
+        f.close()
+        # end dump
+
 
 def mesh(node):
     # DESCRIPTION:
@@ -446,24 +503,6 @@ def bounded_room(node):
                              x1-wt*bx1, x2+wt*bx2, y1-wt*by1, y2+wt*by2, z2, z2+wt*bz2, wall_color, wall_transparancy))
     # end bounded_room
 
-def evac_mesh(node):
-
-    xmin = get_val(node, "xmin", opt=True)
-    xmax = get_val(node, "xmax", opt=True)
-    ymin = get_val(node, "ymin", opt=True)
-    ymax = get_val(node, "ymax", opt=True)
-    zmin = get_val(node, "zmin", opt=True)
-    zmax = get_val(node, "zmax", opt=True)
-
-    nx = get_val(node, "nx", opt=True)
-    ny = get_val(node, "ny", opt=True)
-
-    evac_zmin = 0.25 * (zmax - zmin)
-    evac_zmax = 0.75 * (zmax - zmin)
-
-    write_to_fds("&MESH ID='evac_mesh' IJK=%d,%d,%d, XB=%f,%f,%f,%f,%f,%f, EVACUATION=.TRUE., EVAC_HUMANS=.TRUE. /\n"%(
-        nx, ny, 1, xmin, xmax, ymin, ymax, evac_zmin, evac_zmax))
-
 def my_room(node):
     # DESCRIPTION:
     #  subset of bounded_room
@@ -538,6 +577,25 @@ def my_room(node):
 ############
 # UNSORTED #
 ############
+def evac_mesh(node):
+    xmin = get_val(node, "xmin", opt=True)
+    xmax = get_val(node, "xmax", opt=True)
+    ymin = get_val(node, "ymin", opt=True)
+    ymax = get_val(node, "ymax", opt=True)
+    zmin = get_val(node, "zmin", opt=True)
+    zmax = get_val(node, "zmax", opt=True)
+
+    nx = get_val(node, "nx", opt=True)
+    ny = get_val(node, "ny", opt=True)
+
+    evac_zmin = 0.25 * (zmax - zmin)
+    evac_zmax = 0.75 * (zmax - zmin)
+
+    write_to_fds(
+        "&MESH ID='evac_mesh' IJK=%d,%d,%d, XB=%f,%f,%f,%f,%f,%f, EVACUATION=.TRUE., EVAC_HUMANS=.TRUE. /\n" % (
+            nx, ny, 1, xmin, xmax, ymin, ymax, evac_zmin, evac_zmax))
+
+
 def input(node):  # TODO Verstehen?
     # DESCRIPTION:
     # ?
@@ -594,59 +652,12 @@ def input(node):  # TODO Verstehen?
         write_to_fds("== end of insertion == \n\n")
         # end input
 
-def dump(node):
-    # DESCRIPTION:
-    # writes a given string or the content of a given file via write_to_fds
-    # INPUT (arguments of node):
-    # text, str     - text to be written to the FDS file
-    # file          - file whose content is to be written to the FDS File
-    if check_val(node, 'text'):
-        write_to_fds("%s\n"%(node.attrib["text"]))
-    if check_val(node, 'str'):
-        write_to_fds("%s\n"%(get_val(node,"str")))
-    if check_val(node, 'file'):
-        f = open(node.attrib["file"], 'r')
-        for line in f:
-            write_to_fds("%s\n"%line.rstrip('\n'))
-        f.close()
-        # end dump
-
-def var(node):
-    # DESCRIPTION:
-    # adds new global variables either passed as node arguments or from file via add_var
-    # INPUT (arguments of node):
-    # from_file        -
-    global vars
-    for key in node.attrib:
-        if key != 'from_file':
-            add_var(key, eval(node.attrib[key], globals(), vars))
-            # print "added variable: %s = %s"%(key, str(vars[key]))
-
-    if check_val(node, 'from_file'):
-        print "adding variables from file: "
-        in_file = open(node.attrib["from_file"], 'r')
-        for line in in_file:
-            if line.isspace(): continue
-            contents = line.split()
-            key = contents[0]
-            val = eval(contents[1], globals(), vars)
-            print "  found variable name:  ", key
-            print "  found variable value: ", val
-            add_var(key, val)
-            # end var
-
-def cond(node):
-    # DESCRIPTION:
-    # checks if the requirements passed as node arguments are fulfilled and exits the program with an error message
-    #  to standard output otherwise   -
-    for att in node.attrib:
-        if not get_val(node, att):
-            print "!! condition was not met: ", node.attrib[att]
-            sys.exit()
-            # end cond
-
-
 def process_node(node):
+    # DESCRIPTION:
+    # ?
+    # INPUT (arguments of node):
+    # id
+    #  comment
     global vars
     line=''
     if check_val(node, 'id', opt=True):
@@ -699,6 +710,8 @@ def process_node(node):
         comment = node.attrib['comment']
 
     write_to_fds("&%s %s/ %s\n"%(global_keys[node.tag], line, comment))
+    # end process_node
+
 
 def loop(node):
 
