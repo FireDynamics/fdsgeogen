@@ -11,6 +11,7 @@ import numpy as np
 
 
 
+
 #########################
 ##### FDS arguments #####
 #########################
@@ -395,6 +396,64 @@ def init(node):
     # end init
 
 
+def loop(node):
+    # DESCRIPTION:
+    # loops over the values passed and does something via traverse
+    # INPUT (arguments of node):
+    #  start    - start value of the loop
+    #  stop     - end value of the loop
+    #  var      - ?
+    #  list     - list to loop over
+    # integer iteration from start to stop
+    if 'start' in node.attrib and 'stop' in node.attrib:
+        start = int(get_val(node, 'start'))
+        stop = int(get_val(node, 'stop'))
+
+        for loop_i in range(start, stop):
+            add_var(node.attrib['var'], loop_i)
+            traverse(node)
+            del_var(node.attrib['var'])
+
+    if 'list' in node.attrib:
+        llist = node.attrib['list'].split(',')
+        for loop_i in llist:
+            add_var(node.attrib['var'], loop_i.strip())
+            traverse(node)
+            del_var(node.attrib['var'])
+            # end loop
+
+
+def ramp(node):
+    # DESCRIPTION:
+    # writes a RAMP statement with the given parameters via write_to_fds
+    # INPUT (arguments of node):
+    #  id       - id to be asssigned to the ramp
+    #  t        - ?
+    #  f        - ?
+    if 'id' in node.attrib:
+        id = eval(node.attrib['id'], {}, vars)
+        ramp = "&RAMP ID='RAMP_%s'" % id
+
+    if 't' in node.attrib:
+        t = eval(node.attrib['t'], {}, vars)
+    if 'f' in node.attrib:
+        f = eval(node.attrib['f'], {}, vars)
+        ramp += "T=%f, F=%f /\n" % (t, f)
+        write_to_fds(ramp)
+        #end ramp
+
+
+def radi(node):
+    # DESCRIPTION:
+    # writes a RADI statement with the given radiative fraction via write_to_fds
+    # INPUT (arguments of node):
+    #  radiative_fraction   - ?
+    if 'radiative_fraction' in node.attrib:
+        rf = eval(node.attrib['radiative_fraction'], {}, vars)
+        radi = "&RADI RADIATIVE_FRACTION = %f /\n" % rf
+        write_to_fds(radi)
+        # end radi
+
 #############################
 ##### COMBINED COMMANDS #####
 #############################
@@ -654,9 +713,9 @@ def input(node):  # TODO Verstehen?
 
 def process_node(node):
     # DESCRIPTION:
-    # ?
+    # very important stuff that I still don't really understand
     # INPUT (arguments of node):
-    # id
+    #  id
     #  comment
     global vars
     line=''
@@ -711,48 +770,6 @@ def process_node(node):
 
     write_to_fds("&%s %s/ %s\n"%(global_keys[node.tag], line, comment))
     # end process_node
-
-
-def loop(node):
-
-    # integer iteration from start to stop
-    if 'start' in node.attrib and 'stop' in node.attrib:
-        start = int(get_val(node,'start'))
-        stop  = int(get_val(node,'stop'))
-
-        for loop_i in range(start, stop):
-            add_var(node.attrib['var'], loop_i)
-            traverse(node)
-            del_var(node.attrib['var'])
-
-    if 'list' in node.attrib:
-        llist = node.attrib['list'].split(',')
-        for loop_i in llist:
-            add_var(node.attrib['var'], loop_i.strip())
-            traverse(node)
-            del_var(node.attrib['var'])
-
-def ramp(node):
-	if 'id' in node.attrib:
-		id = eval(node.attrib['id'], {}, vars)
-		ramp = "&RAMP ID='RAMP_%s'"%id
-
-	if 't' in node.attrib:
-		t = eval(node.attrib['t'], {}, vars)
-	if 'f' in node.attrib:
-		f = eval(node.attrib['f'], {}, vars)
-
-		ramp += "T=%f, F=%f /\n"%(t, f)
-
-		write_to_fds(ramp)
-
-def radi(node):
-
-	if 'radiative_fraction' in node.attrib:
-		rf = eval(node.attrib['radiative_fraction'], {}, vars)
-		radi = "&RADI RADIATIVE_FRACTION = %f /\n"%rf
-
-		write_to_fds(radi)
 
 def fire(node):
     if node.attrib['type'] == "burningbox":
