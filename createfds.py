@@ -12,6 +12,7 @@ import numpy as np
 
 
 
+
 #########################
 ##### FDS arguments #####
 #########################
@@ -819,16 +820,11 @@ def paradim(node, dirlist):
     nump = len(paralist)
     if len(dirlist) == 0:
         for ip in paralist: dirlist.append({})
-
     if len(dirlist) != nump:
         print "wrong number of parameter!!"
         sys.exit()
-
     for ip in range(nump):
         dirlist[ip][node.attrib['var']] = paralist[ip]
-
-def section(node):
-    traverse(node)
 
 def traverse(root):
     for node in root:
