@@ -13,22 +13,25 @@ import numpy as np
 
 
 
-#########################
+
+# ########################
 ##### FDS arguments #####
 #########################
 global_args = {}
-global_args['reac'] = ['heat_of_combustion', 'soot_yield','C', 'H', 'fuel']
+global_args['reac'] = ['heat_of_combustion', 'soot_yield', 'C', 'H', 'fuel']
 global_args['matl'] = ['specific_heat', 'conductivity', 'density', 'heat_of_combustion',
                        'n_reactions', 'heat_of_reaction', 'nu_spec', 'reference_temperature',
-                       'a', 'e', 'n_s', 'spec_id', 'emissivity', 'heating_rate', 'pyrolysis_range', 'matl_id', 'nu_matl']
-global_args['surf'] = ['rgb', 'color', 'vel', 'hrrpua','heat_of_vaporization',
+                       'a', 'e', 'n_s', 'spec_id', 'emissivity', 'heating_rate', 'pyrolysis_range', 'matl_id',
+                       'nu_matl']
+global_args['surf'] = ['rgb', 'color', 'vel', 'hrrpua', 'heat_of_vaporization',
                        'ignition_temperature', 'burn_away', 'matl_id', 'matl_mass_fraction',
                        'thickness', 'external_flux', 'backing', 'hrrupa', 'stretch_factor', 'cell_size_factor']
 global_args['obst'] = ['x1', 'x2', 'y1', 'y2', 'z1', 'z2', 'xb', 'surf_ids', 'surf_id', 'color', 'bulk_density']
 global_args['hole'] = ['xb', 'color']
 global_args['vent'] = ['xb', 'surf_id', 'color', 'dynamic_pressure', 'tmp_exterior', 'mb', 'transparency']
 global_args['slcf'] = ['pbx', 'pby', 'pbz', 'quantity', 'vector', 'evacuation']
-global_args['pers'] = ['avatar_color', 'color_method', 'default_properties', 'det_mean', 'pre_mean', 'dens_init', 'l_non_sp']
+global_args['pers'] = ['avatar_color', 'color_method', 'default_properties', 'det_mean', 'pre_mean', 'dens_init',
+                       'l_non_sp']
 global_args['exit'] = ['ior', 'xyz', 'xb']
 global_args['evac'] = ['number_initial_persons', 'xb', 'agent_type', 'pers_id']
 
@@ -36,20 +39,21 @@ global_args['evac'] = ['number_initial_persons', 'xb', 'agent_type', 'pers_id']
 ##### FDS key words #####
 #########################
 global_keys = {}
-global_keys['reac']  = 'REAC'
-global_keys['matl']  = 'MATL'
-global_keys['surf']  = 'SURF'
-global_keys['obst']  = 'OBST'
-global_keys['hole']  = 'HOLE'
-global_keys['vent']  = 'VENT'
-global_keys['slcf']  = 'SLCF'
-global_keys['pers']  = 'PERS'
-global_keys['exit']  = 'EXIT'
-global_keys['evac']  = 'EVAC'
+global_keys['reac'] = 'REAC'
+global_keys['matl'] = 'MATL'
+global_keys['surf'] = 'SURF'
+global_keys['obst'] = 'OBST'
+global_keys['hole'] = 'HOLE'
+global_keys['vent'] = 'VENT'
+global_keys['slcf'] = 'SLCF'
+global_keys['pers'] = 'PERS'
+global_keys['exit'] = 'EXIT'
+global_keys['evac'] = 'EVAC'
 
 
 # accepted deviation when dealing with float arithmetic
 epsilon = 0.0001
+
 
 def div235(n):
     # DESCRIPTION:
@@ -59,14 +63,15 @@ def div235(n):
     r_init = int(n)
     while True:
         r = r_init
-        while r%2 == 0 and r!= 0: r /= 2
-        while r%3 == 0 and r!= 0: r /= 3
-        while r%5 == 0 and r!= 0: r /= 5
+        while r % 2 == 0 and r != 0: r /= 2
+        while r % 3 == 0 and r != 0: r /= 3
+        while r % 5 == 0 and r != 0: r /= 5
 
         if r == 1: break
         r_init += 1
     return r_init
     # end div235
+
 
 ###############################
 ##### VARIABLE MANAGEMENT #####
@@ -81,6 +86,7 @@ def add_var(key, value):
     global vars
     vars[key] = value
     # end add_var
+
 
 def del_var(key):
     # DESCRIPTION:
@@ -133,7 +139,8 @@ def check_get_val(node, name, default):
         return get_val(node, name)
     else:
         return default
-    # end check_get_val
+        # end check_get_val
+
 
 def check_val(node, lst, opt=True):
     # DESCRIPTION:
@@ -144,15 +151,16 @@ def check_val(node, lst, opt=True):
     #  lst      - list of attributes to search for (required)
     #  opt      - determines if the program should be exited if an attribute cannot be found (default: True)
     if type(lst) is not list:
-        lst = [ lst ]
+        lst = [lst]
     for item in lst:
         if not item in node.attrib:
             if not opt:
-                print "required attribute %s not found in node %s"%(item, node)
+                print "required attribute %s not found in node %s" % (item, node)
                 sys.exit()
             return False
     return True
     # end check_val
+
 
 def get_val(node, name, opt=False):
     # DESCRIPTION:
@@ -168,9 +176,9 @@ def get_val(node, name, opt=False):
     elif (opt) and (name in vars):
         return vars[name]
     else:
-        print "error reading attribute %s from node %s"%(name, node)
+        print "error reading attribute %s from node %s" % (name, node)
         sys.exit()
-    # end get_val
+        # end get_val
 
 
 def cond(node):
@@ -195,8 +203,9 @@ def open_fds_file():
     if type(vars['fds_file']) == file:
         close_fds_file()
     vars['fds_file'] = open(vars['outfile'], 'w')
-    write_to_fds("&HEAD CHID='%s', TITLE='%s' /\n"%(vars['chid'], vars['title']))
+    write_to_fds("&HEAD CHID='%s', TITLE='%s' /\n" % (vars['chid'], vars['title']))
     # end open_fds_file
+
 
 def write_to_fds(text):
     # DESCRIPTION:
@@ -209,12 +218,14 @@ def write_to_fds(text):
     vars['fds_file'].write(text)
     # end write_to_fds
 
+
 def close_fds_file():
     # DESCRIPTION:
     #  writes a TAIL statement via write_to_fds and closes the FDS file
     write_to_fds("&TAIL/\n")
     vars['fds_file'].close()
     # end close_fds
+
 
 ###############################
 ##### FDS FILE GENERATION #####
@@ -227,15 +238,16 @@ def info(node):
     #  chid     - job identifier (required)
     #  title    - short description of the job (optional)
     #  outfile  - name of the FDS file, should match with chid (required)
-    if check_val(node, ['chid','outfile'], opt=False):
-        vars['chid'] = get_val(node,"chid")
-        vars['title'] = get_val(node,"title", opt=True)
-        vars['outfile'] = get_val(node,"outfile")
-        print "chid    : %s"%vars['chid']
-        print "title   : %s"%vars['title']
-        print "outfile : %s"%vars['outfile']
+    if check_val(node, ['chid', 'outfile'], opt=False):
+        vars['chid'] = get_val(node, "chid")
+        vars['title'] = get_val(node, "title", opt=True)
+        vars['outfile'] = get_val(node, "outfile")
+        print "chid    : %s" % vars['chid']
+        print "title   : %s" % vars['title']
+        print "outfile : %s" % vars['outfile']
         open_fds_file()
-    # end info
+        # end info
+
 
 def dump(node):
     # DESCRIPTION:
@@ -272,7 +284,7 @@ def mesh(node):
         py = get_val(node, "py", opt=True)
         pz = get_val(node, "pz", opt=True)
 
-    nmeshes = px * py * pz      # NOT USED
+    nmeshes = px * py * pz  # NOT USED
 
     gnx = get_val(node, "nx", opt=True)
     gny = get_val(node, "ny", opt=True)
@@ -296,17 +308,18 @@ def mesh(node):
     for ix in range(px):
         for iy in range(py):
             for iz in range(pz):
-                xmin = gxmin + ix*dx
-                xmax = gxmin + (ix+1)*dx
-                ymin = gymin + iy*dy
-                ymax = gymin + (iy+1)*dy
-                zmin = gzmin + iz*dz
-                zmax = gzmin + (iz+1)*dz
+                xmin = gxmin + ix * dx
+                xmax = gxmin + (ix + 1) * dx
+                ymin = gymin + iy * dy
+                ymax = gymin + (iy + 1) * dy
+                zmin = gzmin + iz * dz
+                zmax = gzmin + (iz + 1) * dz
 
-                write_to_fds("&MESH IJK=%d,%d,%d, XB=%f,%f,%f,%f,%f,%f /\n"%(
-                             lnx, lny, lnz,
-                             xmin, xmax, ymin, ymax, zmin, zmax))
-    # end mesh
+                write_to_fds("&MESH IJK=%d,%d,%d, XB=%f,%f,%f,%f,%f,%f /\n" % (
+                    lnx, lny, lnz,
+                    xmin, xmax, ymin, ymax, zmin, zmax))
+                # end mesh
+
 
 def obst(node):
     # DESCRIPTION:
@@ -318,20 +331,21 @@ def obst(node):
     #  surf_id          - surface of the obstacle
     #  comment          - comment to be written after the OBST statement
 
-    line = "XB=%f,%f,%f,%f,%f,%f"%(get_val(node, "x1"),
-                                   get_val(node, "x2"),
-                                   get_val(node, "y1"),
-                                   get_val(node, "y2"),
-                                   get_val(node, "z1"),
-                                   get_val(node, "z2"))
+    line = "XB=%f,%f,%f,%f,%f,%f" % (get_val(node, "x1"),
+                                     get_val(node, "x2"),
+                                     get_val(node, "y1"),
+                                     get_val(node, "y2"),
+                                     get_val(node, "z1"),
+                                     get_val(node, "z2"))
     if check_val(node, 'color'):
-        line += " COLOR='%s'"%get_val(node, "color")
+        line += " COLOR='%s'" % get_val(node, "color")
     if check_val(node, 'surf_id'):
-        line += " SURF_ID='%s'"%get_val(node, "surf_id")
-    comment=""
+        line += " SURF_ID='%s'" % get_val(node, "surf_id")
+    comment = ""
     check_get_val(node, 'comment', "")
-    write_to_fds("&OBST %s / %s\n"%(line, comment))
+    write_to_fds("&OBST %s / %s\n" % (line, comment))
     # end obst
+
 
 def hole(node):
     # DESCRIPTION:
@@ -340,12 +354,12 @@ def hole(node):
     #  x1, y1, z1       - coordinates of one corner of the hole
     #  x2, y2, z2       - coordinates of the opposing corner of the hole
 
-    write_to_fds("&HOLE XB=%f,%f,%f,%f,%f,%f /\n"%(get_val(node, "x1"),
-                                   get_val(node, "x2"),
-                                   get_val(node, "y1"),
-                                   get_val(node, "y2"),
-                                   get_val(node, "z1"),
-                                   get_val(node, "z2")))
+    write_to_fds("&HOLE XB=%f,%f,%f,%f,%f,%f /\n" % (get_val(node, "x1"),
+                                                     get_val(node, "x2"),
+                                                     get_val(node, "y1"),
+                                                     get_val(node, "y2"),
+                                                     get_val(node, "z1"),
+                                                     get_val(node, "z2")))
     # end hole
 
 
@@ -455,6 +469,7 @@ def radi(node):
         write_to_fds(radi)
         # end radi
 
+
 #############################
 ##### COMBINED COMMANDS #####
 #############################
@@ -496,32 +511,32 @@ def bounded_room(node):
     delta = get_val(node, "delta", opt=True)
 
     # compute the minimum mesh size (room + walls)
-    dxmin = x1 - bx1*wt
-    dxmax = x2 + bx2*wt
-    dymin = y1 - by1*wt
-    dymax = y2 + by2*wt
-    dzmin = z1 - bz1*wt
-    dzmax = z2 + bz2*wt
+    dxmin = x1 - bx1 * wt
+    dxmax = x2 + bx2 * wt
+    dymin = y1 - by1 * wt
+    dymax = y2 + by2 * wt
+    dzmin = z1 - bz1 * wt
+    dzmax = z2 + bz2 * wt
 
     # compute required number of mesh cells
     nx = int(div235((dxmax - dxmin) / delta))
     ny = int(div235((dymax - dymin) / delta))
     nz = int(div235((dzmax - dzmin) / delta))
 
-    if ax==1:
-        dxmax = dxmin + nx*delta
+    if ax == 1:
+        dxmax = dxmin + nx * delta
     else:
-        dxmin = dxmax - nx*delta
+        dxmin = dxmax - nx * delta
 
-    if ay==1:
-        dymax = dymin + ny*delta
+    if ay == 1:
+        dymax = dymin + ny * delta
     else:
-        dymin = dymax - ny*delta
+        dymin = dymax - ny * delta
 
-    if az==1:
-        dzmax = dzmin + nz*delta
+    if az == 1:
+        dzmax = dzmin + nz * delta
     else:
-        dzmin = dzmax - nz*delta
+        dzmin = dzmax - nz * delta
 
     # save the computed values as global variables (for further use, if necessary)
     add_var("xmin", dxmin)
@@ -543,25 +558,32 @@ def bounded_room(node):
     wall_transparancy = check_get_val(node, "wall_transparancy", 0.5)
 
     # draw the walls if the wall is thicker than 0
-    if wt*bx1>epsilon:
-         write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='%s', TRANSPARENCY=%f /\n"%(
-                             x1-wt*bx1, x1, y1-wt*by1, y2+wt*by2, z1-wt*bz1, z2+wt*bz2, wall_color, wall_transparancy))
-    if wt*bx2>epsilon:
-         write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='%s', TRANSPARENCY=%f /\n"%(
-                             x2, x2+wt*bx2, y1-wt*by1, y2+wt*by2, z1-wt*bz1, z2+wt*bz2, wall_color, wall_transparancy))
-    if wt*by1>epsilon:
-         write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='%s', TRANSPARENCY=%f /\n"%(
-                             x1-wt*bx1, x2+wt*bx2, y1-wt*by1, y1, z1-wt*bz1, z2+wt*bz2, wall_color, wall_transparancy))
-    if wt*by2>epsilon:
-         write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='%s', TRANSPARENCY=%f /\n"%(
-                             x1-wt*bx1, x2+wt*bx2, y2, y2+wt*by2, z1-wt*bz1, z2+wt*bz2, wall_color, wall_transparancy))
-    if wt*bz1>epsilon:
-         write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='%s', TRANSPARENCY=%f /\n"%(
-                             x1-wt*bx1, x2+wt*bx2, y1-wt*by1, y2+wt*by2, z1-wt*bz1, z1, wall_color, wall_transparancy))
-    if wt*bz2>epsilon:
-         write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='%s', TRANSPARENCY=%f /\n"%(
-                             x1-wt*bx1, x2+wt*bx2, y1-wt*by1, y2+wt*by2, z2, z2+wt*bz2, wall_color, wall_transparancy))
-    # end bounded_room
+    if wt * bx1 > epsilon:
+        write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='%s', TRANSPARENCY=%f /\n" % (
+            x1 - wt * bx1, x1, y1 - wt * by1, y2 + wt * by2, z1 - wt * bz1, z2 + wt * bz2, wall_color,
+            wall_transparancy))
+    if wt * bx2 > epsilon:
+        write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='%s', TRANSPARENCY=%f /\n" % (
+            x2, x2 + wt * bx2, y1 - wt * by1, y2 + wt * by2, z1 - wt * bz1, z2 + wt * bz2, wall_color,
+            wall_transparancy))
+    if wt * by1 > epsilon:
+        write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='%s', TRANSPARENCY=%f /\n" % (
+            x1 - wt * bx1, x2 + wt * bx2, y1 - wt * by1, y1, z1 - wt * bz1, z2 + wt * bz2, wall_color,
+            wall_transparancy))
+    if wt * by2 > epsilon:
+        write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='%s', TRANSPARENCY=%f /\n" % (
+            x1 - wt * bx1, x2 + wt * bx2, y2, y2 + wt * by2, z1 - wt * bz1, z2 + wt * bz2, wall_color,
+            wall_transparancy))
+    if wt * bz1 > epsilon:
+        write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='%s', TRANSPARENCY=%f /\n" % (
+            x1 - wt * bx1, x2 + wt * bx2, y1 - wt * by1, y2 + wt * by2, z1 - wt * bz1, z1, wall_color,
+            wall_transparancy))
+    if wt * bz2 > epsilon:
+        write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='%s', TRANSPARENCY=%f /\n" % (
+            x1 - wt * bx1, x2 + wt * bx2, y1 - wt * by1, y2 + wt * by2, z2, z2 + wt * bz2, wall_color,
+            wall_transparancy))
+        # end bounded_room
+
 
 def my_room(node):
     # DESCRIPTION:
@@ -596,31 +618,31 @@ def my_room(node):
 
     delta = get_val(node, "delta", opt=True)
 
-    dxmin = x1 - bx1*wt
-    dxmax = x2 + bx2*wt
-    dymin = y1 - by1*wt
-    dymax = y2 + by2*wt
-    dzmin = z1 - bz1*wt
-    dzmax = z2 + bz2*wt
+    dxmin = x1 - bx1 * wt
+    dxmax = x2 + bx2 * wt
+    dymin = y1 - by1 * wt
+    dymax = y2 + by2 * wt
+    dzmin = z1 - bz1 * wt
+    dzmax = z2 + bz2 * wt
 
     nx = int(div235((dxmax - dxmin) / delta))
     ny = int(div235((dymax - dymin) / delta))
     nz = int(div235((dzmax - dzmin) / delta))
 
-    if ax==1:
-        dxmax = dxmin + nx*delta
+    if ax == 1:
+        dxmax = dxmin + nx * delta
     else:
-        dxmin = dxmax - nx*delta
+        dxmin = dxmax - nx * delta
 
-    if ay==1:
-        dymax = dymin + ny*delta
+    if ay == 1:
+        dymax = dymin + ny * delta
     else:
-        dymin = dymax - ny*delta
+        dymin = dymax - ny * delta
 
-    if az==1:
-        dzmax = dzmin + nz*delta
+    if az == 1:
+        dzmax = dzmin + nz * delta
     else:
-        dzmin = dzmax - nz*delta
+        dzmin = dzmax - nz * delta
 
     add_var("xmin", dxmin)
     add_var("xmax", dxmax)
@@ -633,6 +655,7 @@ def my_room(node):
     add_var("ny", ny)
     add_var("nz", nz)
     # end my_room
+
 
 ############
 # UNSORTED #
@@ -661,22 +684,27 @@ def input(node):  # TODO Verstehen?
     # ?
     # INPUT (arguments of node):
     # text, str      - text to write to the FDS file
+    #  from_file
+    #  incl
+    #  excl
     if check_val(node, 'text'):
-        write_to_fds("&%s /\n"%(node.attrib["text"]))
+        write_to_fds("&%s /\n" % (node.attrib["text"]))
     if check_val(node, 'str'):
-        write_to_fds("&%s /\n"%(get_val(node,"str")))
+        write_to_fds("&%s /\n" % (get_val(node, "str")))
 
     if check_val(node, "from_file"):
         excl = []
         excl_tmp = check_get_val(node, 'excl', None)
         if excl_tmp:
-            if type(excl_tmp) == type('str'): excl.append(excl_tmp)
+            if type(excl_tmp) == type('str'):
+                excl.append(excl_tmp)
             else:
                 for e in excl_tmp: excl.append(e)
         incl = []
         incl_tmp = check_get_val(node, 'incl', None)
         if incl_tmp:
-            if type(incl_tmp) == type('str'): excl.append(incl_tmp)
+            if type(incl_tmp) == type('str'):
+                incl.append(incl_tmp)
             else:
                 for e in incl_tmp: incl.append(e)
 
@@ -687,15 +715,14 @@ def input(node):  # TODO Verstehen?
             print "!! exclusion and inclusion of FDS key words at the same time is not possible "
             sys.exit()
 
-
         in_file_name = get_val(node, "from_file")
         in_file = open(in_file_name, 'r')
         in_file_raw = in_file.read()
         in_file.close()
 
-        in_file_contents = re.findall('&.*?/', in_file_raw.replace('\n' , ' '))
+        in_file_contents = re.findall('&.*?/', in_file_raw.replace('\n', ' '))
 
-        write_to_fds("\n == insertion from file: %s == \n"%in_file_name)
+        write_to_fds("\n == insertion from file: %s == \n" % in_file_name)
         for line in in_file_contents:
 
             # looking for FDS keyword
@@ -704,13 +731,14 @@ def input(node):  # TODO Verstehen?
 
             print " -- found FDS key: ", fds_key
 
-            if (incl!=[] and fds_key in incl) or (incl==[] and not fds_key in excl):
-                write_to_fds("%s\n"%line)
+            if (incl != [] and fds_key in incl) or (incl == [] and not fds_key in excl):
+                write_to_fds("%s\n" % line)
             else:
                 print "  - ignoring key ", fds_key
 
         write_to_fds("== end of insertion == \n\n")
         # end input
+
 
 def process_node(node):
     # DESCRIPTION:
@@ -719,9 +747,9 @@ def process_node(node):
     #  id
     #  comment
     global vars
-    line=''
+    line = ''
     if check_val(node, 'id', opt=True):
-        line += "ID='%s'"%get_val(node, 'id')
+        line += "ID='%s'" % get_val(node, 'id')
     else:
         line += "ID='none'"
 
@@ -730,14 +758,14 @@ def process_node(node):
     for arg in args:
         if check_val(node, arg):
 
-            vec_post=''
+            vec_post = ''
             if node.attrib[arg].find(';') != -1:
                 vec_post = '(' + node.attrib[arg].split(';')[0] + ')'
                 val = eval(node.attrib[arg].split(';')[1], globals(), vars)
             else:
                 val = get_val(node, arg)
             if isinstance(val, tuple):
-                line += ", %s%s="%(arg.upper(),vec_post)
+                line += ", %s%s=" % (arg.upper(), vec_post)
                 first = True
                 for el in val:
                     if not first:
@@ -745,17 +773,19 @@ def process_node(node):
                     first = False
 
                     if isinstance(el, basestring):
-                        line += "'%s'"%(el)
+                        line += "'%s'" % (el)
                     else:
-                        line += "%f"%(el)
+                        line += "%f" % (el)
             else:
                 if isinstance(val, basestring):
-                    line += ", %s='%s'"%(arg.upper(),val)
+                    line += ", %s='%s'" % (arg.upper(), val)
                 elif isinstance(val, bool):
-                    if val==True: line += ", %s=%s"%(arg.upper(),'.TRUE.')
-                    else: line += ", %s=%s"%(arg.upper(),'.FALSE.')
+                    if val == True:
+                        line += ", %s=%s" % (arg.upper(), '.TRUE.')
+                    else:
+                        line += ", %s=%s" % (arg.upper(), '.FALSE.')
                 else:
-                    line += ", %s=%f"%(arg.upper(),val)
+                    line += ", %s=%f" % (arg.upper(), val)
 
     all_args = args[:]
     all_args.extend(['id', 'comment'])
@@ -763,14 +793,15 @@ def process_node(node):
     for att in node.attrib:
         #print "checking attribute %s"%att
         if att not in all_args:
-            print "WARNING: unknown argument %s"%att
+            print "WARNING: unknown argument %s" % att
 
     comment = ''
     if check_val(node, 'comment'):
         comment = node.attrib['comment']
 
-    write_to_fds("&%s %s/ %s\n"%(global_keys[node.tag], line, comment))
+    write_to_fds("&%s %s/ %s\n" % (global_keys[node.tag], line, comment))
     # end process_node
+
 
 def fire(node):
     if node.attrib['type'] == "burningbox":
@@ -779,30 +810,33 @@ def fire(node):
         lz = eval(node.attrib['lz'], {}, vars)
         w2 = eval(node.attrib['width'], {}, vars) / 2.0
         h = eval(node.attrib['height'], {}, vars)
-        box_obst  = "&OBST "
-        box_obst += "XB=%f, %f, %f, %f, %f, %f"%(cx-w2, cx+w2, cy-w2, cy+w2, lz, lz+h)
+        box_obst = "&OBST "
+        box_obst += "XB=%f, %f, %f, %f, %f, %f" % (cx - w2, cx + w2, cy - w2, cy + w2, lz, lz + h)
         box_obst += "/\n"
         write_to_fds(box_obst)
 
         write_to_fds("&REAC FUEL = 'METHANE' /\n")
-        hrrpua = eval(node.attrib['hrr'], {}, vars) / (2.0*w2)**2
-        write_to_fds("&SURF ID='burningbox', HRRPUA=%f /\n"%hrrpua)
-        write_to_fds("&VENT XB=%f,%f,%f,%f,%f,%f SURF_ID='burningbox' color='RED'/\n"%(cx-w2, cx+w2, cy-w2, cy+w2, lz+h, lz+h))
+        hrrpua = eval(node.attrib['hrr'], {}, vars) / (2.0 * w2) ** 2
+        write_to_fds("&SURF ID='burningbox', HRRPUA=%f /\n" % hrrpua)
+        write_to_fds("&VENT XB=%f,%f,%f,%f,%f,%f SURF_ID='burningbox' color='RED'/\n" % (
+            cx - w2, cx + w2, cy - w2, cy + w2, lz + h, lz + h))
+
 
 def slice(node):
-    q = "QUANTITY='%s'"%node.attrib['q']
+    q = "QUANTITY='%s'" % node.attrib['q']
     v = ""
     if 'v' in node.attrib:
-        if node.attrib['v'] == '1': v="VECTOR=.TRUE."
+        if node.attrib['v'] == '1': v = "VECTOR=.TRUE."
     if 'x' in node.attrib:
         pos = eval(node.attrib['x'], {}, vars)
-        write_to_fds("&SLCF PBX=%e, %s %s /\n"%(pos, q, v))
+        write_to_fds("&SLCF PBX=%e, %s %s /\n" % (pos, q, v))
     if 'y' in node.attrib:
         pos = eval(node.attrib['y'], {}, vars)
-        write_to_fds("&SLCF PBY=%e, %s %s /\n"%(pos, q, v))
+        write_to_fds("&SLCF PBY=%e, %s %s /\n" % (pos, q, v))
     if 'z' in node.attrib:
         pos = eval(node.attrib['z'], {}, vars)
-        write_to_fds("&SLCF PBZ=%e, %s %s /\n"%(pos, q, v))
+        write_to_fds("&SLCF PBZ=%e, %s %s /\n" % (pos, q, v))
+
 
 def paradim(node, dirlist):
     check_val(node, ["var"], opt=False)
@@ -812,7 +846,7 @@ def paradim(node, dirlist):
         paralist = eval(node.attrib['list'])
 
     if check_val(node, ["file"]):
-        col=0
+        col = 0
         if check_val(node, ["col"]):
             col = int(get_val(node, "col"))
         paralist = np.loadtxt(node.attrib["file"], usecols=(col,), delimiter=',')
@@ -826,6 +860,7 @@ def paradim(node, dirlist):
     for ip in range(nump):
         dirlist[ip][node.attrib['var']] = paralist[ip]
 
+
 def traverse(root):
     for node in root:
         if node.tag in global_keys:
@@ -833,11 +868,13 @@ def traverse(root):
         else:
             globals()[node.tag](node)
 
+
 def dbg(node):
     print get_val(node, "print")
 
+
 def device(node):
-    check_val(node, ["q" ,"id"], opt=False)
+    check_val(node, ["q", "id"], opt=False)
     q = get_val(node, "q", opt=True)
     id = get_val(node, "id", opt=True)
     if check_val(node, ["x1", "x2", "y1", "y2", "z1", "z2"]):
@@ -847,7 +884,7 @@ def device(node):
         y2 = get_val(node, "y2", opt=True)
         z1 = get_val(node, "z1", opt=True)
         z2 = get_val(node, "z2", opt=True)
-        write_to_fds("&DEVC ID='%s' XB=%f,%f,%f,%f,%f,%f QUANTITY='%s'/\n"%(id,x1,x2,y1,y2,z1,z2,q))
+        write_to_fds("&DEVC ID='%s' XB=%f,%f,%f,%f,%f,%f QUANTITY='%s'/\n" % (id, x1, x2, y1, y2, z1, z2, q))
         return True
     if check_val(node, ["x", "y", "z"]):
         x = get_val(node, "x", opt=True)
@@ -855,10 +892,11 @@ def device(node):
         z = get_val(node, "z", opt=True)
         ior_s = ''
         if check_val(node, ["ior"], opt=True):
-            ior_s = "IOR=%s"%get_val(node, "ior", opt=True)
-        write_to_fds("&DEVC ID='%s', XYZ=%f,%f,%f, QUANTITY='%s', %s/\n"%(id,x,y,z,q,ior_s))
+            ior_s = "IOR=%s" % get_val(node, "ior", opt=True)
+        write_to_fds("&DEVC ID='%s', XYZ=%f,%f,%f, QUANTITY='%s', %s/\n" % (id, x, y, z, q, ior_s))
         return True
     return False
+
 
 def para(node):
     pass
@@ -879,7 +917,8 @@ for node in root:
 para_id = 0
 for items in product(*[params[pd] for pd in params]):
 
-    vars = {'outfile':"output.fds", 'chid':"chid", 'title':"title", 'fds_file_open':False, 'fds_file':0, 'para_id': para_id}
+    vars = {'outfile': "output.fds", 'chid': "chid", 'title': "title", 'fds_file_open': False, 'fds_file': 0,
+            'para_id': para_id}
     para_id += 1
 
     for v in items:
