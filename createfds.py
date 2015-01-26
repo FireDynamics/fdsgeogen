@@ -17,6 +17,7 @@ import numpy as np
 
 
 
+
 # ########################
 ##### FDS arguments #####
 #########################
@@ -441,6 +442,25 @@ def loop(node):
             # end loop
 
 
+def slice(node):
+    # DESCRIPTION:
+    # defines slice files and writes the SLCF statements via write_to_fds
+    # INPUT (arguments of node):
+    # q        - some quantity of the slice file?
+    #  v        - some vector property?
+    #  x, y, z  - dimension to record as slice file
+    q = "QUANTITY='%s'" % node.attrib['q']
+    v = ""
+    if check_get_val(node, 'v', "") == '1':
+        v = "VECTOR=.TRUE."
+    if check_val(node, 'x'):
+        write_to_fds("&SLCF PBX=%e, %s %s /\n" % (get_val(node, 'x'), q, v))
+    if check_val(node, 'y'):
+        write_to_fds("&SLCF PBY=%e, %s %s /\n" % (get_val(node, 'y'), q, v))
+    if check_val(node, 'z'):
+        write_to_fds("&SLCF PBZ=%e, %s %s /\n" % (get_val(node, 'z'), q, v))
+        # end slice
+
 def ramp(node):
     # DESCRIPTION:
     # writes a RAMP statement with the given parameters via write_to_fds
@@ -458,7 +478,7 @@ def ramp(node):
         f = eval(node.attrib['f'], {}, vars)
         ramp += "T=%f, F=%f /\n" % (t, f)
         write_to_fds(ramp)
-        #end ramp
+        # end ramp
 
 
 def radi(node):
@@ -835,27 +855,6 @@ def process_node(node):
     write_to_fds("&%s %s/ %s\n" % (global_keys[node.tag], line, comment))
     # end process_node
 
-
-def slice(node):
-    # DESCRIPTION:
-    # defines slice files and writes the SLCF statements via write_to_fds
-    # INPUT (arguments of node):
-    # q        - some quantity of the slice file?
-    #  v        - some vector property?
-    #  x, y, z  - dimension to record as slice file
-    q = "QUANTITY='%s'" % node.attrib['q']
-    v = ""
-    if check_get_val(node, 'v', "") == '1':
-        v = "VECTOR=.TRUE."
-    if check_val(node, 'x'):
-        write_to_fds("&SLCF PBX=%e, %s %s /\n" % (get_val(node, 'x'), q, v))
-    if check_val(node, 'y'):
-        write_to_fds("&SLCF PBY=%e, %s %s /\n" % (get_val(node, 'y'), q, v))
-    if check_val(node, 'z'):
-        write_to_fds("&SLCF PBZ=%e, %s %s /\n" % (get_val(node, 'z'), q, v))
-        # end slice
-
-
 def paradim(node, dirlist):
     check_val(node, ["var"], opt=False)
 
@@ -915,11 +914,13 @@ def device(node):
         return True
     return False
 
-
 def para(node):
     pass
 
-#################### MAIN LOOP
+# #####################
+##### MAIN LOOP ######
+######################
+
 tree = ET.parse(str(sys.argv[1]))
 root = tree.getroot()
 
