@@ -15,6 +15,7 @@ import numpy as np
 
 
 
+
 # ########################
 ##### FDS arguments #####
 #########################
@@ -474,6 +475,36 @@ def radi(node):
 #############################
 ##### COMBINED COMMANDS #####
 #############################
+def fire(node):
+    # DESCRIPTION:
+    # defines a box and writes the OBST statement via write_to_fds
+    #  defines a fire fueled by methane on the box and writes the REAC, SURF and VENT statements via write_to_fds
+    # INPUT (arguments of node):
+    #  type     - must be "burningbox" in order for the mothod to have an effect
+    #  cx, cy   - x/y coordinates of the center of the box
+    #  lz       - z coordinate of the bottom of the box
+    #  width    - width of the box
+    #  height   - height of the box
+    #  hrr      - heat release rate (somehow related to the box surface?)
+    if node.attrib['type'] == "burningbox":
+        # define the box
+        cx = get_val(node, 'cx')
+        cy = get_val(node, 'cy')
+        lz = get_val(node, 'lz')
+        w2 = get_val(node, 'width') / 2.0
+        h = get_val(node, 'height')
+        box_obst = "&OBST "
+        box_obst += "XB=%f, %f, %f, %f, %f, %f" % (cx - w2, cx + w2, cy - w2, cy + w2, lz, lz + h)
+        box_obst += "/\n"
+        write_to_fds(box_obst)
+
+        # define the fire
+        write_to_fds("&REAC FUEL = 'METHANE' /\n")
+        hrrpua = get_val(node, 'hrr') / (2.0 * w2) ** 2
+        write_to_fds("&SURF ID='burningbox', HRRPUA=%f /\n" % hrrpua)
+        write_to_fds("&VENT XB=%f,%f,%f,%f,%f,%f SURF_ID='burningbox' color='RED'/\n" % (
+            cx - w2, cx + w2, cy - w2, cy + w2, lz + h, lz + h))
+        # end fire
 
 def bounded_room(node):
     # DESCRIPTION:
@@ -804,36 +835,11 @@ def process_node(node):
     # end process_node
 
 
-def fire(node):
-    # DESCRIPTION:
-    # ?
-    # INPUT (arguments of node):
-    #  cx
-    #  cy
-    #  lz
-    #  width
-    #  height
-    #  hrr
-    if node.attrib['type'] == "burningbox":
-        cx = get_val(node, 'cx')
-        cy = get_val(node, 'cy')
-        lz = get_val(node, 'lz')
-        w2 = get_val(node, 'width') / 2.0
-        h = get_val(node, 'height')
-        box_obst = "&OBST "
-        box_obst += "XB=%f, %f, %f, %f, %f, %f" % (cx - w2, cx + w2, cy - w2, cy + w2, lz, lz + h)
-        box_obst += "/\n"
-        write_to_fds(box_obst)
-
-        write_to_fds("&REAC FUEL = 'METHANE' /\n")
-        hrrpua = get_val(node, 'hrr') / (2.0 * w2) ** 2
-        write_to_fds("&SURF ID='burningbox', HRRPUA=%f /\n" % hrrpua)
-        write_to_fds("&VENT XB=%f,%f,%f,%f,%f,%f SURF_ID='burningbox' color='RED'/\n" % (
-            cx - w2, cx + w2, cy - w2, cy + w2, lz + h, lz + h))
-        # end fire
-
-
 def slice(node):
+    # DESCRIPTION:
+    # very important stuff that I still don't really understand
+    # INPUT (arguments of node):
+    #  id
     q = "QUANTITY='%s'" % node.attrib['q']
     v = ""
     if 'v' in node.attrib:
@@ -847,6 +853,7 @@ def slice(node):
     if 'z' in node.attrib:
         pos = eval(node.attrib['z'], {}, vars)
         write_to_fds("&SLCF PBZ=%e, %s %s /\n" % (pos, q, v))
+        # end slice
 
 
 def paradim(node, dirlist):
