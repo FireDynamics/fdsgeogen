@@ -16,6 +16,7 @@ import numpy as np
 
 
 
+
 # ########################
 ##### FDS arguments #####
 #########################
@@ -837,22 +838,21 @@ def process_node(node):
 
 def slice(node):
     # DESCRIPTION:
-    # very important stuff that I still don't really understand
+    # defines slice files and writes the SLCF statements via write_to_fds
     # INPUT (arguments of node):
-    #  id
+    # q        - some quantity of the slice file?
+    #  v        - some vector property?
+    #  x, y, z  - dimension to record as slice file
     q = "QUANTITY='%s'" % node.attrib['q']
     v = ""
-    if 'v' in node.attrib:
-        if node.attrib['v'] == '1': v = "VECTOR=.TRUE."
-    if 'x' in node.attrib:
-        pos = eval(node.attrib['x'], {}, vars)
-        write_to_fds("&SLCF PBX=%e, %s %s /\n" % (pos, q, v))
-    if 'y' in node.attrib:
-        pos = eval(node.attrib['y'], {}, vars)
-        write_to_fds("&SLCF PBY=%e, %s %s /\n" % (pos, q, v))
-    if 'z' in node.attrib:
-        pos = eval(node.attrib['z'], {}, vars)
-        write_to_fds("&SLCF PBZ=%e, %s %s /\n" % (pos, q, v))
+    if check_get_val(node, 'v', "") == '1':
+        v = "VECTOR=.TRUE."
+    if check_val(node, 'x'):
+        write_to_fds("&SLCF PBX=%e, %s %s /\n" % (get_val(node, 'x'), q, v))
+    if check_val(node, 'y'):
+        write_to_fds("&SLCF PBY=%e, %s %s /\n" % (get_val(node, 'y'), q, v))
+    if check_val(node, 'z'):
+        write_to_fds("&SLCF PBZ=%e, %s %s /\n" % (get_val(node, 'z'), q, v))
         # end slice
 
 
