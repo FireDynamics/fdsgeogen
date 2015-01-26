@@ -14,6 +14,7 @@ import numpy as np
 
 
 
+
 # ########################
 ##### FDS arguments #####
 #########################
@@ -804,22 +805,32 @@ def process_node(node):
 
 
 def fire(node):
+    # DESCRIPTION:
+    # ?
+    # INPUT (arguments of node):
+    #  cx
+    #  cy
+    #  lz
+    #  width
+    #  height
+    #  hrr
     if node.attrib['type'] == "burningbox":
-        cx = eval(node.attrib['cx'], {}, vars)
-        cy = eval(node.attrib['cy'], {}, vars)
-        lz = eval(node.attrib['lz'], {}, vars)
-        w2 = eval(node.attrib['width'], {}, vars) / 2.0
-        h = eval(node.attrib['height'], {}, vars)
+        cx = get_val(node, 'cx')
+        cy = get_val(node, 'cy')
+        lz = get_val(node, 'lz')
+        w2 = get_val(node, 'width') / 2.0
+        h = get_val(node, 'height')
         box_obst = "&OBST "
         box_obst += "XB=%f, %f, %f, %f, %f, %f" % (cx - w2, cx + w2, cy - w2, cy + w2, lz, lz + h)
         box_obst += "/\n"
         write_to_fds(box_obst)
 
         write_to_fds("&REAC FUEL = 'METHANE' /\n")
-        hrrpua = eval(node.attrib['hrr'], {}, vars) / (2.0 * w2) ** 2
+        hrrpua = get_val(node, 'hrr') / (2.0 * w2) ** 2
         write_to_fds("&SURF ID='burningbox', HRRPUA=%f /\n" % hrrpua)
         write_to_fds("&VENT XB=%f,%f,%f,%f,%f,%f SURF_ID='burningbox' color='RED'/\n" % (
             cx - w2, cx + w2, cy - w2, cy + w2, lz + h, lz + h))
+        # end fire
 
 
 def slice(node):
