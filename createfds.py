@@ -8,16 +8,6 @@ import xml.etree.ElementTree as ET
 import numpy as np
 
 
-
-
-
-
-
-
-
-
-
-
 # ########################
 ##### FDS arguments #####
 #########################
@@ -104,9 +94,9 @@ def del_var(key):
 
 def var(node):
     # DESCRIPTION:
-    # adds new global variables either passed as node arguments or from file via add_var
+    #  adds new global variables either passed as node arguments or from file via add_var
     # INPUT (arguments of node):
-    # from_file        -
+    #  from_file        -
     global vars
     for key in node.attrib:
         if key != 'from_file':
@@ -188,7 +178,7 @@ def get_val(node, name, opt=False):
 def cond(node):
     # DESCRIPTION:
     # checks if the requirements passed as node arguments are fulfilled and exits the program with an error message
-    # to standard output otherwise   -
+    #  to standard output otherwise   -
     for att in node.attrib:
         if not get_val(node, att):
             print "!! condition was not met: ", node.attrib[att]
@@ -439,14 +429,14 @@ def loop(node):
             add_var(node.attrib['var'], loop_i.strip())
             traverse(node)
             del_var(node.attrib['var'])
-            # end loop
+    # end loop
 
 
 def slice(node):
     # DESCRIPTION:
-    # defines slice files and writes the SLCF statements via write_to_fds
+    #  defines slice files and writes the SLCF statements via write_to_fds
     # INPUT (arguments of node):
-    # q        - some quantity of the slice file?
+    #  q        - some quantity of the slice file?
     #  v        - some vector property?
     #  x, y, z  - dimension to record as slice file
     q = "QUANTITY='%s'" % node.attrib['q']
@@ -459,11 +449,12 @@ def slice(node):
         write_to_fds("&SLCF PBY=%e, %s %s /\n" % (get_val(node, 'y'), q, v))
     if check_val(node, 'z'):
         write_to_fds("&SLCF PBZ=%e, %s %s /\n" % (get_val(node, 'z'), q, v))
-        # end slice
+    # end slice
+
 
 def ramp(node):
     # DESCRIPTION:
-    # writes a RAMP statement with the given parameters via write_to_fds
+    #  writes a RAMP statement with the given parameters via write_to_fds
     # INPUT (arguments of node):
     #  id       - id to be asssigned to the ramp
     #  t        - ?
@@ -478,19 +469,19 @@ def ramp(node):
         f = eval(node.attrib['f'], {}, vars)
         ramp += "T=%f, F=%f /\n" % (t, f)
         write_to_fds(ramp)
-        # end ramp
+    # end ramp
 
 
 def radi(node):
     # DESCRIPTION:
-    # writes a RADI statement with the given radiative fraction via write_to_fds
+    #  writes a RADI statement with the given radiative fraction via write_to_fds
     # INPUT (arguments of node):
     #  radiative_fraction   - ?
     if 'radiative_fraction' in node.attrib:
         rf = eval(node.attrib['radiative_fraction'], {}, vars)
         radi = "&RADI RADIATIVE_FRACTION = %f /\n" % rf
         write_to_fds(radi)
-        # end radi
+    # end radi
 
 
 #############################
@@ -498,7 +489,7 @@ def radi(node):
 #############################
 def fire(node):
     # DESCRIPTION:
-    # defines a box and writes the OBST statement via write_to_fds
+    #  defines a box and writes the OBST statement via write_to_fds
     #  defines a fire fueled by methane on the box and writes the REAC, SURF and VENT statements via write_to_fds
     # INPUT (arguments of node):
     #  type     - must be "burningbox" in order for the mothod to have an effect
@@ -525,7 +516,8 @@ def fire(node):
         write_to_fds("&SURF ID='burningbox', HRRPUA=%f /\n" % hrrpua)
         write_to_fds("&VENT XB=%f,%f,%f,%f,%f,%f SURF_ID='burningbox' color='RED'/\n" % (
             cx - w2, cx + w2, cy - w2, cy + w2, lz + h, lz + h))
-        # end fire
+    # end fire
+
 
 def bounded_room(node):
     # DESCRIPTION:
@@ -635,7 +627,7 @@ def bounded_room(node):
         write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='%s', TRANSPARENCY=%f /\n" % (
             x1 - wt * bx1, x2 + wt * bx2, y1 - wt * by1, y2 + wt * by2, z2, z2 + wt * bz2, wall_color,
             wall_transparancy))
-        # end bounded_room
+    # end bounded_room
 
 
 def my_room(node):
@@ -734,9 +726,9 @@ def evac_mesh(node):
 
 def input(node):  # TODO Verstehen?
     # DESCRIPTION:
-    # ?
+    #  ?
     # INPUT (arguments of node):
-    # text, str      - text to write to the FDS file
+    #  text, str    - text to write to the FDS file
     #  from_file
     #  incl
     #  excl
@@ -790,12 +782,12 @@ def input(node):  # TODO Verstehen?
                 print "  - ignoring key ", fds_key
 
         write_to_fds("== end of insertion == \n\n")
-        # end input
+    # end input
 
 
 def process_node(node):
     # DESCRIPTION:
-    # very important stuff that I still don't really understand
+    #  very important stuff that I still don't really understand
     # INPUT (arguments of node):
     #  id
     #  comment
@@ -914,7 +906,7 @@ def device(node):
         return True
     return False
 
-def para(node):
+def para(node):  # TODO unused method, no functionality?
     pass
 
 # #####################
