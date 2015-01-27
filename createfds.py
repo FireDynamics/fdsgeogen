@@ -8,6 +8,7 @@ import xml.etree.ElementTree as ET
 import numpy as np
 
 
+
 # ########################
 ##### FDS arguments #####
 #########################
@@ -177,7 +178,7 @@ def get_val(node, name, opt=False):
 
 def cond(node):
     # DESCRIPTION:
-    # checks if the requirements passed as node arguments are fulfilled and exits the program with an error message
+    #  checks if the requirements passed as node arguments are fulfilled and exits the program with an error message
     #  to standard output otherwise   -
     for att in node.attrib:
         if not get_val(node, att):
@@ -359,9 +360,9 @@ def hole(node):
 
 def boundary(node):
     # DESCRIPTION:
-    # defines open surfaces and writes the VENT statements via write_to_fds
+    #  defines open surfaces and writes the VENT statements via write_to_fds
     # INPUT (arguments of node):
-    # x, y, z          - surfaces in the corresponding direction ? (optional)
+    #  x, y, z          - surfaces in the corresponding direction ? (optional)
     #  zmin, zmax       - allows choosing only one of the surfaces of z ? (optional)
     if check_get_val(node, "x", "") == "open":
         write_to_fds("&VENT MB='XMIN' ,SURF_ID='OPEN' /\n")
@@ -384,9 +385,9 @@ def boundary(node):
 
 def init(node):
     # DESCRIPTION:
-    # initializes temperature in a defined area and writes the INIT statement via write_to_fds
+    #  initializes temperature in a defined area and writes the INIT statement via write_to_fds
     # INPUT (arguments of node):
-    # temperature      - temperature in the defined area
+    #  temperature      - temperature in the defined area
     #  x1, y1, z1       - coordinates of one corner of the defined area
     #  x2, y2, z2       - coordinates of the opposing corner of the defined area
     #  comment          - comment to be written after the INIT statement
@@ -407,7 +408,7 @@ def init(node):
 
 def loop(node):
     # DESCRIPTION:
-    # loops over the values passed and does something via traverse
+    #  loops over the values passed and does something via traverse
     # INPUT (arguments of node):
     #  start    - start value of the loop
     #  stop     - end value of the loop
@@ -450,7 +451,6 @@ def slice(node):
     if check_val(node, 'z'):
         write_to_fds("&SLCF PBZ=%e, %s %s /\n" % (get_val(node, 'z'), q, v))
     # end slice
-
 
 def ramp(node):
     # DESCRIPTION:
@@ -517,7 +517,6 @@ def fire(node):
         write_to_fds("&VENT XB=%f,%f,%f,%f,%f,%f SURF_ID='burningbox' color='RED'/\n" % (
             cx - w2, cx + w2, cy - w2, cy + w2, lz + h, lz + h))
     # end fire
-
 
 def bounded_room(node):
     # DESCRIPTION:
