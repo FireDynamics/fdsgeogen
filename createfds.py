@@ -8,6 +8,7 @@ import xml.etree.ElementTree as ET
 import numpy as np
 
 
+
 # ########################
 ##### FDS arguments #####
 #########################
@@ -64,9 +65,7 @@ def div235(n):
         if r == 1: break
         r_init += 1
     return r_init
-
-
-# end div235
+    # end div235
 
 
 ###############################
@@ -81,9 +80,7 @@ def add_var(key, value):
     #  value    - value assigned to the new variable (required)
     global vars
     vars[key] = value
-
-
-# end add_var
+    # end add_var
 
 
 def del_var(key):
@@ -93,8 +90,6 @@ def del_var(key):
     #  key      - name of the variable to delete (required)
     global vars
     del vars[key]
-
-
 # end del_var
 
 
@@ -120,9 +115,7 @@ def var(node):
             print "  found variable name:  ", key
             print "  found variable value: ", val
             add_var(key, val)
-
-
-# end var
+            # end var
 
 
 ###########################
@@ -141,9 +134,7 @@ def check_get_val(node, name, default):
         return get_val(node, name)
     else:
         return default
-
-
-# end check_get_val
+        # end check_get_val
 
 
 def check_val(node, lst, opt=True):
@@ -154,6 +145,7 @@ def check_val(node, lst, opt=True):
     #  node     - current node (required)
     #  lst      - list of attributes to search for (required)
     #  opt      - determines if the program should be exited if an attribute cannot be found (default: True)
+
     if type(lst) is not list:
         lst = [lst]
     for item in lst:
@@ -163,9 +155,7 @@ def check_val(node, lst, opt=True):
                 sys.exit()
             return False
     return True
-
-
-# end check_val
+    # end check_val
 
 
 def get_val(node, name, opt=False):
@@ -184,9 +174,7 @@ def get_val(node, name, opt=False):
     else:
         print "error reading attribute %s from node %s" % (name, node)
         sys.exit()
-
-
-# end get_val
+        # end get_val
 
 
 def cond(node):
@@ -197,9 +185,7 @@ def cond(node):
         if not get_val(node, att):
             print "!! condition was not met: ", node.attrib[att]
             sys.exit()
-
-
-# end cond
+            # end cond
 
 
 ###############################
@@ -214,9 +200,7 @@ def open_fds_file():
         close_fds_file()
     vars['fds_file'] = open(vars['outfile'], 'w')
     write_to_fds("&HEAD CHID='%s', TITLE='%s' /\n" % (vars['chid'], vars['title']))
-
-
-# end open_fds_file
+    # end open_fds_file
 
 
 def write_to_fds(text):
@@ -228,9 +212,7 @@ def write_to_fds(text):
     if type(vars['fds_file']) != file:
         open_fds_file()
     vars['fds_file'].write(text)
-
-
-# end write_to_fds
+    # end write_to_fds
 
 
 def close_fds_file():
@@ -238,9 +220,7 @@ def close_fds_file():
     #  writes a TAIL statement via write_to_fds and closes the FDS file
     write_to_fds("&TAIL/\n")
     vars['fds_file'].close()
-
-
-# end close_fds
+    # end close_fds
 
 
 ###############################
@@ -262,9 +242,7 @@ def info(node):
         print "title   : %s" % vars['title']
         print "outfile : %s" % vars['outfile']
         open_fds_file()
-
-
-# end info
+        # end info
 
 
 def dump(node):
@@ -282,9 +260,7 @@ def dump(node):
         for line in f:
             write_to_fds("%s\n" % line.rstrip('\n'))
         f.close()
-
-
-# end dump
+        # end dump
 
 
 def mesh(node):
@@ -338,9 +314,7 @@ def mesh(node):
                 write_to_fds("&MESH IJK=%d,%d,%d, XB=%f,%f,%f,%f,%f,%f /\n" % (
                     lnx, lny, lnz,
                     xmin, xmax, ymin, ymax, zmin, zmax))
-
-
-# end mesh
+                # end mesh
 
 
 def obst(node):
@@ -366,9 +340,7 @@ def obst(node):
     comment = ""
     check_get_val(node, 'comment', "")
     write_to_fds("&OBST %s / %s\n" % (line, comment))
-
-
-# end obst
+    # end obst
 
 
 def hole(node):
@@ -384,9 +356,7 @@ def hole(node):
                                                      get_val(node, "y2"),
                                                      get_val(node, "z1"),
                                                      get_val(node, "z2")))
-
-
-# end hole
+    # end hole
 
 
 def boundary(node):
@@ -411,9 +381,7 @@ def boundary(node):
         write_to_fds("&VENT MB='ZMIN' ,SURF_ID='OPEN' /\n")
     if check_get_val(node, "zmax", "") == "open":
         write_to_fds("&VENT MB='ZMAX' ,SURF_ID='OPEN' /\n")
-
-
-# end boundary
+        # end boundary
 
 
 def init(node):
@@ -436,9 +404,7 @@ def init(node):
         comment = node.attrib["comment"]
 
     write_to_fds("&INIT %s / %s \n" % (line, comment))
-
-
-# end init
+    # end init
 
 
 def loop(node):
@@ -465,9 +431,7 @@ def loop(node):
             add_var(node.attrib['var'], loop_i.strip())
             traverse(node)
             del_var(node.attrib['var'])
-
-
-# end loop
+            # end loop
 
 
 def slice(node):
@@ -487,9 +451,7 @@ def slice(node):
         write_to_fds("&SLCF PBY=%e, %s %s /\n" % (get_val(node, 'y'), q, v))
     if check_val(node, 'z'):
         write_to_fds("&SLCF PBZ=%e, %s %s /\n" % (get_val(node, 'z'), q, v))
-
-
-# end slice
+        # end slice
 
 def ramp(node):
     # DESCRIPTION:
@@ -508,9 +470,7 @@ def ramp(node):
         f = eval(node.attrib['f'], {}, vars)
         ramp += "T=%f, F=%f /\n" % (t, f)
         write_to_fds(ramp)
-
-
-# end ramp
+        # end ramp
 
 
 def radi(node):
@@ -522,14 +482,13 @@ def radi(node):
         rf = eval(node.attrib['radiative_fraction'], {}, vars)
         radi = "&RADI RADIATIVE_FRACTION = %f /\n" % rf
         write_to_fds(radi)
-
-
 # end radi
 
 
 #############################
 ##### COMBINED COMMANDS #####
 #############################
+
 def fire(node):
     # DESCRIPTION:
     #  defines a box and writes the OBST statement via write_to_fds
@@ -559,9 +518,7 @@ def fire(node):
         write_to_fds("&SURF ID='burningbox', HRRPUA=%f /\n" % hrrpua)
         write_to_fds("&VENT XB=%f,%f,%f,%f,%f,%f SURF_ID='burningbox' color='RED'/\n" % (
             cx - w2, cx + w2, cy - w2, cy + w2, lz + h, lz + h))
-
-
-# end fire
+        # end fire
 
 def bounded_room(node):
     # DESCRIPTION:
@@ -671,9 +628,7 @@ def bounded_room(node):
         write_to_fds("&OBST XB=%f,%f,%f,%f,%f,%f, COLOR='%s', TRANSPARENCY=%f /\n" % (
             x1 - wt * bx1, x2 + wt * bx2, y1 - wt * by1, y2 + wt * by2, z2, z2 + wt * bz2, wall_color,
             wall_transparancy))
-
-
-# end bounded_room
+        # end bounded_room
 
 
 def my_room(node):
@@ -745,14 +700,12 @@ def my_room(node):
     add_var("nx", nx)
     add_var("ny", ny)
     add_var("nz", nz)
-
-
-# end my_room
-
+    # end my_room
 
 ############
 # UNSORTED #
 ############
+
 def evac_mesh(node):
     xmin = get_val(node, "xmin", opt=True)
     xmax = get_val(node, "xmax", opt=True)
@@ -830,9 +783,7 @@ def input(node):  # TODO Verstehen?
                 print "  - ignoring key ", fds_key
 
         write_to_fds("== end of insertion == \n\n")
-
-
-# end input
+        # end input
 
 
 def process_node(node):
@@ -895,16 +846,21 @@ def process_node(node):
         comment = node.attrib['comment']
 
     write_to_fds("&%s %s/ %s\n" % (global_keys[node.tag], line, comment))
-
-
-# end process_node
+    # end process_node
 
 def paradim(node, dirlist):
+    # DESCRIPTION:
+    # probably important stuff that I still don't really understand
+    # INPUT (arguments of node):
+    #  var      - ?
+    #  list     - list of parameters
+    #  file     - file with a list of comma-separated parameters, passing a file deletes the parameters of list!
+    #  col      - number of columns in file
     check_val(node, ["var"], opt=False)
 
     if check_val(node, ["list"]):
         #paralist = ast.literal_eval(node.attrib['list'])
-        paralist = eval(node.attrib['list'])
+        paralist = get_val(node, 'list')
 
     if check_val(node, ["file"]):
         col = 0
@@ -920,18 +876,24 @@ def paradim(node, dirlist):
         sys.exit()
     for ip in range(nump):
         dirlist[ip][node.attrib['var']] = paralist[ip]
-
+        # end paradim
 
 def traverse(root):
+    # DESCRIPTION:
+    #  traverses through the tree and processes the child nodes od root
     for node in root:
         if node.tag in global_keys:
             process_node(node)
         else:
             globals()[node.tag](node)
+            # end traverse
 
 
-def dbg(node):
+def dbg(node):  # TODO unused?
+    # DESCRIPTION:
+    #  writes the value of the node argument print to standard output
     print get_val(node, "print")
+    # end dbg
 
 
 def device(node):
@@ -961,7 +923,7 @@ def device(node):
 def para(node):  # TODO unused method, no functionality?
     pass
 
-# #####################
+######################
 ##### MAIN LOOP ######
 ######################
 
