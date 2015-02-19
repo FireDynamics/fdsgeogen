@@ -9,6 +9,7 @@ import numpy as np
 
 
 
+
 # ########################
 ##### FDS arguments #####
 #########################
@@ -310,19 +311,20 @@ def obst(node):
     # INPUT (arguments of node):
     #  x1, y1, z1       - coordinates of one corner of the obstacle (required)
     # x2, y2, z2       - coordinates of the opposing corner of the obstacle (required)
-    #  color            - color of the obstacle
+    #  color            - color of the obstacle (default: white)
+    #  transparency     - transparency of the obstacle (default: 1.0)
     #  surf_id          - surface of the obstacle
     #  comment          - comment to be written after the OBST statement
-    line = "XB=%f,%f,%f,%f,%f,%f" % (get_val(node, "x1"),
-                                     get_val(node, "x2"),
-                                     get_val(node, "y1"),
-                                     get_val(node, "y2"),
-                                     get_val(node, "z1"),
-                                     get_val(node, "z2"))
-    if check_val(node, 'color'):
-        line += " COLOR='%s'" % get_val(node, "color")
+    line = "XB=%f,%f,%f,%f,%f,%f, COLOR=%s, TRANSPARENCY=%f" % (get_val(node, "x1"),
+                                                                get_val(node, "x2"),
+                                                                get_val(node, "y1"),
+                                                                get_val(node, "y2"),
+                                                                get_val(node, "z1"),
+                                                                get_val(node, "z2"),
+                                                                check_get_val(node, "color", "WHITE"),
+                                                                check_get_val(node, "transparency", 1.))
     if check_val(node, 'surf_id'):
-        line += " SURF_ID='%s'" % get_val(node, "surf_id")
+        line += ", SURF_ID='%s'" % get_val(node, "surf_id")
     comment = check_get_val(node, 'comment', "")
     write_to_fds("&OBST %s / %s\n" % (line, comment))
 
@@ -497,8 +499,8 @@ def bounded_room(node):
     #  wt                               - reference value for wall thickness (default: 0.0)
     #  ax, ay, az                       - number of meshes in the x, y or z direction (default: 1)
     #  delta                            - cell width of the mesh? (optional)
-    #  wall_color                       - color of room walls (optional)
-    #  wall_transparency                - transparency of walls (optional)
+    # wall_color                       - color of room walls (default: firebrick)
+    #  wall_transparency                - transparency of walls (default: 0.5)
 
     # get input values from node (if possible)
     x1 = get_val(node, "x1", opt=True)
@@ -664,7 +666,7 @@ def my_room(node):
 
 
 ############
-# UNSORTED # #TODO
+# UNSORTED #     #TODO
 # ###########
 
 def evac_mesh(node):
@@ -753,11 +755,8 @@ def process_node(node):
     #  comment
     global vars
     line = ''
-    if check_val(node, 'id', opt=True):
-        line += "ID='%s'" % get_val(node, 'id')
-    else:
-        line += "ID='none'"
 
+    line += "ID='%s'" % check_get_val(node, 'id', 'none')
     args = global_args[node.tag]
     for arg in args:
         if check_val(node, arg):
@@ -836,7 +835,7 @@ def paradim(node, dirlist):
 
 def traverse(root):
     # DESCRIPTION:
-    #  traverses through the tree and processes the child nodes od root
+    # traverses through the tree and processes the child nodes of root
     for node in root:
         if node.tag in global_keys:
             process_node(node)
