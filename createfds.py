@@ -8,6 +8,7 @@ import xml.etree.ElementTree as ET
 import numpy as np
 
 
+
 # ########################
 ##### FDS arguments #####
 #########################
@@ -872,6 +873,11 @@ def device(node):
         write_to_fds("&DEVC ID='%s', XYZ=%f,%f,%f, QUANTITY='%s', %s/\n" % (id, x, y, z, q, ior_s))
         return True
     return False
+
+
+def section(node):
+    traverse(node)
+
 
 def para(node):  # TODO unused method, no functionality?
     pass
