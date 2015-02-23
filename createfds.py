@@ -11,6 +11,7 @@ import numpy as np
 
 
 
+
 # ########################
 ##### FDS arguments #####
 #########################
@@ -23,7 +24,7 @@ global_args['matl'] = ['specific_heat', 'conductivity', 'density', 'heat_of_comb
 global_args['surf'] = ['rgb', 'color', 'vel', 'hrrpua', 'heat_of_vaporization',
                        'ignition_temperature', 'burn_away', 'matl_id', 'matl_mass_fraction',
                        'thickness', 'external_flux', 'backing', 'hrrupa', 'stretch_factor', 'cell_size_factor']
-global_args['obst'] = ['x1', 'x2', 'y1', 'y2', 'z1', 'z2', 'xb', 'surf_ids', 'surf_id', 'color', 'bulk_density']
+global_args['obst'] = ['xb', 'surf_ids', 'surf_id', 'color', 'bulk_density']
 global_args['hole'] = ['xb', 'color']
 global_args['vent'] = ['xb', 'surf_id', 'color', 'dynamic_pressure', 'tmp_exterior', 'mb', 'transparency']
 global_args['slcf'] = ['pbx', 'pby', 'pbz', 'quantity', 'vector', 'evacuation']
@@ -201,20 +202,20 @@ def close_fds_file():
     vars['fds_file'].close()
 
 
+###############################
+##### FDS CODE GENERATION #####
+###############################
+
 def write_to_fds(text):
     # DESCRIPTION:
     # checks if the FDS file specified by the fds_file variable exists, opens a new one
-    #  via open_fds_file if necessary and writes a given text into the FDS file
+    # via open_fds_file if necessary and writes a given text into the FDS file
     # INPUT:
     #  text     - text to write into the FDS file
     if type(vars['fds_file']) != file:
         open_fds_file()
     vars['fds_file'].write(text)
 
-
-###############################
-##### FDS CODE GENERATION #####
-###############################
 
 def dump(node):
     # DESCRIPTION:
@@ -231,6 +232,68 @@ def dump(node):
         for line in f:
             write_to_fds("%s\n" % line.rstrip('\n'))
         f.close()
+
+
+def input(node):
+    # DESCRIPTION:
+    # writes FDS given as a string or file via write_to_fds
+    #  excluding and including FDS keywords at the same time is not supported and will cause the program to exit with
+    #  an error message to standard output
+    # INPUT (arguments of node):
+    #  text, str    - FDS command to write to the FDS file, will be preceded by a '&'
+    #  from_file    - file that includes FDS commands to be inserted into the FDS file
+    #  incl         - list of FDS keywords to exclude
+    #  excl         - list of FDS keywords to include
+    # given as a string
+    if check_val(node, 'text'):
+        write_to_fds("&%s /\n" % (node.attrib["text"]))
+    if check_val(node, 'str'):
+        write_to_fds("&%s /\n" % (get_val(node, "str")))
+    # given as a file
+    #  check for included and excluded keywords
+    if check_val(node, "from_file"):
+        excl = []
+        excl_tmp = check_get_val(node, 'excl', None)
+        if excl_tmp:
+            if type(excl_tmp) == type('str'):
+                excl.append(excl_tmp)
+            else:
+                for e in excl_tmp: excl.append(e)
+        incl = []
+        incl_tmp = check_get_val(node, 'incl', None)
+        if incl_tmp:
+            if type(incl_tmp) == type('str'):
+                incl.append(incl_tmp)
+            else:
+                for e in incl_tmp: incl.append(e)
+        # capitalize keywords
+        if incl != []: incl = [e.upper() for e in incl]
+        if excl != []: excl = [e.upper() for e in excl]
+        # ensure that keywords are not included and excluded at the same time
+        if incl != [] and excl != []:
+            print "!! exclusion and inclusion of FDS key words at the same time is not possible "
+            sys.exit()
+        # open and read input file
+        in_file_name = get_val(node, "from_file")
+        in_file = open(in_file_name, 'r')
+        in_file_raw = in_file.read()
+        in_file.close()
+        # look for lines starting with '&' which marks FDS commands
+        in_file_contents = re.findall('&.*?/', in_file_raw.replace('\n', ' '))
+        # insert the found commands into the FDS file
+        write_to_fds("\n == insertion from file: %s == \n" % in_file_name)
+        for line in in_file_contents:
+            # looking for the FDS keyword in each line
+            m = re.search('\A\s*&\D{4}', line)
+            fds_key = m.group(0).strip().strip('&').upper()
+            print " -- found FDS key: ", fds_key
+            # write the command into the FDS file if it is included or not excluded else ignore it
+            if (incl != [] and fds_key in incl) or (incl == [] and not fds_key in excl):
+                write_to_fds("%s\n" % line)
+            else:
+                print "  - ignoring key ", fds_key
+        write_to_fds("== end of insertion == \n\n")
+
 
 def loop(node):
     # DESCRIPTION:
@@ -266,7 +329,6 @@ def mesh(node):
     #  xmin, ymin, zmin     - starting coordinates of the mesh (?)
     #  xmax, ymax, zmax     - end coordinates of the mesh (?)
     # calculating the number of meshes
-    nmeshes = 1
     px = 1
     py = 1
     pz = 1
@@ -274,7 +336,6 @@ def mesh(node):
         px = get_val(node, "px", opt=True)
         py = get_val(node, "py", opt=True)
         pz = get_val(node, "pz", opt=True)
-    nmeshes = px * py * pz
     # calculating the number of cells
     gnx = get_val(node, "nx", opt=True)
     gny = get_val(node, "ny", opt=True)
@@ -306,7 +367,7 @@ def mesh(node):
                     xmin, xmax, ymin, ymax, zmin, zmax))
 
 
-def obst(node):
+def obstacle(node):
     # DESCRIPTION:
     #  defines an rectangular obstacle and writes the OBST statement via write_to_fds
     # INPUT (arguments of node):
@@ -393,7 +454,7 @@ def ramp(node):
     # DESCRIPTION:
     #  writes a RAMP statement with the given parameters via write_to_fds
     # INPUT (arguments of node):
-    #  id       - id to be asssigned to the ramp
+    # id       - id to be assigned to the ramp
     #  t        - ?
     #  f        - ?
     if 'id' in node.attrib:
@@ -686,64 +747,6 @@ def evac_mesh(node):
             nx, ny, 1, xmin, xmax, ymin, ymax, evac_zmin, evac_zmax))
 
 
-def input(node):
-    # DESCRIPTION:
-    #  ?
-    # INPUT (arguments of node):
-    #  text, str    - text to write to the FDS file
-    #  from_file
-    #  incl
-    #  excl
-    if check_val(node, 'text'):
-        write_to_fds("&%s /\n" % (node.attrib["text"]))
-    if check_val(node, 'str'):
-        write_to_fds("&%s /\n" % (get_val(node, "str")))
-
-    if check_val(node, "from_file"):
-        excl = []
-        excl_tmp = check_get_val(node, 'excl', None)
-        if excl_tmp:
-            if type(excl_tmp) == type('str'):
-                excl.append(excl_tmp)
-            else:
-                for e in excl_tmp: excl.append(e)
-        incl = []
-        incl_tmp = check_get_val(node, 'incl', None)
-        if incl_tmp:
-            if type(incl_tmp) == type('str'):
-                incl.append(incl_tmp)
-            else:
-                for e in incl_tmp: incl.append(e)
-
-        if incl != []: incl = [e.upper() for e in incl]
-        if excl != []: excl = [e.upper() for e in excl]
-        if incl != [] and excl != []:
-            print "!! exclusion and inclusion of FDS key words at the same time is not possible "
-            sys.exit()
-
-        in_file_name = get_val(node, "from_file")
-        in_file = open(in_file_name, 'r')
-        in_file_raw = in_file.read()
-        in_file.close()
-
-        in_file_contents = re.findall('&.*?/', in_file_raw.replace('\n', ' '))
-
-        write_to_fds("\n == insertion from file: %s == \n" % in_file_name)
-        for line in in_file_contents:
-
-            # looking for FDS keyword
-            m = re.search('\A\s*&\D{4}', line)
-            fds_key = m.group(0).strip().strip('&').upper()
-
-            print " -- found FDS key: ", fds_key
-
-            if (incl != [] and fds_key in incl) or (incl == [] and not fds_key in excl):
-                write_to_fds("%s\n" % line)
-            else:
-                print "  - ignoring key ", fds_key
-
-        write_to_fds("== end of insertion == \n\n")
-
 
 def process_node(node):
     # DESCRIPTION:
@@ -805,20 +808,15 @@ def paradim(node, dirlist):
     # DESCRIPTION:
     # probably important stuff that I still don't really understand
     # INPUT (arguments of node):
-    #  var      - ?
+    # var      - ? (required)
     #  list     - list of parameters
     #  file     - file with a list of comma-separated parameters, passing a file deletes the parameters of list!
     #  col      - number of columns in file
     check_val(node, ["var"], opt=False)
-
-    if check_val(node, ["list"]):
-        #paralist = ast.literal_eval(node.attrib['list'])
-        paralist = get_val(node, 'list')
+    paralist = check_get_val(node, 'list', [])
 
     if check_val(node, ["file"]):
-        col = 0
-        if check_val(node, ["col"]):
-            col = int(get_val(node, "col"))
+        col = int(check_get_val(node, "col", 0))
         paralist = np.loadtxt(node.attrib["file"], usecols=(col,), delimiter=',')
 
     nump = len(paralist)
@@ -876,7 +874,7 @@ def section(node):
     traverse(node)
 
 
-def para(node):  # TODO unused method, no functionality?
+def para(node):
     pass
 
 ######################
