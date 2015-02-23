@@ -10,6 +10,7 @@ import numpy as np
 
 
 
+
 # ########################
 ##### FDS arguments #####
 #########################
@@ -75,7 +76,7 @@ def add_var(key, value):
     # DESCRIPTION:
     #  adds a new variable
     # INPUT:
-    # key          - name of the new variable (required)
+    #  key          - name of the new variable (required)
     #  value        - value assigned to the new variable (required)
     global vars
     vars[key] = value
@@ -94,7 +95,7 @@ def var(node):
     # DESCRIPTION:
     #  adds new global variables either passed as node arguments or from file via add_var
     # INPUT (arguments of node):
-    # from_file    - file that contains variable keys and values
+    #  from_file    - file that contains variable keys and values
     global vars
     for key in node.attrib:
         if key != 'from_file':
@@ -172,10 +173,10 @@ def get_val(node, name, opt=False):
 def cond(node):
     # DESCRIPTION:
     #  checks if the requirements passed as node arguments are fulfilled and exits the program with an error message
-    # to standard output otherwise
+    #  to standard output otherwise
     for att in node.attrib:
         if not get_val(node, att):
-            print "!! condition was not met: ", node.attrib[att]
+            print "condition was not met: ", node.attrib[att]
             sys.exit()
 
 
@@ -193,23 +194,22 @@ def open_fds_file():
     write_to_fds("&HEAD CHID='%s', TITLE='%s' /\n" % (vars['chid'], vars['title']))
 
 
+def close_fds_file():
+    # DESCRIPTION:
+    #  writes a TAIL statement via write_to_fds and closes the FDS file
+    write_to_fds("&TAIL/\n")
+    vars['fds_file'].close()
+
+
 def write_to_fds(text):
     # DESCRIPTION:
-    #  checks if the FDS file specified by the fds_file variable exists, opens a new one
+    # checks if the FDS file specified by the fds_file variable exists, opens a new one
     #  via open_fds_file if necessary and writes a given text into the FDS file
     # INPUT:
     #  text     - text to write into the FDS file
     if type(vars['fds_file']) != file:
         open_fds_file()
     vars['fds_file'].write(text)
-    # end write_to_fds
-
-
-def close_fds_file():
-    # DESCRIPTION:
-    #  writes a TAIL statement via write_to_fds and closes the FDS file
-    write_to_fds("&TAIL/\n")
-    vars['fds_file'].close()
 
 
 ###############################
@@ -221,7 +221,7 @@ def dump(node):
     # writes a given string or the content of a given file via write_to_fds
     # INPUT (arguments of node):
     # text, str     - text to be written to the FDS file
-    # file          - file whose content is to be written to the FDS File
+    #  file          - file whose content is to be written to the FDS File
     if check_val(node, 'text'):
         write_to_fds("%s\n" % (node.attrib["text"]))
     if check_val(node, 'str'):
@@ -234,12 +234,12 @@ def dump(node):
 
 def loop(node):
     # DESCRIPTION:
-    # loops over the values passed and does something via traverse
+    # loops via traverse over the values passed by a given start and stop value and/or a list of values
     # INPUT (arguments of node):
     #  var      - ?
-    #  start    - start value of the loop
-    #  stop     - end value of the loop
-    #  list     - list to loop over
+    # start    - start value of the loop, interpreted as an integer
+    #  stop     - end value of the loop, interpreted as an integer
+    #  list     - comma-separated list to loop over
     # integer iteration from start to stop
     if 'start' in node.attrib and 'stop' in node.attrib:
         start = int(get_val(node, 'start'))
@@ -248,7 +248,7 @@ def loop(node):
             add_var(node.attrib['var'], loop_i)
             traverse(node)
             del_var(node.attrib['var'])
-
+    # iteration over a list
     if 'list' in node.attrib:
         llist = node.attrib['list'].split(',')
         for loop_i in llist:
@@ -261,10 +261,11 @@ def mesh(node):
     # DESCRIPTION:
     # creates a mesh with the given parameters and writes the MESH statement via write_to_fds
     # INPUT (arguments of node):
-    # px, py, pz               - number of meshes in x,y or z direction (?) (default: 1)
-    #  gnx, gny, gnz            - number of cells in x, y and z direction (?)
-    #  gxmin, gymin, gzmin      - starting point of the mesh (?)
-    #  gxmax, gymax, gzmax      - end point of the mesh (?)
+    #  px, py, pz           - number of meshes in x,y or z direction (?) (default: 1)
+    # nx, ny, nz           - number of cells in x, y and z direction (?)
+    #  xmin, ymin, zmin     - starting coordinates of the mesh (?)
+    #  xmax, ymax, zmax     - end coordinates of the mesh (?)
+    # calculating the number of meshes
     nmeshes = 1
     px = 1
     py = 1
@@ -273,8 +274,8 @@ def mesh(node):
         px = get_val(node, "px", opt=True)
         py = get_val(node, "py", opt=True)
         pz = get_val(node, "pz", opt=True)
-    nmeshes = px * py * pz  # NOT USED
-
+    nmeshes = px * py * pz
+    # calculating the number of cells
     gnx = get_val(node, "nx", opt=True)
     gny = get_val(node, "ny", opt=True)
     gnz = get_val(node, "nz", opt=True)
@@ -290,7 +291,7 @@ def mesh(node):
     dx = (gxmax - gxmin) / px
     dy = (gymax - gymin) / py
     dz = (gzmax - gzmin) / pz
-
+    # writing the MESH statements
     for ix in range(px):
         for iy in range(py):
             for iz in range(pz):
@@ -310,13 +311,13 @@ def obst(node):
     #  defines an rectangular obstacle and writes the OBST statement via write_to_fds
     # INPUT (arguments of node):
     #  x1, y1, z1       - coordinates of one corner of the obstacle (required)
-    # x2, y2, z2       - coordinates of the opposing corner of the obstacle (required)
-    #  color            - color of the obstacle (default: white)
+    #  x2, y2, z2       - coordinates of the opposing corner of the obstacle (required)
+    # color            - color of the obstacle (default: "WHITE")
     #  transparency     - transparency of the obstacle (default: 1.0)
     #  surf_id          - surface of the obstacle
     #  comment          - comment to be written after the OBST statement
-    line = "XB=%f,%f,%f,%f,%f,%f, COLOR=%s, TRANSPARENCY=%f" % (get_val(node, "x1"),
-                                                                get_val(node, "x2"),
+    line = "XB=%f,%f,%f,%f,%f,%f, COLOR='%s', TRANSPARENCY=%f" % (get_val(node, "x1"),
+                                                                  get_val(node, "x2"),
                                                                 get_val(node, "y1"),
                                                                 get_val(node, "y2"),
                                                                 get_val(node, "z1"),
@@ -334,7 +335,7 @@ def hole(node):
     #  defines an rectangular hole in an obstacle and writes the HOLE statement via write_to_fds
     # INPUT (arguments of node):
     #  x1, y1, z1       - coordinates of one corner of the hole (required)
-    # x2, y2, z2       - coordinates of the opposing corner of the hole (required)
+    #  x2, y2, z2       - coordinates of the opposing corner of the hole (required)
     write_to_fds("&HOLE XB=%f,%f,%f,%f,%f,%f /\n" % (get_val(node, "x1"),
                                                      get_val(node, "x2"),
                                                      get_val(node, "y1"),
@@ -345,9 +346,9 @@ def hole(node):
 
 def boundary(node):
     # DESCRIPTION:
-    #  defines open surfaces and writes the VENT statements via write_to_fds
+    #  defines open surfaces as boundary conditions and writes the VENT statements via write_to_fds
     # INPUT (arguments of node):
-    #  x, y, z          - surfaces in the corresponding direction (?)
+    #  x, y, z          - boundary conditions for the corresponding direction (?)
     # zmin, zmax       - allows choosing only one of the surfaces of z (?)
     if check_get_val(node, "x", "") == "open":
         write_to_fds("&VENT MB='XMIN' ,SURF_ID='OPEN' /\n")
@@ -372,7 +373,7 @@ def init(node):
     #  initializes temperature in a defined area and writes the INIT statement via write_to_fds
     # INPUT (arguments of node):
     #  temperature      - temperature in the defined area (required)
-    # x1, y1, z1       - coordinates of one corner of the defined area (required)
+    #  x1, y1, z1       - coordinates of one corner of the defined area (required)
     #  x2, y2, z2       - coordinates of the opposing corner of the defined area (required)
     #  comment          - comment to be written after the INIT statement
     line = "TEMPERATURE=%f XB=%f,%f,%f,%f,%f,%f" % (get_val(node, "temperature"),
@@ -463,12 +464,12 @@ def fire(node):
     #  defines a box and writes the OBST statement via write_to_fds
     #  defines a fire fueled by methane on the box and writes the REAC, SURF and VENT statements via write_to_fds
     # INPUT (arguments of node):
-    #  type     - must be "burningbox" in order for the method to have an effect
-    # cx, cy   - x & y coordinates of the center of the box
-    #  lz       - z coordinate of the bottom of the box
-    #  width    - width of the box
-    #  height   - height of the box
-    #  hrr      - heat release rate (somehow related to the box surface?)
+    #  type     - must be "burningbox" in order for the method to have an effect (required)
+    # cx, cy   - x & y coordinates of the center of the box (required)
+    #  lz       - z coordinate of the bottom of the box (required)
+    #  width    - width of the box (required)
+    #  height   - height of the box (required)
+    #  hrr      - heat release rate, somehow related to the box surface? (required)
     if node.attrib['type'] == "burningbox":
         # define the box
         cx = get_val(node, 'cx')
@@ -493,22 +494,21 @@ def bounded_room(node):
     # DESCRIPTION:
     #  creates a simple rectangular room with walls and a fitting mesh created via mesh
     # INPUT (arguments of node):
-    #  x1, y1, z1                       - coordinates of one corner of the room (optional)
-    #  x2, y2, z2                       - coordinates of the opposing corner of the room (optional)
+    #  x1, y1, z1                       - coordinates of one corner of the room
+    # x2, y2, z2                       - coordinates of the opposing corner of the room
     #  bx1, bx2, by1, by2, bz1, bz2     - wall thickness in relation to wt (default: 0)
     #  wt                               - reference value for wall thickness (default: 0.0)
     #  ax, ay, az                       - number of meshes in the x, y or z direction (default: 1)
-    #  delta                            - cell width of the mesh? (optional)
-    # wall_color                       - color of room walls (default: firebrick)
+    #  delta                            - cell width of the mesh
+    # wall_color                       - color of room walls (default: "FIREBRICK")
     #  wall_transparency                - transparency of walls (default: 0.5)
-
-    # get input values from node (if possible)
-    x1 = get_val(node, "x1", opt=True)
-    x2 = get_val(node, "x2", opt=True)
-    y1 = get_val(node, "y1", opt=True)
-    y2 = get_val(node, "y2", opt=True)
-    z1 = get_val(node, "z1", opt=True)
-    z2 = get_val(node, "z2", opt=True)
+    # get input values from node
+    x1 = get_val(node, "x1")
+    x2 = get_val(node, "x2")
+    y1 = get_val(node, "y1")
+    y2 = get_val(node, "y2")
+    z1 = get_val(node, "z1")
+    z2 = get_val(node, "z2")
 
     bx1 = check_get_val(node, "bx1", 0)
     bx2 = check_get_val(node, "bx2", 0)
@@ -516,7 +516,6 @@ def bounded_room(node):
     by2 = check_get_val(node, "by2", 0)
     bz1 = check_get_val(node, "bz1", 0)
     bz2 = check_get_val(node, "bz2", 0)
-
     wt = check_get_val(node, "wt", 0.0)
 
     ax = check_get_val(node, "ax", 1)
@@ -537,7 +536,6 @@ def bounded_room(node):
     nx = int(div235((dxmax - dxmin) / delta))
     ny = int(div235((dymax - dymin) / delta))
     nz = int(div235((dzmax - dzmin) / delta))
-
     if ax == 1:
         dxmax = dxmin + nx * delta
     else:
@@ -551,7 +549,7 @@ def bounded_room(node):
     else:
         dzmin = dzmax - nz * delta
 
-    # save the computed values as global variables (for further use, if necessary)
+    # save the computed values as global variables (for further usage)
     add_var("xmin", dxmin)
     add_var("xmax", dxmax)
     add_var("ymin", dymin)
@@ -599,18 +597,19 @@ def my_room(node):
     #  subset of bounded_room
     #  determines mesh parameters for simple rectangular room with walls but does neither create the mesh nor the walls
     # INPUT (arguments of node):
-    #  x1, y1, z1                       - coordinates of one corner of the room (optional)
-    #  x2, y2, z2                       - coordinates of the opposing corner of the room (optional)
+    #  x1, y1, z1                       - coordinates of one corner of the room
+    # x2, y2, z2                       - coordinates of the opposing corner of the room
     #  bx1, bx2, by1, by2, bz1, bz2     - wall thickness in relation to wt (default: 0)
     #  wt                               - reference value for wall thickness (default: 0.0)
     #  ax, ay, az                       - number of meshes in the x, y or z direction (default: 1)
-    #  delta                            - cell width of the mesh? (optional)
-    x1 = get_val(node, "x1", opt=True)
-    x2 = get_val(node, "x2", opt=True)
-    y1 = get_val(node, "y1", opt=True)
-    y2 = get_val(node, "y2", opt=True)
-    z1 = get_val(node, "z1", opt=True)
-    z2 = get_val(node, "z2", opt=True)
+    #  delta                            - cell width of the mesh
+    # get input values from node
+    x1 = get_val(node, "x1")
+    x2 = get_val(node, "x2")
+    y1 = get_val(node, "y1")
+    y2 = get_val(node, "y2")
+    z1 = get_val(node, "z1")
+    z2 = get_val(node, "z2")
 
     bx1 = check_get_val(node, "bx1", 0)
     bx2 = check_get_val(node, "bx2", 0)
@@ -627,6 +626,7 @@ def my_room(node):
 
     delta = get_val(node, "delta", opt=True)
 
+    # compute the minimum mesh size (room + walls)
     dxmin = x1 - bx1 * wt
     dxmax = x2 + bx2 * wt
     dymin = y1 - by1 * wt
@@ -634,32 +634,30 @@ def my_room(node):
     dzmin = z1 - bz1 * wt
     dzmax = z2 + bz2 * wt
 
+    # compute required number of mesh cells
     nx = int(div235((dxmax - dxmin) / delta))
     ny = int(div235((dymax - dymin) / delta))
     nz = int(div235((dzmax - dzmin) / delta))
-
     if ax == 1:
         dxmax = dxmin + nx * delta
     else:
         dxmin = dxmax - nx * delta
-
     if ay == 1:
         dymax = dymin + ny * delta
     else:
         dymin = dymax - ny * delta
-
     if az == 1:
         dzmax = dzmin + nz * delta
     else:
         dzmin = dzmax - nz * delta
 
+    # save the computed values as global variables (for further usage)
     add_var("xmin", dxmin)
     add_var("xmax", dxmax)
     add_var("ymin", dymin)
     add_var("ymax", dymax)
     add_var("zmin", dzmin)
     add_var("zmax", dzmax)
-
     add_var("nx", nx)
     add_var("ny", ny)
     add_var("nz", nz)
@@ -667,7 +665,7 @@ def my_room(node):
 
 ############
 # UNSORTED #     #TODO
-# ###########
+############
 
 def evac_mesh(node):
     xmin = get_val(node, "xmin", opt=True)
