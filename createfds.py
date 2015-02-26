@@ -10,6 +10,7 @@ import numpy as np
 
 
 
+
 # ########################
 ##### FDS arguments #####
 #########################
@@ -52,22 +53,6 @@ global_keys['evac'] = 'EVAC'
 
 # accepted deviation when dealing with float arithmetic
 epsilon = 0.0001
-
-
-def div235(n):
-    # DESCRIPTION:
-    #  increases a given integer value until its factors only consist of 2, 3 and 5
-    # INPUT:
-    #  n        - integer value to increase (required)
-    r_init = int(n)
-    while True:
-        r = r_init
-        while r % 2 == 0 and r != 0: r /= 2
-        while r % 3 == 0 and r != 0: r /= 3
-        while r % 5 == 0 and r != 0: r /= 5
-        if r == 1: break
-        r_init += 1
-    return r_init
 
 
 ###############################
@@ -180,6 +165,18 @@ def cond(node):
         if not get_val(node, att):
             print "condition was not met: ", node.attrib[att]
             sys.exit()
+
+
+def traverse(root):
+    # DESCRIPTION:
+    # traverses through the tree and processes the child nodes of root
+    # uses process_node if the tag is included in global_keys (marking it as a keyword of FDS)
+    # looks for a method named like the tag otherwise
+    for node in root:
+        if node.tag in global_keys:
+            process_node(node)
+        else:
+            globals()[node.tag](node)
 
 
 def process_node(node):
@@ -424,7 +421,7 @@ def mesh(node):
 
 def evac_mesh(node):
     # DESCRIPTION:
-    # creates a single mesh for evacuation simulations with the given parameters and writes the MESH statement
+    #  creates a single mesh for evacuation simulations with the given parameters and writes the MESH statement
     #  via write_to_fds
     # INPUT (arguments of node):
     #  px, py, pz           - number of meshes in x,y or z direction (default: 1)
@@ -455,7 +452,7 @@ def obstacle(node):
     # INPUT (arguments of node):
     #  x1, y1, z1       - coordinates of one corner of the obstacle (required)
     #  x2, y2, z2       - coordinates of the opposing corner of the obstacle (required)
-    # color            - color of the obstacle (default: "WHITE")
+    #  color            - color of the obstacle (default: "WHITE")
     #  transparency     - transparency of the obstacle (default: 1.0)
     #  surf_id          - surface of the obstacle
     #  comment          - comment to be written after the OBST statement
@@ -562,7 +559,7 @@ def ramp(node):
 
 def hrr_fromfile(node):
     # DESCRIPTION:
-    # reads ramp data from a given file and writes the RAMP statements via write_to_fds
+    #  reads ramp data from a given file and writes the RAMP statements via write_to_fds
     # INPUT (arguments of node):
     #  id       - identifier of the ramp (default: 'none')
     #  file     - file with the ramp data (required)
@@ -582,6 +579,42 @@ def radi(node):
     if check_val(node, 'radiative_fraction'):
         write_to_fds("&RADI RADIATIVE_FRACTION = %f /\n" % (get_val(node, 'radiative_fraction'),
                                                             check_get_val(node, 'comment', "")))
+
+
+def device(node):
+    # DESCRIPTION:
+    # defines devices in an area or a single point and writes the DEVC statement via write_to_fds
+    # INPUT (arguments of node):
+    #  id           - identifier of the device (required)
+    #  q            - quantity of the devices (required)
+    #  x1, y1, z1   - coordinates of one corner of the defined area where the devices are to be placed
+    #  x2, y2, z2   - coordinates of the opposing corner of the defined area where the devices are to be placed
+    # OR
+    #  x, y, z      - coordinates of the point where the devices are to be placed
+    #  ior          - ?
+    check_val(node, ["q", "id"], opt=False)
+    if check_val(node, ["x1", "x2", "y1", "y2", "z1", "z2"]):
+        write_to_fds("&DEVC ID='%s' XB=%f,%f,%f,%f,%f,%f QUANTITY='%s'/\n" % (get_val(node, "id"),
+                                                                              get_val(node, "x1"),
+                                                                              get_val(node, "x2"),
+                                                                              get_val(node, "y1"),
+                                                                              get_val(node, "y2"),
+                                                                              get_val(node, "z1"),
+                                                                              get_val(node, "z2"),
+                                                                              get_val(node, "q")))
+        return True
+    if check_val(node, ["x", "y", "z"]):
+        ior_s = ''
+        if check_val(node, ["ior"], opt=True):
+            ior_s = ", IOR=%s" % get_val(node, "ior")
+        write_to_fds("&DEVC ID='%s', XYZ=%f,%f,%f, QUANTITY='%s'%s/\n" % (get_val(node, "id"),
+                                                                          get_val(node, "x"),
+                                                                          get_val(node, "y"),
+                                                                          get_val(node, "z"),
+                                                                          get_val(node, "q"),
+                                                                          ior_s))
+        return True
+    return False
 
 
 def slice(node):
@@ -634,7 +667,7 @@ def fire(node):
     #  lz       - z coordinate of the bottom of the box (required)
     #  width    - width of the box (required)
     #  height   - height of the box (required)
-    #  hrr      - heat release rate, somehow related to the box surface? (required)
+    # hrr      - heat release rate (required)
     if node.attrib['type'] == "burningbox":
         # define the box
         cx = get_val(node, 'cx')
@@ -828,21 +861,53 @@ def my_room(node):
     add_var("nz", nz)
 
 
-############
-# UNSORTED #     #TODO
-############
+##########
+# OTHERS #
+# #########
+
+def section(node):
+    # DESCRIPTION:
+    # no functionality itself, used for structuring the XML file
+    traverse(node)
 
 
+def dbg(node):
+    # DESCRIPTION:
+    # writes the value of the node argument print to standard output
+    print get_val(node, "print")
+
+
+def div235(n):
+    # DESCRIPTION:
+    # increases a given integer value until its factors only consist of 2, 3 and 5
+    # INPUT:
+    #  n        - integer value to increase (required)
+    r_init = int(n)
+    while True:
+        r = r_init
+        while r % 2 == 0 and r != 0: r /= 2
+        while r % 3 == 0 and r != 0: r /= 3
+        while r % 5 == 0 and r != 0: r /= 5
+        if r == 1: break
+        r_init += 1
+    return r_init
+
+
+def para(node):
+    # DESCRIPTION:
+    # the tag defines parameters that are used for creating a parameter space in the main loop
+    #  the node has no functionality when the tree is traversed
+    pass
 
 
 def paradim(node, dirlist):
     # DESCRIPTION:
-    # probably important stuff that I still don't really understand
+    # evaluates nodes with the para tag and creates a list of parameters
     # INPUT (arguments of node):
-    # var      - ? (required)
+    #  var      - name of the attribute (required)
     #  list     - list of parameters
     #  file     - file with a list of comma-separated parameters, passing a file deletes the parameters of list!
-    #  col      - number of columns in file
+    #  col      - number of the first column with content
     check_val(node, ["var"], opt=False)
     paralist = check_get_val(node, 'list', [])
 
@@ -858,55 +923,6 @@ def paradim(node, dirlist):
         sys.exit()
     for ip in range(nump):
         dirlist[ip][node.attrib['var']] = paralist[ip]
-
-
-def traverse(root):
-    # DESCRIPTION:
-    # traverses through the tree and processes the child nodes of root
-    for node in root:
-        if node.tag in global_keys:
-            process_node(node)
-        else:
-            globals()[node.tag](node)
-
-
-def dbg(node):
-    # DESCRIPTION:
-    #  writes the value of the node argument print to standard output
-    print get_val(node, "print")
-
-
-def device(node):
-    check_val(node, ["q", "id"], opt=False)
-    q = get_val(node, "q", opt=True)
-    id = get_val(node, "id", opt=True)
-    if check_val(node, ["x1", "x2", "y1", "y2", "z1", "z2"]):
-        x1 = get_val(node, "x1", opt=True)
-        x2 = get_val(node, "x2", opt=True)
-        y1 = get_val(node, "y1", opt=True)
-        y2 = get_val(node, "y2", opt=True)
-        z1 = get_val(node, "z1", opt=True)
-        z2 = get_val(node, "z2", opt=True)
-        write_to_fds("&DEVC ID='%s' XB=%f,%f,%f,%f,%f,%f QUANTITY='%s'/\n" % (id, x1, x2, y1, y2, z1, z2, q))
-        return True
-    if check_val(node, ["x", "y", "z"]):
-        x = get_val(node, "x", opt=True)
-        y = get_val(node, "y", opt=True)
-        z = get_val(node, "z", opt=True)
-        ior_s = ''
-        if check_val(node, ["ior"], opt=True):
-            ior_s = "IOR=%s" % get_val(node, "ior", opt=True)
-        write_to_fds("&DEVC ID='%s', XYZ=%f,%f,%f, QUANTITY='%s', %s/\n" % (id, x, y, z, q, ior_s))
-        return True
-    return False
-
-
-def section(node):
-    traverse(node)
-
-
-def para(node):
-    pass
 
 
 ######################
@@ -926,7 +942,7 @@ for node in root:
             params[node.attrib['dim']] = []
         paradim(node, params[node.attrib['dim']])
 
-# generating sets of parameters and traversing the tree for each set
+# generating a parameter space and traversing the tree for each set of parameters
 para_id = 0
 for items in product(*[params[pd] for pd in params]):
     vars = {'outfile': "output.fds", 'chid': "chid", 'title': "title", 'fds_file_open': False, 'fds_file': 0,
