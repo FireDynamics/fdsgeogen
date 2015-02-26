@@ -12,6 +12,7 @@ import numpy as np
 
 
 
+
 # ########################
 ##### FDS arguments #####
 #########################
@@ -467,6 +468,19 @@ def ramp(node):
         f = eval(node.attrib['f'], {}, vars)
         ramp += "T=%f, F=%f /\n" % (t, f)
         write_to_fds(ramp)
+
+
+def hrr_fromfile(node):
+    # DESCRIPTION:
+    # reads ramp data from a given file and writes the RAMP statements via write_to_fds
+    # INPUT (arguments of node):
+    #  id       - identifier of the ramp (default: 'none')
+    #  file     - file with the ramp data (required)
+    id = check_get_val(node, 'id', 'none')
+    if check_val(node, 'file'):
+        file_values = open(node.attrib["file"], 'r')
+        for line in file_values:
+            write_to_fds("&RAMP ID='%s' T=%f, F=%f / \n" % (id, float(line.split(",")[0]), float(line.split(",")[1])))
 
 
 def radi(node):
