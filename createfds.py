@@ -9,6 +9,7 @@ import numpy as np
 
 
 
+
 # ########################
 ##### FDS arguments #####
 #########################
@@ -179,6 +180,58 @@ def cond(node):
         if not get_val(node, att):
             print "condition was not met: ", node.attrib[att]
             sys.exit()
+
+
+def process_node(node):
+    # DESCRIPTION:
+    # processes node with a tag/key found in global_keys and writes it as a FDS statement to the FDS file via write_to_fds
+    # INPUT (arguments of node):
+    #  id       - identifier of the statement
+    #  comment  - comment to be written after the statement
+    global vars
+    line = ''
+    line += "ID='%s'" % check_get_val(node, 'id', 'none')
+    args = global_args[node.tag]
+    for arg in args:
+        # checks if the argument is a vector in order to treat vectors correctly
+        if check_val(node, arg):
+            vec_post = ''
+            if node.attrib[arg].find(';') != -1:
+                vec_post = '(' + node.attrib[arg].split(';')[0] + ')'
+                val = eval(node.attrib[arg].split(';')[1], globals(), vars)
+            else:
+                val = get_val(node, arg)
+            if isinstance(val, tuple):
+                line += ", %s%s=" % (arg.upper(), vec_post)
+                first = True
+                for el in val:
+                    if not first:
+                        line += ", "
+                    first = False
+
+                    if isinstance(el, basestring):
+                        line += "'%s'" % (el)
+                    else:
+                        line += "%f" % (el)
+            else:
+                if isinstance(val, basestring):
+                    line += ", %s='%s'" % (arg.upper(), val)
+                elif isinstance(val, bool):
+                    if val == True:
+                        line += ", %s=%s" % (arg.upper(), '.TRUE.')
+                    else:
+                        line += ", %s=%s" % (arg.upper(), '.FALSE.')
+                else:
+                    line += ", %s=%f" % (arg.upper(), val)
+    all_args = args[:]
+    all_args.extend(['id', 'comment'])
+    # checks if the arguments given are consistent with global_args for the given key
+    for att in node.attrib:
+        #print "checking attribute %s"%att
+        if att not in all_args:
+            print "WARNING: unknown argument %s" % att
+    # writes the statement to the FDS file
+    write_to_fds("&%s %s/ %s\n" % (global_keys[node.tag], line, check_get_val(node, 'comment', "")))
 
 
 ###############################
@@ -367,6 +420,33 @@ def mesh(node):
                 write_to_fds("&MESH IJK=%d,%d,%d, XB=%f,%f,%f,%f,%f,%f /\n" % (
                     lnx, lny, lnz,
                     xmin, xmax, ymin, ymax, zmin, zmax))
+
+
+def evac_mesh(node):
+    # DESCRIPTION:
+    # creates a single mesh for evacuation simulations with the given parameters and writes the MESH statement
+    #  via write_to_fds
+    # INPUT (arguments of node):
+    #  px, py, pz           - number of meshes in x,y or z direction (default: 1)
+    #  xmin, ymin, zmin     - starting coordinates of the mesh
+    #  xmax, ymax, zmax     - end coordinates of the mesh
+    #  nx, ny               - number of cells in x and y direction
+    xmin = get_val(node, "xmin", opt=True)
+    xmax = get_val(node, "xmax", opt=True)
+    ymin = get_val(node, "ymin", opt=True)
+    ymax = get_val(node, "ymax", opt=True)
+    zmin = get_val(node, "zmin", opt=True)
+    zmax = get_val(node, "zmax", opt=True)
+
+    nx = get_val(node, "nx", opt=True)
+    ny = get_val(node, "ny", opt=True)
+
+    evac_zmin = 0.25 * (zmax - zmin)
+    evac_zmax = 0.75 * (zmax - zmin)
+
+    write_to_fds(
+        "&MESH ID='evac_mesh' IJK=%d,%d,%d, XB=%f,%f,%f,%f,%f,%f, EVACUATION=.TRUE., EVAC_HUMANS=.TRUE. /\n" % (
+            nx, ny, 1, xmin, xmax, ymin, ymax, evac_zmin, evac_zmax))
 
 
 def obstacle(node):
@@ -752,80 +832,7 @@ def my_room(node):
 # UNSORTED #     #TODO
 ############
 
-def evac_mesh(node):
-    xmin = get_val(node, "xmin", opt=True)
-    xmax = get_val(node, "xmax", opt=True)
-    ymin = get_val(node, "ymin", opt=True)
-    ymax = get_val(node, "ymax", opt=True)
-    zmin = get_val(node, "zmin", opt=True)
-    zmax = get_val(node, "zmax", opt=True)
 
-    nx = get_val(node, "nx", opt=True)
-    ny = get_val(node, "ny", opt=True)
-
-    evac_zmin = 0.25 * (zmax - zmin)
-    evac_zmax = 0.75 * (zmax - zmin)
-
-    write_to_fds(
-        "&MESH ID='evac_mesh' IJK=%d,%d,%d, XB=%f,%f,%f,%f,%f,%f, EVACUATION=.TRUE., EVAC_HUMANS=.TRUE. /\n" % (
-            nx, ny, 1, xmin, xmax, ymin, ymax, evac_zmin, evac_zmax))
-
-
-
-def process_node(node):
-    # DESCRIPTION:
-    #  very important stuff that I still don't really understand
-    # INPUT (arguments of node):
-    #  id
-    #  comment
-    global vars
-    line = ''
-
-    line += "ID='%s'" % check_get_val(node, 'id', 'none')
-    args = global_args[node.tag]
-    for arg in args:
-        if check_val(node, arg):
-
-            vec_post = ''
-            if node.attrib[arg].find(';') != -1:
-                vec_post = '(' + node.attrib[arg].split(';')[0] + ')'
-                val = eval(node.attrib[arg].split(';')[1], globals(), vars)
-            else:
-                val = get_val(node, arg)
-            if isinstance(val, tuple):
-                line += ", %s%s=" % (arg.upper(), vec_post)
-                first = True
-                for el in val:
-                    if not first:
-                        line += ", "
-                    first = False
-
-                    if isinstance(el, basestring):
-                        line += "'%s'" % (el)
-                    else:
-                        line += "%f" % (el)
-            else:
-                if isinstance(val, basestring):
-                    line += ", %s='%s'" % (arg.upper(), val)
-                elif isinstance(val, bool):
-                    if val == True:
-                        line += ", %s=%s" % (arg.upper(), '.TRUE.')
-                    else:
-                        line += ", %s=%s" % (arg.upper(), '.FALSE.')
-                else:
-                    line += ", %s=%f" % (arg.upper(), val)
-    all_args = args[:]
-    all_args.extend(['id', 'comment'])
-
-    for att in node.attrib:
-        #print "checking attribute %s"%att
-        if att not in all_args:
-            print "WARNING: unknown argument %s" % att
-
-    comment = ''
-    if check_val(node, 'comment'):
-        comment = node.attrib['comment']
-    write_to_fds("&%s %s/ %s\n" % (global_keys[node.tag], line, comment))
 
 
 def paradim(node, dirlist):
@@ -901,6 +908,7 @@ def section(node):
 def para(node):
     pass
 
+
 ######################
 ##### MAIN LOOP ######
 ######################
@@ -911,12 +919,14 @@ root = tree.getroot()
 params = {}
 vars = {}
 
+# looking for parameters
 for node in root:
     if node.tag == 'para':
         if node.attrib['dim'] not in params:
             params[node.attrib['dim']] = []
         paradim(node, params[node.attrib['dim']])
 
+# generating sets of parameters and traversing the tree for each set
 para_id = 0
 for items in product(*[params[pd] for pd in params]):
     vars = {'outfile': "output.fds", 'chid': "chid", 'title': "title", 'fds_file_open': False, 'fds_file': 0,
