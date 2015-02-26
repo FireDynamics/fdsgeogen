@@ -9,13 +9,10 @@ import numpy as np
 
 
 
-
-
-
-
 # ########################
 ##### FDS arguments #####
 #########################
+
 global_args = {}
 global_args['reac'] = ['heat_of_combustion', 'soot_yield', 'C', 'H', 'fuel']
 global_args['matl'] = ['specific_heat', 'conductivity', 'density', 'heat_of_combustion',
@@ -34,9 +31,11 @@ global_args['pers'] = ['avatar_color', 'color_method', 'default_properties', 'de
 global_args['exit'] = ['ior', 'xyz', 'xb']
 global_args['evac'] = ['number_initial_persons', 'xb', 'agent_type', 'pers_id']
 
+
 #########################
 ##### FDS key words #####
 #########################
+
 global_keys = {}
 global_keys['reac'] = 'REAC'
 global_keys['matl'] = 'MATL'
@@ -209,7 +208,7 @@ def close_fds_file():
 
 def write_to_fds(text):
     # DESCRIPTION:
-    # checks if the FDS file specified by the fds_file variable exists, opens a new one
+    #  checks if the FDS file specified by the fds_file variable exists, opens a new one
     # via open_fds_file if necessary and writes a given text into the FDS file
     # INPUT:
     #  text     - text to write into the FDS file
@@ -220,9 +219,10 @@ def write_to_fds(text):
 
 def dump(node):
     # DESCRIPTION:
-    # writes a given string or the content of a given file via write_to_fds
+    #  writes a given string or the content of a given file via write_to_fds
     # INPUT (arguments of node):
-    # text, str     - text to be written to the FDS file
+    # text,         - raw text to be written to the FDS file
+    #  str           - text to be interpreted and written to the FDS file
     #  file          - file whose content is to be written to the FDS File
     if check_val(node, 'text'):
         write_to_fds("%s\n" % (node.attrib["text"]))
@@ -241,7 +241,8 @@ def input(node):
     #  excluding and including FDS keywords at the same time is not supported and will cause the program to exit with
     #  an error message to standard output
     # INPUT (arguments of node):
-    #  text, str    - FDS command to write to the FDS file, will be preceded by a '&'
+    # text,         - raw text to be written to the FDS file, will be preceded by a '&'
+    #  str           - text to be interpreted and written to the FDS file, will be preceded by a '&'
     #  from_file    - file that includes FDS commands to be inserted into the FDS file
     #  incl         - list of FDS keywords to exclude
     #  excl         - list of FDS keywords to include
@@ -300,8 +301,8 @@ def loop(node):
     # DESCRIPTION:
     # loops via traverse over the values passed by a given start and stop value and/or a list of values
     # INPUT (arguments of node):
-    #  var      - ?
-    # start    - start value of the loop, interpreted as an integer
+    # var      - variable of the loop
+    #  start    - start value of the loop, interpreted as an integer
     #  stop     - end value of the loop, interpreted as an integer
     #  list     - comma-separated list to loop over
     # integer iteration from start to stop
@@ -325,10 +326,10 @@ def mesh(node):
     # DESCRIPTION:
     # creates a mesh with the given parameters and writes the MESH statement via write_to_fds
     # INPUT (arguments of node):
-    #  px, py, pz           - number of meshes in x,y or z direction (?) (default: 1)
-    # nx, ny, nz           - number of cells in x, y and z direction (?)
-    #  xmin, ymin, zmin     - starting coordinates of the mesh (?)
-    #  xmax, ymax, zmax     - end coordinates of the mesh (?)
+    # px, py, pz           - number of meshes in x,y or z direction (default: 1)
+    #  nx, ny, nz           - number of cells in x, y and z direction
+    #  xmin, ymin, zmin     - starting coordinates of the mesh
+    #  xmax, ymax, zmax     - end coordinates of the mesh
     # calculating the number of meshes
     px = 1
     py = 1
@@ -388,8 +389,7 @@ def obstacle(node):
                                                                 check_get_val(node, "transparency", 1.))
     if check_val(node, 'surf_id'):
         line += ", SURF_ID='%s'" % get_val(node, "surf_id")
-    comment = check_get_val(node, 'comment', "")
-    write_to_fds("&OBST %s / %s\n" % (line, comment))
+    write_to_fds("&OBST %s / %s\n" % (line, check_get_val(node, 'comment', "")))
 
 
 def hole(node):
@@ -398,36 +398,48 @@ def hole(node):
     # INPUT (arguments of node):
     #  x1, y1, z1       - coordinates of one corner of the hole (required)
     #  x2, y2, z2       - coordinates of the opposing corner of the hole (required)
-    write_to_fds("&HOLE XB=%f,%f,%f,%f,%f,%f /\n" % (get_val(node, "x1"),
-                                                     get_val(node, "x2"),
-                                                     get_val(node, "y1"),
-                                                     get_val(node, "y2"),
-                                                     get_val(node, "z1"),
-                                                     get_val(node, "z2")))
+    # comment          - comment to be written after the HOLE statement
+    write_to_fds("&HOLE XB=%f,%f,%f,%f,%f,%f / %s\n" % (get_val(node, "x1"),
+                                                        get_val(node, "x2"),
+                                                        get_val(node, "y1"),
+                                                        get_val(node, "y2"),
+                                                        get_val(node, "z1"),
+                                                        get_val(node, "z2"),
+                                                        check_get_val(node, 'comment', "")))
 
 
 def boundary(node):
     # DESCRIPTION:
     #  defines open surfaces as boundary conditions and writes the VENT statements via write_to_fds
     # INPUT (arguments of node):
-    #  x, y, z          - boundary conditions for the corresponding direction (?)
-    # zmin, zmax       - allows choosing only one of the surfaces of z (?)
+    #  x, y, z                              - boundary conditions for the corresponding direction, effecting both surfaces
+    # xmin, xmax, ymin, ymax, zmin, zmax   - boundary condition for only one surface
     if check_get_val(node, "x", "") == "open":
         write_to_fds("&VENT MB='XMIN' ,SURF_ID='OPEN' /\n")
         write_to_fds("&VENT MB='XMAX' ,SURF_ID='OPEN' /\n")
+    else:
+        if check_get_val(node, "xmin", "") == "open":
+            write_to_fds("&VENT MB='XMIN' ,SURF_ID='OPEN' /\n")
+        if check_get_val(node, "xmax", "") == "open":
+            write_to_fds("&VENT MB='XMAX' ,SURF_ID='OPEN' /\n")
 
     if check_get_val(node, "y", "") == "open":
         write_to_fds("&VENT MB='YMIN' ,SURF_ID='OPEN' /\n")
         write_to_fds("&VENT MB='YMAX' ,SURF_ID='OPEN' /\n")
+    else:
+        if check_get_val(node, "ymin", "") == "open":
+            write_to_fds("&VENT MB='YMIN' ,SURF_ID='OPEN' /\n")
+        if check_get_val(node, "ymax", "") == "open":
+            write_to_fds("&VENT MB='YMAX' ,SURF_ID='OPEN' /\n")
 
     if check_get_val(node, "z", "") == " open":
         write_to_fds("&VENT MB='ZMIN' ,SURF_ID='OPEN' /\n")
         write_to_fds("&VENT MB='ZMAX' ,SURF_ID='OPEN' /\n")
-
-    if check_get_val(node, "zmin", "") == "open":
-        write_to_fds("&VENT MB='ZMIN' ,SURF_ID='OPEN' /\n")
-    if check_get_val(node, "zmax", "") == "open":
-        write_to_fds("&VENT MB='ZMAX' ,SURF_ID='OPEN' /\n")
+    else:
+        if check_get_val(node, "zmin", "") == "open":
+            write_to_fds("&VENT MB='ZMIN' ,SURF_ID='OPEN' /\n")
+        if check_get_val(node, "zmax", "") == "open":
+            write_to_fds("&VENT MB='ZMAX' ,SURF_ID='OPEN' /\n")
 
 
 def init(node):
@@ -438,26 +450,24 @@ def init(node):
     #  x1, y1, z1       - coordinates of one corner of the defined area (required)
     #  x2, y2, z2       - coordinates of the opposing corner of the defined area (required)
     #  comment          - comment to be written after the INIT statement
-    line = "TEMPERATURE=%f XB=%f,%f,%f,%f,%f,%f" % (get_val(node, "temperature"),
-                                                    get_val(node, "x1"),
-                                                    get_val(node, "x2"),
-                                                    get_val(node, "y1"),
-                                                    get_val(node, "y2"),
-                                                    get_val(node, "z1"),
-                                                    get_val(node, "z2"))
-    comment = ""
-    if check_val(node, 'comment'):
-        comment = node.attrib["comment"]
-    write_to_fds("&INIT %s / %s \n" % (line, comment))
+    write_to_fds("&INIT TEMPERATURE=%f XB=%f,%f,%f,%f,%f,%f / %s" % (get_val(node, "temperature"),
+                                                                     get_val(node, "x1"),
+                                                                     get_val(node, "x2"),
+                                                                     get_val(node, "y1"),
+                                                                     get_val(node, "y2"),
+                                                                     get_val(node, "z1"),
+                                                                     get_val(node, "z2"),
+                                                                     check_get_val(node, 'comment', "")))
 
 
 def ramp(node):
     # DESCRIPTION:
+    #  if possible: use hrr_fromfile instead
     #  writes a RAMP statement with the given parameters via write_to_fds
     # INPUT (arguments of node):
-    # id       - id to be assigned to the ramp
-    #  t        - ?
-    #  f        - ?
+    #  id       - identifier of the ramp (required)
+    # t        - time
+    #  f        - value associated with time
     if 'id' in node.attrib:
         id = eval(node.attrib['id'], {}, vars)
         ramp = "&RAMP ID='RAMP_%s'" % id
@@ -487,21 +497,21 @@ def radi(node):
     # DESCRIPTION:
     #  writes a RADI statement with the given radiative fraction via write_to_fds
     # INPUT (arguments of node):
-    #  radiative_fraction   - ?
-    if 'radiative_fraction' in node.attrib:
-        rf = eval(node.attrib['radiative_fraction'], {}, vars)
-        radi = "&RADI RADIATIVE_FRACTION = %f /\n" % rf
-        write_to_fds(radi)
+    #  radiative_fraction   - radiative fraction (required)
+    # comment              - comment to be written after the INIT statement
+    if check_val(node, 'radiative_fraction'):
+        write_to_fds("&RADI RADIATIVE_FRACTION = %f /\n" % (get_val(node, 'radiative_fraction'),
+                                                            check_get_val(node, 'comment', "")))
 
 
 def slice(node):
     # DESCRIPTION:
     # defines slice files and writes the SLCF statements via write_to_fds
     # INPUT (arguments of node):
-    #  q        - some quantity of the slice file?
-    #  v        - some vector property?
+    #  q        - quantity of slices
+    # v        - determines that a vector is used
     #  x, y, z  - dimension to record as slice file
-    q = "QUANTITY='%s'" % node.attrib['q']
+    q = "QUANTITY='%s'" % get_val(node, 'q')
     v = ""
     if check_get_val(node, 'v', "") == '1':
         v = "VECTOR=.TRUE."
