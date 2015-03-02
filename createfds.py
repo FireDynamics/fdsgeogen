@@ -12,6 +12,7 @@ import numpy as np
 
 
 
+
 # ########################
 ##### FDS arguments #####
 #########################
@@ -33,6 +34,7 @@ global_args['pers'] = ['avatar_color', 'color_method', 'default_properties', 'de
                        'l_non_sp']
 global_args['exit'] = ['ior', 'xyz', 'xb']
 global_args['evac'] = ['number_initial_persons', 'xb', 'agent_type', 'pers_id']
+global_args['ramp'] = ['id', 't', 'f']
 
 
 #########################
@@ -50,6 +52,7 @@ global_keys['slcf'] = 'SLCF'
 global_keys['pers'] = 'PERS'
 global_keys['exit'] = 'EXIT'
 global_keys['evac'] = 'EVAC'
+global_keys['ramp'] = 'RAMP'
 
 
 # accepted deviation when dealing with float arithmetic
@@ -536,26 +539,6 @@ def init(node):
                                                                      get_val(node, "z1"),
                                                                      get_val(node, "z2"),
                                                                      check_get_val(node, 'comment', "")))
-
-
-def ramp(node):
-    # DESCRIPTION:
-    #  if possible: use hrr_fromfile instead
-    #  writes a RAMP statement with the given parameters via write_to_fds
-    # INPUT (arguments of node):
-    #  id       - identifier of the ramp (required)
-    # t        - time
-    #  f        - value associated with time
-    if 'id' in node.attrib:
-        id = eval(node.attrib['id'], {}, vars)
-        ramp = "&RAMP ID='RAMP_%s'" % id
-
-    if 't' in node.attrib:
-        t = eval(node.attrib['t'], {}, vars)
-    if 'f' in node.attrib:
-        f = eval(node.attrib['f'], {}, vars)
-        ramp += "T=%f, F=%f /\n" % (t, f)
-        write_to_fds(ramp)
 
 
 def hrr_fromfile(node):
