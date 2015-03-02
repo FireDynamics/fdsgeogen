@@ -13,6 +13,7 @@ import numpy as np
 
 
 
+
 # ########################
 ##### FDS arguments #####
 #########################
@@ -34,7 +35,7 @@ global_args['pers'] = ['avatar_color', 'color_method', 'default_properties', 'de
                        'l_non_sp']
 global_args['exit'] = ['ior', 'xyz', 'xb']
 global_args['evac'] = ['number_initial_persons', 'xb', 'agent_type', 'pers_id']
-global_args['ramp'] = ['id', 't', 'f']
+global_args['ramp'] = ['t', 'f']
 
 
 #########################
@@ -450,9 +451,9 @@ def evac_mesh(node):
             nx, ny, 1, xmin, xmax, ymin, ymax, evac_zmin, evac_zmax))
 
 
-def obstacle(node):
+def obstruction(node):
     # DESCRIPTION:
-    #  defines an rectangular obstacle and writes the OBST statement via write_to_fds
+    # defines an rectangular obstruction and writes the OBST statement via write_to_fds
     # INPUT (arguments of node):
     #  x1, y1, z1       - coordinates of one corner of the obstacle (required)
     #  x2, y2, z2       - coordinates of the opposing corner of the obstacle (required)
@@ -473,9 +474,9 @@ def obstacle(node):
     write_to_fds("&OBST %s / %s\n" % (line, check_get_val(node, 'comment', "")))
 
 
-def hole(node):
+def void(node):
     # DESCRIPTION:
-    #  defines an rectangular hole in an obstacle and writes the HOLE statement via write_to_fds
+    # defines an rectangular void in an obstruction and writes the HOLE statement via write_to_fds
     # INPUT (arguments of node):
     #  x1, y1, z1       - coordinates of one corner of the hole (required)
     #  x2, y2, z2       - coordinates of the opposing corner of the hole (required)
