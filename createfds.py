@@ -11,6 +11,7 @@ import numpy as np
 
 
 
+
 # ########################
 ##### FDS arguments #####
 #########################
@@ -561,9 +562,9 @@ def hrr_fromfile(node):
     # DESCRIPTION:
     #  reads ramp data from a given file and writes the RAMP statements via write_to_fds
     # INPUT (arguments of node):
-    #  id       - identifier of the ramp (default: 'none')
+    # id       - identifier of the ramp (default: name of the passed file)
     #  file     - file with the ramp data (required)
-    id = check_get_val(node, 'id', 'none')
+    id = check_get_val(node, 'id', node.attrib["file"].split(".")[0])
     if check_val(node, 'file'):
         file_values = open(node.attrib["file"], 'r')
         for line in file_values:
@@ -863,7 +864,7 @@ def my_room(node):
 
 ##########
 # OTHERS #
-# #########
+##########
 
 def section(node):
     # DESCRIPTION:
