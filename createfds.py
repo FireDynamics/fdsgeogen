@@ -208,7 +208,7 @@ def process_node(node):
 
                     if isinstance(el, basestring):
                         line += "'%s'" % (el)
-                    else if isinstance(el, int):
+                    elif isinstance(el, int):
                         line += "%d" % (el)
                     else:
                         line += "%f" % (el)
