@@ -1,10 +1,10 @@
 <fds>
 
     <!-- variables for the position and diameter of the burner -->
-    <var xpos = "0.6"  ypos = "1.0" diameter = "0.4"/>
+    <var xpos = "0.6"  ypos = "1.2" diameter = "0.4"/>
 
     <!-- file naming -->
-    <info chid="'simple_burner'" title="'Example file for FDSgeogen'" outfile="'simple_burner.fds'"/>
+    <info chid="'simple_burner_with_output'" title="'Example file for FDSgeogen'" outfile="'simple_burner_with_output.fds'"/>
 
     <!-- fixed input parameter -->
     <input text="TIME T_END=5.0" />
@@ -37,5 +37,17 @@
     
     <!-- creating and positioning the burner -->
     <fds_obst xb="xpos-diameter/2., xpos+diameter/2., ypos-diameter/2., ypos+diameter/2., 0.0, 0.4" surf_ids="'burner', 'INERT', 'INERT'"/>
+    
+    
+	<!--================================
+	======== output definition =========
+	=================================-->    
+    
+    <!-- creates 10 temperature devices with vertical distance of 0.1 m above the center of the burner. The lowest device is in a height of 0.5m -->
+	<loop var="z" start="0" stop="9">
+		<devc id="'TEMP_z%i'%(z)" x="xpos" y="ypos" z="0.5+0.1*z" q="'TEMPERATURE'" />
+	</loop>
+	
+	<fds_slcf pby="ypos" quantity="'VELOCITY'" vector="True" />
 
 </fds>
