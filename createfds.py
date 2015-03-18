@@ -4,38 +4,31 @@ import sys
 import re
 from itertools import product
 import xml.etree.ElementTree as ET
-
 import numpy as np
 
 
-
-
-
-
-
-
-# ########################
+#########################
 ##### FDS arguments #####
 #########################
 
 global_args = {}
-global_args['reac'] = ['heat_of_combustion', 'soot_yield', 'C', 'H', 'fuel']
-global_args['matl'] = ['specific_heat', 'conductivity', 'density', 'heat_of_combustion',
+global_args['fds_reac'] = ['heat_of_combustion', 'soot_yield', 'C', 'H', 'fuel']
+global_args['fds_matl'] = ['specific_heat', 'conductivity', 'density', 'heat_of_combustion',
                        'n_reactions', 'heat_of_reaction', 'nu_spec', 'reference_temperature',
                        'a', 'e', 'n_s', 'spec_id', 'emissivity', 'heating_rate', 'pyrolysis_range', 'matl_id',
                        'nu_matl']
-global_args['surf'] = ['rgb', 'color', 'vel', 'hrrpua', 'heat_of_vaporization',
+global_args['fds_surf'] = ['rgb', 'color', 'vel', 'hrrpua', 'heat_of_vaporization',
                        'ignition_temperature', 'burn_away', 'matl_id', 'matl_mass_fraction',
                        'thickness', 'external_flux', 'backing', 'hrrupa', 'stretch_factor', 'cell_size_factor']
-global_args['obst'] = ['xb', 'surf_ids', 'surf_id', 'color', 'bulk_density']
-global_args['hole'] = ['xb', 'color']
-global_args['vent'] = ['xb', 'surf_id', 'color', 'dynamic_pressure', 'tmp_exterior', 'mb', 'transparency']
-global_args['slcf'] = ['pbx', 'pby', 'pbz', 'quantity', 'vector', 'evacuation']
-global_args['pers'] = ['avatar_color', 'color_method', 'default_properties', 'det_mean', 'pre_mean', 'dens_init',
+global_args['fds_obst'] = ['xb', 'surf_ids', 'surf_id', 'color', 'bulk_density']
+global_args['fds_hole'] = ['xb', 'color']
+global_args['fds_vent'] = ['xb', 'surf_id', 'color', 'dynamic_pressure', 'tmp_exterior', 'mb', 'transparency']
+global_args['fds_slcf'] = ['pbx', 'pby', 'pbz', 'quantity', 'vector', 'evacuation']
+global_args['fds_pers'] = ['avatar_color', 'color_method', 'default_properties', 'det_mean', 'pre_mean', 'dens_init',
                        'l_non_sp']
-global_args['exit'] = ['ior', 'xyz', 'xb']
-global_args['evac'] = ['number_initial_persons', 'xb', 'agent_type', 'pers_id']
-global_args['ramp'] = ['t', 'f']
+global_args['fds_exit'] = ['ior', 'xyz', 'xb']
+global_args['fds_evac'] = ['number_initial_persons', 'xb', 'agent_type', 'pers_id']
+global_args['fds_ramp'] = ['t', 'f']
 
 
 #########################
@@ -43,17 +36,17 @@ global_args['ramp'] = ['t', 'f']
 #########################
 
 global_keys = {}
-global_keys['reac'] = 'REAC'
-global_keys['matl'] = 'MATL'
-global_keys['surf'] = 'SURF'
-global_keys['obst'] = 'OBST'
-global_keys['hole'] = 'HOLE'
-global_keys['vent'] = 'VENT'
-global_keys['slcf'] = 'SLCF'
-global_keys['pers'] = 'PERS'
-global_keys['exit'] = 'EXIT'
-global_keys['evac'] = 'EVAC'
-global_keys['ramp'] = 'RAMP'
+global_keys['fds_reac'] = 'REAC'
+global_keys['fds_matl'] = 'MATL'
+global_keys['fds_surf'] = 'SURF'
+global_keys['fds_obst'] = 'OBST'
+global_keys['fds_hole'] = 'HOLE'
+global_keys['fds_vent'] = 'VENT'
+global_keys['fds_slcf'] = 'SLCF'
+global_keys['fds_pers'] = 'PERS'
+global_keys['fds_exit'] = 'EXIT'
+global_keys['fds_evac'] = 'EVAC'
+global_keys['fds_ramp'] = 'RAMP'
 
 
 # accepted deviation when dealing with float arithmetic
@@ -174,11 +167,11 @@ def cond(node):
 
 def traverse(root):
     # DESCRIPTION:
-    # traverses through the tree and processes the child nodes of root
-    # uses process_node if the tag is included in global_keys (marking it as a keyword of FDS)
-    # looks for a method named like the tag otherwise
+    #  traverses through the tree and processes the child nodes of root
+    #  uses process_node if the tag is included in global_keys (marking it as a keyword of FDS)
+    #  looks for a method named like the tag otherwise
     for node in root:
-        if node.tag in global_keys:
+        if node.tag.lower() in global_keys:
             process_node(node)
         else:
             globals()[node.tag](node)
@@ -186,14 +179,14 @@ def traverse(root):
 
 def process_node(node):
     # DESCRIPTION:
-    # processes node with a tag/key found in global_keys and writes it as a FDS statement to the FDS file via write_to_fds
+    #  processes node with a tag/key found in global_keys and writes it as a FDS statement to the FDS file via write_to_fds
     # INPUT (arguments of node):
     #  id       - identifier of the statement
     #  comment  - comment to be written after the statement
     global vars
     line = ''
     line += "ID='%s'" % check_get_val(node, 'id', 'none')
-    args = global_args[node.tag]
+    args = global_args[node.tag.lower()]
     for arg in args:
         # checks if the argument is a vector in order to treat vectors correctly
         if check_val(node, arg):
@@ -233,7 +226,7 @@ def process_node(node):
         if att not in all_args:
             print "WARNING: unknown argument %s" % att
     # writes the statement to the FDS file
-    write_to_fds("&%s %s/ %s\n" % (global_keys[node.tag], line, check_get_val(node, 'comment', "")))
+    write_to_fds("&%s %s/ %s\n" % (global_keys[node.tag.lower()], line, check_get_val(node, 'comment', "")))
 
 
 ###############################
@@ -264,7 +257,7 @@ def close_fds_file():
 def write_to_fds(text):
     # DESCRIPTION:
     #  checks if the FDS file specified by the fds_file variable exists, opens a new one
-    # via open_fds_file if necessary and writes a given text into the FDS file
+    #  via open_fds_file if necessary and writes a given text into the FDS file
     # INPUT:
     #  text     - text to write into the FDS file
     if type(vars['fds_file']) != file:
@@ -276,7 +269,7 @@ def dump(node):
     # DESCRIPTION:
     #  writes a given string or the content of a given file via write_to_fds
     # INPUT (arguments of node):
-    # text,         - raw text to be written to the FDS file
+    #  text          - raw text to be written to the FDS file
     #  str           - text to be interpreted and written to the FDS file
     #  file          - file whose content is to be written to the FDS File
     if check_val(node, 'text'):
@@ -292,12 +285,12 @@ def dump(node):
 
 def input(node):
     # DESCRIPTION:
-    # writes FDS given as a string or file via write_to_fds
+    #  writes FDS given as a string or file via write_to_fds
     #  excluding and including FDS keywords at the same time is not supported and will cause the program to exit with
     #  an error message to standard output
     # INPUT (arguments of node):
-    # text,         - raw text to be written to the FDS file, will be preceded by a '&'
-    #  str           - text to be interpreted and written to the FDS file, will be preceded by a '&'
+    #  text         - raw text to be written to the FDS file, will be preceded by a '&'
+    #  str          - text to be interpreted and written to the FDS file, will be preceded by a '&'
     #  from_file    - file that includes FDS commands to be inserted into the FDS file
     #  incl         - list of FDS keywords to exclude
     #  excl         - list of FDS keywords to include
@@ -354,9 +347,9 @@ def input(node):
 
 def loop(node):
     # DESCRIPTION:
-    # loops via traverse over the values passed by a given start and stop value and/or a list of values
+    #  loops via traverse over the values passed by a given start and stop value and/or a list of values
     # INPUT (arguments of node):
-    # var      - variable of the loop
+    #  var      - variable of the loop
     #  start    - start value of the loop, interpreted as an integer
     #  stop     - end value of the loop, interpreted as an integer
     #  list     - comma-separated list to loop over
@@ -379,9 +372,9 @@ def loop(node):
 
 def mesh(node):
     # DESCRIPTION:
-    # creates a mesh with the given parameters and writes the MESH statement via write_to_fds
+    #  creates a mesh with the given parameters and writes the MESH statement via write_to_fds
     # INPUT (arguments of node):
-    # px, py, pz           - number of meshes in x,y or z direction (default: 1)
+    #  px, py, pz           - number of meshes in x,y or z direction (default: 1)
     #  nx, ny, nz           - number of cells in x, y and z direction
     #  xmin, ymin, zmin     - starting coordinates of the mesh
     #  xmax, ymax, zmax     - end coordinates of the mesh
@@ -451,9 +444,9 @@ def evac_mesh(node):
             nx, ny, 1, xmin, xmax, ymin, ymax, evac_zmin, evac_zmax))
 
 
-def obstruction(node):
+def obst(node):
     # DESCRIPTION:
-    # defines an rectangular obstruction and writes the OBST statement via write_to_fds
+    #  defines an rectangular obstruction and writes the OBST statement via write_to_fds
     # INPUT (arguments of node):
     #  x1, y1, z1       - coordinates of one corner of the obstacle (required)
     #  x2, y2, z2       - coordinates of the opposing corner of the obstacle (required)
@@ -474,9 +467,9 @@ def obstruction(node):
     write_to_fds("&OBST %s / %s\n" % (line, check_get_val(node, 'comment', "")))
 
 
-def void(node):
+def hole(node):
     # DESCRIPTION:
-    # defines an rectangular void in an obstruction and writes the HOLE statement via write_to_fds
+    #  defines an rectangular void in an obstruction and writes the HOLE statement via write_to_fds
     # INPUT (arguments of node):
     #  x1, y1, z1       - coordinates of one corner of the hole (required)
     #  x2, y2, z2       - coordinates of the opposing corner of the hole (required)
@@ -495,7 +488,7 @@ def boundary(node):
     #  defines open surfaces as boundary conditions and writes the VENT statements via write_to_fds
     # INPUT (arguments of node):
     #  x, y, z                              - boundary conditions for the corresponding direction, effecting both surfaces
-    # xmin, xmax, ymin, ymax, zmin, zmax   - boundary condition for only one surface
+    #  xmin, xmax, ymin, ymax, zmin, zmax   - boundary condition for only one surface
     if check_get_val(node, "x", "") == "open":
         write_to_fds("&VENT MB='XMIN' ,SURF_ID='OPEN' /\n")
         write_to_fds("&VENT MB='XMAX' ,SURF_ID='OPEN' /\n")
@@ -546,7 +539,7 @@ def hrr_fromfile(node):
     # DESCRIPTION:
     #  reads ramp data from a given file and writes the RAMP statements via write_to_fds
     # INPUT (arguments of node):
-    # id       - identifier of the ramp (default: name of the passed file)
+    #  id       - identifier of the ramp (default: name of the passed file)
     #  file     - file with the ramp data (required)
     id = check_get_val(node, 'id', node.attrib["file"].split(".")[0])
     if check_val(node, 'file'):
@@ -560,15 +553,15 @@ def radi(node):
     #  writes a RADI statement with the given radiative fraction via write_to_fds
     # INPUT (arguments of node):
     #  radiative_fraction   - radiative fraction (required)
-    # comment              - comment to be written after the INIT statement
+    #  comment              - comment to be written after the INIT statement
     if check_val(node, 'radiative_fraction'):
         write_to_fds("&RADI RADIATIVE_FRACTION = %f /\n" % (get_val(node, 'radiative_fraction'),
                                                             check_get_val(node, 'comment', "")))
 
 
-def device(node):
+def devc(node):
     # DESCRIPTION:
-    # defines devices in an area or a single point and writes the DEVC statement via write_to_fds
+    #  defines devices in an area or a single point and writes the DEVC statement via write_to_fds
     # INPUT (arguments of node):
     #  id           - identifier of the device (required)
     #  q            - quantity of the devices (required)
@@ -602,12 +595,12 @@ def device(node):
     return False
 
 
-def slice(node):
+def slcf(node):
     # DESCRIPTION:
-    # defines slice files and writes the SLCF statements via write_to_fds
+    #  defines slice files and writes the SLCF statements via write_to_fds
     # INPUT (arguments of node):
     #  q        - quantity of slices
-    # v        - determines that a vector is used
+    #  v        - determines that a vector is used
     #  x, y, z  - dimension to record as slice file
     q = "QUANTITY='%s'" % get_val(node, 'q')
     v = ""
@@ -627,7 +620,7 @@ def slice(node):
 
 def info(node):
     # DESCRIPTION:
-    # writes a short info about the job to standard output and creates a new FDS file via open_fds_file
+    #  writes a short info about the job to standard output and creates a new FDS file via open_fds_file
     # INPUT (arguments of node):
     #  chid     - job identifier (required)
     #  title    - short description of the job
@@ -648,7 +641,7 @@ def fire(node):
     #  defines a fire fueled by methane on the box and writes the REAC, SURF and VENT statements via write_to_fds
     # INPUT (arguments of node):
     #  type     - must be "burningbox" in order for the method to have an effect (required)
-    # cx, cy   - x & y coordinates of the center of the box (required)
+    #  cx, cy   - x & y coordinates of the center of the box (required)
     #  lz       - z coordinate of the bottom of the box (required)
     #  width    - width of the box (required)
     #  height   - height of the box (required)
@@ -678,12 +671,12 @@ def bounded_room(node):
     #  creates a simple rectangular room with walls and a fitting mesh created via mesh
     # INPUT (arguments of node):
     #  x1, y1, z1                       - coordinates of one corner of the room
-    # x2, y2, z2                       - coordinates of the opposing corner of the room
+    #  x2, y2, z2                       - coordinates of the opposing corner of the room
     #  bx1, bx2, by1, by2, bz1, bz2     - wall thickness in relation to wt (default: 0)
     #  wt                               - reference value for wall thickness (default: 0.0)
     #  ax, ay, az                       - number of meshes in the x, y or z direction (default: 1)
     #  delta                            - cell width of the mesh
-    # wall_color                       - color of room walls (default: "FIREBRICK")
+    #  wall_color                       - color of room walls (default: "FIREBRICK")
     #  wall_transparency                - transparency of walls (default: 0.5)
     # get input values from node
     x1 = get_val(node, "x1")
@@ -781,7 +774,7 @@ def my_room(node):
     #  determines mesh parameters for simple rectangular room with walls but does neither create the mesh nor the walls
     # INPUT (arguments of node):
     #  x1, y1, z1                       - coordinates of one corner of the room
-    # x2, y2, z2                       - coordinates of the opposing corner of the room
+    #  x2, y2, z2                       - coordinates of the opposing corner of the room
     #  bx1, bx2, by1, by2, bz1, bz2     - wall thickness in relation to wt (default: 0)
     #  wt                               - reference value for wall thickness (default: 0.0)
     #  ax, ay, az                       - number of meshes in the x, y or z direction (default: 1)
@@ -852,19 +845,19 @@ def my_room(node):
 
 def section(node):
     # DESCRIPTION:
-    # no functionality itself, used for structuring the XML file
+    #  no functionality itself, used for structuring the XML file
     traverse(node)
 
 
 def dbg(node):
     # DESCRIPTION:
-    # writes the value of the node argument print to standard output
+    #  writes the value of the node argument print to standard output
     print get_val(node, "print")
 
 
 def div235(n):
     # DESCRIPTION:
-    # increases a given integer value until its factors only consist of 2, 3 and 5
+    #  increases a given integer value until its factors only consist of 2, 3 and 5
     # INPUT:
     #  n        - integer value to increase (required)
     r_init = int(n)
@@ -880,14 +873,14 @@ def div235(n):
 
 def para(node):
     # DESCRIPTION:
-    # the tag defines parameters that are used for creating a parameter space in the main loop
+    #  the tag defines parameters that are used for creating a parameter space in the main loop
     #  the node has no functionality when the tree is traversed
     pass
 
 
 def paradim(node, dirlist):
     # DESCRIPTION:
-    # evaluates nodes with the para tag and creates a list of parameters
+    #  evaluates nodes with the para tag and creates a list of parameters
     # INPUT (arguments of node):
     #  var      - name of the attribute (required)
     #  list     - list of parameters
