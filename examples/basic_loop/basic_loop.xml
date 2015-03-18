@@ -1,0 +1,12 @@
+<fds>
+
+    <!-- file naming -->
+    <info chid="'basic_loop'" outfile="'basic_loop.fds'"/>
+
+    <loop var="count" start="1" stop="10">
+
+        <dbg print="'value of count: %d'%count" />
+
+    </loop>
+
+</fds>

@@ -1,0 +1,25 @@
+<fds>
+
+    <!-- file naming -->
+    <info chid="'obst_loop'" outfile="'obst_loop.fds'"/>
+
+    <!-- fixed input parameter -->
+    <input text="TIME T_END=0.0" />
+
+    <!-- create mesh -->
+    <fds_mesh ijk="32, 32, 32" xb="0, 32, 0, 32, 0, 32" />
+
+
+    <!-- create obstractions in a loop -->
+    <!-- position and height as a function of the loop variable 'count' -->
+    <loop var="count" start="1" stop="10">
+
+        <dbg print="'value of count: %d'%count" />
+
+        <var x="10+count" z="count * 2" />
+
+        <fds_obst xb="x, x+1.0, 0, 32, 0, z"/>
+
+    </loop>
+
+</fds>
