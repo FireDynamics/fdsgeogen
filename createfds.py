@@ -29,6 +29,7 @@ global_args['fds_pers'] = ['avatar_color', 'color_method', 'default_properties',
 global_args['fds_exit'] = ['ior', 'xyz', 'xb']
 global_args['fds_evac'] = ['number_initial_persons', 'xb', 'agent_type', 'pers_id']
 global_args['fds_ramp'] = ['t', 'f']
+global_args['fds_mesh'] = ['ijk', 'xb']
 
 
 #########################
@@ -47,6 +48,7 @@ global_keys['fds_pers'] = 'PERS'
 global_keys['fds_exit'] = 'EXIT'
 global_keys['fds_evac'] = 'EVAC'
 global_keys['fds_ramp'] = 'RAMP'
+global_keys['fds_mesh'] = 'MESH'
 
 
 # accepted deviation when dealing with float arithmetic
