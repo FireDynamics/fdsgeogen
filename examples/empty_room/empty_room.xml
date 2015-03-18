@@ -1,0 +1,29 @@
+<fds>
+
+    <!-- file naming -->
+    <info chid="'empty_room'" outfile="'empty_room.fds'"/>
+
+    <!-- fixed input parameter -->
+    <input text="TIME T_END=0.0" />
+
+    <section id="mesh">
+        
+        <!-- grid spacing of 0.2 m -->
+        <var delta = "0.2" />
+        
+        <!-- spacial dimensions -->
+        <var lx = "2.4" ly = "3.6" lz = "1.8" />
+        
+        <!-- compute gird dimensions -->
+        <var nx = "int(lx / delta)" ny="int(ly / delta)" nz="int(lz / delta)" />
+
+        <!-- info output to FDS file -->
+        <dump str="'! create FDS mesh with a grid spacing of %f and an extension of %f x %f x %f'%(delta, lx, ly, lz)" />
+
+        <!-- create mesh -->
+        <fds_mesh ijk="nx, ny, nz" xb="0, lx, 0, ly, 0, lz" />
+
+
+    </section>
+
+</fds>
