@@ -361,7 +361,7 @@ def loop(node):
     if 'start' in node.attrib and 'stop' in node.attrib:
         start = int(get_val(node, 'start'))
         stop = int(get_val(node, 'stop'))
-        for loop_i in range(start, stop):
+        for loop_i in range(start, stop+1):
             add_var(node.attrib['var'], loop_i)
             traverse(node)
             del_var(node.attrib['var'])
