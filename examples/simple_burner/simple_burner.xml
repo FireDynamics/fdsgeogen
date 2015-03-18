@@ -1,0 +1,41 @@
+<fds>
+
+    <!-- variables for the position and diameter of the burner -->
+    <var xpos = "0.6"  ypos = "1.0" diameter = "0.4"/>
+    
+    <!-- file naming -->
+    <info chid="'simple_burner'" title="'Example file for FDSgeogen'" outfile="'simple_burner.fds'"/>
+
+    <!-- fixed input parameter -->
+    <input text="TIME T_END=5.0" />
+
+    <!-- definition of the reaction -->
+    <fds_reac id="'METHANE'" fuel="'METHANE'" soot_yield="0.05"/> 
+
+    <section id="mesh">
+        
+        <!-- mesh dimensions -->       
+		<var xmin = "0.0"  ymin = "0.0"  zmin = "0.0" />
+		<var xmax = "3.0"  ymax = "3.0"  zmax = "2.4" />
+		
+        <!-- number of cells -->
+        <var nx = "15" ny = "15" nz = "12" />
+
+        <!-- creating the mesh -->
+		<mesh />
+
+        <!-- mesh boundaries -->
+		<fds_vent mb = "'XMIN'" surf_id = "'OPEN'" />
+		<fds_vent mb = "'XMAX'" surf_id = "'OPEN'" />
+		<fds_vent mb = "'YMIN'" surf_id = "'OPEN'" />
+		<fds_vent mb = "'YMAX'" surf_id = "'OPEN'" />
+		<fds_vent mb = "'ZMAX'" surf_id = "'OPEN'" />
+		
+    </section>
+
+    <!-- burning surface -->
+    <fds_surf id="'burner'" hrrpua="1000" />
+    <!-- creating and poistioning the burner -->
+    <fds_obst xb="xpos-diameter/2., xpos+diameter/2., ypos-diameter/2., ypos+diameter/2., 0.0, 0.4" surf_ids="'burner', 'INERT', 'INERT'"/>
+
+</fds>
