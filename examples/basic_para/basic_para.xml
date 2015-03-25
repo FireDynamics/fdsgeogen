@@ -1,0 +1,12 @@
+<fds>
+
+    <para var='xpos' list='1.0, 1.2, 1.4, 1.6, 1.8, 2.0' />
+
+    <!-- file naming -->
+    <info chid="'basic_para'" outfile="'basic_para_id%03d.fds'%para_id"/>
+
+    <!-- simple control output -->
+    <dump str="'! para id : %3d'%para_id" />
+    <dump str="'! xpos    : %f'%xpos" />
+
+</fds>
