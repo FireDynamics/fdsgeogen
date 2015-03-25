@@ -920,6 +920,8 @@ vars = {}
 # looking for parameters
 for node in root:
     if node.tag == 'para':
+        if 'dim' not in node.attrib:
+            node.attrib['dim'] = 'default_dim'
         if node.attrib['dim'] not in params:
             params[node.attrib['dim']] = []
         paradim(node, params[node.attrib['dim']])
