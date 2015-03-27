@@ -1,0 +1,9 @@
+<fds>
+
+    <!-- FDS input file naming -->
+    <info chid="'basic_include'" outfile="'basic_include.fds'" />
+
+    <!-- inclusion of only OBST statements of from an external file -->
+    <input from_file="'external.fds'" incl="'OBST'"/>
+
+</fds>
