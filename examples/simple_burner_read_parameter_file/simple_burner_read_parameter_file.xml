@@ -1,11 +1,11 @@
 <fds>
 
     <!-- reading in the parameter file -->
-	<para dim="dimension" var="dimvar1" file="data.csv" col="0" />
-	<para dim="dimension" var="dimvar2" file="data.csv" col="1" />
+	<para var="xpos" file="data.csv" col="0" />
+	<para var="ypos" file="data.csv" col="1" />
 	
-    <!-- variables for the position and diameter of the burner -->
-    <var xpos = "dimvar1"  ypos = "dimvar2" diameter = "0.4"/>
+    <!-- variable for the diameter of the burner -->
+    <var diameter = "0.4"/>
 
     <!-- file naming according to the parameter id-->
     <info chid="'simple_burner_id%i'%para_id" title="'Example file for FDSgeogen'" outfile="'simple_burner_id%i.fds'%para_id"/>

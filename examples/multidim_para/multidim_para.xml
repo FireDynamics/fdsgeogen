@@ -1,0 +1,14 @@
+<fds>
+
+    <para dim='position' var='xpos' list='1.0, 1.2, 1.4, 1.6, 1.8, 2.0' />
+    <para dim='position' var='ypos' list='range(6)' />
+    <para dim='diam'     var="diameter" list='0.1, 0.2, 0.3' />
+
+
+    <!-- file naming -->
+    <info chid="'basic_para'" outfile="'basic_para_id%03d.fds'%para_id"/>
+
+    <!-- simple control output -->
+    <dump str="'! para_id : %2d, xpos : %f, ypos : %f, diameter : %f'%(para_id,xpos,ypos,diameter)" />
+
+</fds>
