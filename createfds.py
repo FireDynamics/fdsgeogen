@@ -21,7 +21,9 @@ global_args['fds_surf'] = ['rgb', 'color', 'vel', 'hrrpua', 'heat_of_vaporizatio
                        'ignition_temperature', 'burn_away', 'matl_id', 'matl_mass_fraction',
                        'thickness', 'external_flux', 'backing', 'hrrupa', 'stretch_factor', 'cell_size_factor',
                        'ramp_q', 'mlrpua', 'tmp_front', 'transparency']
-global_args['fds_obst'] = ['xb', 'surf_ids', 'surf_id', 'color', 'bulk_density', 'bndf_obst']
+global_args['fds_obst'] = ['xb', 'surf_ids', 'surf_id', 'color', 'bulk_density', 'bndf_obst',
+                       'thickness', 'external_flux', 'backing', 'hrrupa', 'stretch_factor', 'cell_size_factor',
+                       'ramp_q', 'mlrpua']
 global_args['fds_hole'] = ['xb', 'color']
 global_args['fds_vent'] = ['xb', 'surf_id', 'color', 'dynamic_pressure', 'tmp_exterior', 'mb', 'transparency']
 global_args['fds_slcf'] = ['pbx', 'pby', 'pbz', 'quantity', 'vector', 'evacuation']
