@@ -12,14 +12,15 @@ import numpy as np
 #########################
 
 global_args = {}
-global_args['fds_reac'] = ['heat_of_combustion', 'soot_yield', 'C', 'H', 'fuel']
+global_args['fds_reac'] = ['heat_of_combustion', 'soot_yield', 'C', 'H', 'fuel', 'ideal']
 global_args['fds_matl'] = ['specific_heat', 'conductivity', 'density', 'heat_of_combustion',
                        'n_reactions', 'heat_of_reaction', 'nu_spec', 'reference_temperature',
                        'a', 'e', 'n_s', 'spec_id', 'emissivity', 'heating_rate', 'pyrolysis_range', 'matl_id',
                        'nu_matl']
 global_args['fds_surf'] = ['rgb', 'color', 'vel', 'hrrpua', 'heat_of_vaporization',
                        'ignition_temperature', 'burn_away', 'matl_id', 'matl_mass_fraction',
-                       'thickness', 'external_flux', 'backing', 'hrrupa', 'stretch_factor', 'cell_size_factor']
+                       'thickness', 'external_flux', 'backing', 'hrrupa', 'stretch_factor', 'cell_size_factor',
+                       'ramp_q', 'mlrpua']
 global_args['fds_obst'] = ['xb', 'surf_ids', 'surf_id', 'color', 'bulk_density']
 global_args['fds_hole'] = ['xb', 'color']
 global_args['fds_vent'] = ['xb', 'surf_id', 'color', 'dynamic_pressure', 'tmp_exterior', 'mb', 'transparency']
@@ -539,7 +540,7 @@ def init(node):
                                                                      check_get_val(node, 'comment', "")))
 
 
-def hrr_fromfile(node):
+def ramp(node):
     # DESCRIPTION:
     #  reads ramp data from a given file and writes the RAMP statements via write_to_fds
     # INPUT (arguments of node):
@@ -547,7 +548,7 @@ def hrr_fromfile(node):
     #  file     - file with the ramp data (required)
     id = check_get_val(node, 'id', node.attrib["file"].split(".")[0])
     if check_val(node, 'file'):
-        file_values = open(node.attrib["file"], 'r')
+        file_values = open(get_val(node, "file"), 'r')
         for line in file_values:
             write_to_fds("&RAMP ID='%s' T=%f, F=%f / \n" % (id, float(line.split(",")[0]), float(line.split(",")[1])))
 
@@ -683,12 +684,12 @@ def bounded_room(node):
     #  wall_color                       - color of room walls (default: "FIREBRICK")
     #  wall_transparency                - transparency of walls (default: 0.5)
     # get input values from node
-    x1 = get_val(node, "x1")
-    x2 = get_val(node, "x2")
-    y1 = get_val(node, "y1")
-    y2 = get_val(node, "y2")
-    z1 = get_val(node, "z1")
-    z2 = get_val(node, "z2")
+    x1 = get_val(node, "x1", opt=True)
+    x2 = get_val(node, "x2", opt=True)
+    y1 = get_val(node, "y1", opt=True)
+    y2 = get_val(node, "y2", opt=True)
+    z1 = get_val(node, "z1", opt=True)
+    z2 = get_val(node, "z2", opt=True)
 
     bx1 = check_get_val(node, "bx1", 0)
     bx2 = check_get_val(node, "bx2", 0)
