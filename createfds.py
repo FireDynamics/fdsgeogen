@@ -20,11 +20,12 @@ global_args['fds_matl'] = ['specific_heat', 'conductivity', 'density', 'heat_of_
 global_args['fds_surf'] = ['rgb', 'color', 'vel', 'hrrpua', 'heat_of_vaporization',
                        'ignition_temperature', 'burn_away', 'matl_id', 'matl_mass_fraction',
                        'thickness', 'external_flux', 'backing', 'hrrupa', 'stretch_factor', 'cell_size_factor',
-                       'ramp_q', 'mlrpua', 'tmp_front']
-global_args['fds_obst'] = ['xb', 'surf_ids', 'surf_id', 'color', 'bulk_density']
+                       'ramp_q', 'mlrpua', 'tmp_front', 'transparency']
+global_args['fds_obst'] = ['xb', 'surf_ids', 'surf_id', 'color', 'bulk_density', 'bndf_obst']
 global_args['fds_hole'] = ['xb', 'color']
 global_args['fds_vent'] = ['xb', 'surf_id', 'color', 'dynamic_pressure', 'tmp_exterior', 'mb', 'transparency']
 global_args['fds_slcf'] = ['pbx', 'pby', 'pbz', 'quantity', 'vector', 'evacuation']
+global_args['fds_bndf'] = ['quantity']
 global_args['fds_pers'] = ['avatar_color', 'color_method', 'default_properties', 'det_mean', 'pre_mean', 'dens_init',
                        'l_non_sp']
 global_args['fds_exit'] = ['ior', 'xyz', 'xb']
@@ -45,6 +46,7 @@ global_keys['fds_obst'] = 'OBST'
 global_keys['fds_hole'] = 'HOLE'
 global_keys['fds_vent'] = 'VENT'
 global_keys['fds_slcf'] = 'SLCF'
+global_keys['fds_bndf'] = 'BNDF'
 global_keys['fds_pers'] = 'PERS'
 global_keys['fds_exit'] = 'EXIT'
 global_keys['fds_evac'] = 'EVAC'
