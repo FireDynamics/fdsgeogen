@@ -57,6 +57,46 @@ global_keys['fds_mesh'] = 'MESH'
 # accepted deviation when dealing with float arithmetic
 epsilon = 0.0001
 
+###############################
+#####  HELPER FUNCTIONS   #####
+###############################
+
+def primes(n):
+    primfac = []
+    d = 2
+    while d*d <= n:
+        while (n % d) == 0:
+            primfac.append(d)  # supposing you want multiple factors repeated
+            n //= d
+        d += 1
+    if n > 1:
+       primfac.append(n)
+    return primfac
+
+def decompose(n, p):
+    p_primes = primes(p)[::-1]
+    procs = np.array([1,1,1])
+    n_tmp = np.copy(n)
+
+    for fac in p_primes:
+        while (np.any(n_tmp > 0)):
+            cpmax = np.argmax(n_tmp)
+            cmax  = np.amax(n_tmp)
+            if (cmax % fac == 0):
+                n_tmp[cpmax] /= fac
+                procs[cpmax] *= fac
+                break
+            else:
+                n_tmp[cpmax] = -n_tmp[cpmax]
+
+        if np.all(n_tmp < 0):
+            print "!! decomposition does not work out... ", fac, n_tmp
+            sys.exit()
+
+        n_tmp = np.abs(n_tmp)
+
+    print " - decomposition: resulting proc decomposition ", procs, " local mesh size ", n_tmp
+    return procs[0], procs[1], procs[2]
 
 ###############################
 ##### VARIABLE MANAGEMENT #####
@@ -382,9 +422,16 @@ def mesh(node):
     #  creates a mesh with the given parameters and writes the MESH statement via write_to_fds
     # INPUT (arguments of node):
     #  px, py, pz           - number of meshes in x,y or z direction (default: 1)
+    #  P                    - total number of meshes to be split into
     #  nx, ny, nz           - number of cells in x, y and z direction
     #  xmin, ymin, zmin     - starting coordinates of the mesh
     #  xmax, ymax, zmax     - end coordinates of the mesh
+
+    # calculating the number of cells
+    gnx = get_val(node, "nx", opt=True)
+    gny = get_val(node, "ny", opt=True)
+    gnz = get_val(node, "nz", opt=True)
+
     # calculating the number of meshes
     px = 1
     py = 1
@@ -393,19 +440,23 @@ def mesh(node):
         px = get_val(node, "px", opt=True)
         py = get_val(node, "py", opt=True)
         pz = get_val(node, "pz", opt=True)
-    # calculating the number of cells
-    gnx = get_val(node, "nx", opt=True)
-    gny = get_val(node, "ny", opt=True)
-    gnz = get_val(node, "nz", opt=True)
+    elif check_val(node, ["P"]):
+        P = get_val(node, "P", opt=True)
+        px, py, pz = decompose([gnx, gny, gnz], P)
+
+
+    # calculating the local mesh sizes
     lnx = gnx / px
     lny = gny / py
     lnz = gnz / pz
+
     gxmin = get_val(node, "xmin", opt=True)
     gxmax = get_val(node, "xmax", opt=True)
     gymin = get_val(node, "ymin", opt=True)
     gymax = get_val(node, "ymax", opt=True)
     gzmin = get_val(node, "zmin", opt=True)
     gzmax = get_val(node, "zmax", opt=True)
+
     dx = (gxmax - gxmin) / px
     dy = (gymax - gymin) / py
     dz = (gzmax - gzmin) / pz
