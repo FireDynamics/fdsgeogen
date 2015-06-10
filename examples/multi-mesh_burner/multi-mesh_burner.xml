@@ -1,0 +1,35 @@
+<fds>
+
+    <!-- file naming -->
+    <info chid="'multi-mesh_burner'" title="'Example file for FDSgeogen'" outfile="'multi-mesh_burner.fds'"/>
+
+    <!-- fixed input parameter -->
+    <input text="TIME T_END=5.0" />
+
+	<!--================================
+	========= mesh definition ==========
+	=================================-->
+          
+	<!-- set rooms physical extension -->
+    <var x1="0.0" x2="2.0" y1="0.0" y2="2.0" z1="0.0" z2="3.0" />
+
+    <!-- set grid spacing -->
+	<var delta="0.1" />
+
+    <!-- create empty room, split into 8 meshes -->
+    <bounded_room P="8" />
+
+	<!-- mesh boundaries -->
+	<fds_vent mb = "'XMIN'" surf_id = "'OPEN'" />
+	<fds_vent mb = "'XMAX'" surf_id = "'OPEN'" />
+	<fds_vent mb = "'YMIN'" surf_id = "'OPEN'" />
+	<fds_vent mb = "'YMAX'" surf_id = "'OPEN'" />
+	<fds_vent mb = "'ZMAX'" surf_id = "'OPEN'" />
+
+	<!--================================
+	========= fire definition ==========
+	=================================-->
+
+   <fire type="burningbox" cx="0.6" cy="1.0" lz="0" width="0.4" height="0.6" hrr="100.0" />
+
+</fds>
