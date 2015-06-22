@@ -660,18 +660,26 @@ def slcf(node):
     #  q        - quantity of slices
     #  v        - determines that a vector is used
     #  x, y, z  - dimension to record as slice file
-    q = "QUANTITY='%s'" % get_val(node, 'q')
 
-    v = ""
-    if check_get_val(node, 'v', "False"):
-        v = "VECTOR=.TRUE."
+    if check_val(node, 'q'):
 
-    if check_val(node, 'x'):
-        write_to_fds("&SLCF PBX=%e, %s %s /\n" % (get_val(node, 'x'), q, v))
-    if check_val(node, 'y'):
-        write_to_fds("&SLCF PBY=%e, %s %s /\n" % (get_val(node, 'y'), q, v))
-    if check_val(node, 'z'):
-        write_to_fds("&SLCF PBZ=%e, %s %s /\n" % (get_val(node, 'z'), q, v))
+		q = get_val(node, 'q')
+		if not (type(q) is list or type(q) is tuple):
+			q = [q]
+
+		for iq in q:
+			curr_q = "QUANTITY='%s'" % iq
+
+			v = ""
+			if check_get_val(node, 'v', "False"):
+				v = "VECTOR=.TRUE."
+
+			if check_val(node, 'x'):
+				write_to_fds("&SLCF PBX=%e, %s %s /\n" % (get_val(node, 'x'), curr_q, v))
+			if check_val(node, 'y'):
+				write_to_fds("&SLCF PBY=%e, %s %s /\n" % (get_val(node, 'y'), curr_q, v))
+			if check_val(node, 'z'):
+				write_to_fds("&SLCF PBZ=%e, %s %s /\n" % (get_val(node, 'z'), curr_q, v))
 
 
 #############################
