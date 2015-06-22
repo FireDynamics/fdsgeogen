@@ -661,9 +661,11 @@ def slcf(node):
     #  v        - determines that a vector is used
     #  x, y, z  - dimension to record as slice file
     q = "QUANTITY='%s'" % get_val(node, 'q')
+
     v = ""
-    if check_get_val(node, 'v', "") == '1':
+    if check_get_val(node, 'v', "False"):
         v = "VECTOR=.TRUE."
+
     if check_val(node, 'x'):
         write_to_fds("&SLCF PBX=%e, %s %s /\n" % (get_val(node, 'x'), q, v))
     if check_val(node, 'y'):
