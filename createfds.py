@@ -20,7 +20,7 @@ global_args['fds_matl'] = ['specific_heat', 'conductivity', 'density', 'heat_of_
 global_args['fds_surf'] = ['rgb', 'color', 'vel', 'hrrpua', 'heat_of_vaporization',
                        'ignition_temperature', 'burn_away', 'matl_id', 'matl_mass_fraction',
                        'thickness', 'external_flux', 'backing', 'hrrupa', 'stretch_factor', 'cell_size_factor',
-                       'ramp_q', 'mlrpua', 'tmp_front', 'transparency']
+                       'ramp_q', 'mlrpua', 'tmp_front', 'tmp_inner','tmp_back', 'transparency']
 global_args['fds_obst'] = ['xb', 'surf_ids', 'surf_id', 'color', 'bulk_density', 'bndf_obst',
                        'thickness', 'external_flux', 'backing', 'hrrupa', 'stretch_factor', 'cell_size_factor',
                        'ramp_q', 'mlrpua']
@@ -583,7 +583,7 @@ def init(node):
     #  x1, y1, z1       - coordinates of one corner of the defined area (required)
     #  x2, y2, z2       - coordinates of the opposing corner of the defined area (required)
     #  comment          - comment to be written after the INIT statement
-    write_to_fds("&INIT TEMPERATURE=%f XB=%f,%f,%f,%f,%f,%f / %s" % (get_val(node, "temperature"),
+    write_to_fds("&INIT TEMPERATURE=%f XB=%f,%f,%f,%f,%f,%f / %s \n" % (get_val(node, "temperature"),
                                                                      get_val(node, "x1"),
                                                                      get_val(node, "x2"),
                                                                      get_val(node, "y1"),
