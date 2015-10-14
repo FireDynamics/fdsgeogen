@@ -2,6 +2,7 @@
 
 import sys
 import re
+import os
 from itertools import product
 import xml.etree.ElementTree as ET
 import numpy as np
@@ -286,7 +287,13 @@ def open_fds_file():
     #  as specified by the outfile variable, writes a HEAD statement via write_to_fds
     if type(vars['fds_file']) == file:
         close_fds_file()
-    vars['fds_file'] = open(vars['outfile'], 'w')
+    if not os.path.isdir(vars['subdir']):
+        os.mkdir(vars['subdir'])
+    if not vars['subdir'] in subdirs:
+        subdirs[vars['subdir']] = vars['outfile']
+    else:
+        print "WARNING: sub directory used multiple times"
+    vars['fds_file'] = open(vars['subdir'] + '/' + vars['outfile'], 'w')
     write_to_fds("&HEAD CHID='%s', TITLE='%s' /\n" % (vars['chid'], vars['title']))
 
 
@@ -697,9 +704,11 @@ def info(node):
         vars['chid'] = get_val(node, "chid")
         vars['title'] = get_val(node, "title", opt=True)
         vars['outfile'] = get_val(node, "outfile")
-        print "chid    : %s" % vars['chid']
-        print "title   : %s" % vars['title']
-        print "outfile : %s" % vars['outfile']
+        vars['subdir'] = check_get_val(node, "subdir", "./")
+        print "chid          : %s" % vars['chid']
+        print "title         : %s" % vars['title']
+        print "outfile       : %s" % vars['outfile']
+        print "sub directory : %s" % vars['subdir']
         open_fds_file()
 
 
@@ -980,6 +989,7 @@ root = tree.getroot()
 
 params = {}
 vars = {}
+subdirs = {}
 
 # looking for parameters
 for node in root:
@@ -1003,3 +1013,8 @@ for items in product(*[params[pd] for pd in params]):
     traverse(root)
 
     close_fds_file()
+
+subdirs_file = open('fdsgeogen.subdirlist', 'w')
+for i in subdirs:
+    subdirs_file.write(i + ' ; ' + subdirs[i] + '\n')
+subdirs_file.close()
