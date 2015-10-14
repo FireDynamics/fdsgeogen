@@ -700,6 +700,7 @@ def info(node):
     #  chid     - job identifier (required)
     #  title    - short description of the job
     #  outfile  - name of the FDS file, should match with chid (required)
+    #  subdir   - name of subdirectory to be created and where the output FDS file will be placed
     if check_val(node, ['chid', 'outfile'], opt=False):
         vars['chid'] = get_val(node, "chid")
         vars['title'] = get_val(node, "title", opt=True)
