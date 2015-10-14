@@ -1040,5 +1040,5 @@ for items in product(*[params[pd] for pd in params]):
 
 subdirs_file = open('fdsgeogen.subdirlist', 'w')
 for i in subdirs:
-    subdirs_file.write(i + ' ; ' + subdirs[i] + '\n')
+    subdirs_file.write(i + ';' + subdirs[i] + '\n')
 subdirs_file.close()
