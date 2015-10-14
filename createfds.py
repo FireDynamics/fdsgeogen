@@ -635,29 +635,52 @@ def devc(node):
     # OR
     #  x, y, z      - coordinates of the point where the devices are to be placed
     #  ior          - ?
+    #  plot         - instruct the analysis script to plot the device output, options: [single]
+    
     check_val(node, ["q", "id"], opt=False)
-    if check_val(node, ["x1", "x2", "y1", "y2", "z1", "z2"]):
-        write_to_fds("&DEVC ID='%s' XB=%f,%f,%f,%f,%f,%f QUANTITY='%s'/\n" % (get_val(node, "id"),
-                                                                              get_val(node, "x1"),
-                                                                              get_val(node, "x2"),
-                                                                              get_val(node, "y1"),
-                                                                              get_val(node, "y2"),
-                                                                              get_val(node, "z1"),
-                                                                              get_val(node, "z2"),
-                                                                              get_val(node, "q")))
-        return True
-    if check_val(node, ["x", "y", "z"]):
-        ior_s = ''
-        if check_val(node, ["ior"], opt=True):
-            ior_s = ", IOR=%s" % get_val(node, "ior")
-        write_to_fds("&DEVC ID='%s', XYZ=%f,%f,%f, QUANTITY='%s'%s/\n" % (get_val(node, "id"),
-                                                                          get_val(node, "x"),
-                                                                          get_val(node, "y"),
-                                                                          get_val(node, "z"),
-                                                                          get_val(node, "q"),
-                                                                          ior_s))
-        return True
-    return False
+
+    q_list  = get_val(node, 'q')
+    id_list = get_val(node, 'id')
+    
+    if not (type(q_list) is list or type(q_list) is tuple):
+        q_list = [q_list]
+    
+    for devc_cnt in range(len(q_list)):
+    
+        devc_q  = q_list[devc_cnt]
+        if not (type(id_list) is list or type(id_list) is tuple):
+            devc_id = id_list + '_%03d'%devc_cnt
+        else:
+            devc_id = id_list[devc_cnt]
+    
+        plot_type = check_get_val(node, 'plot', '')
+        if plot_type != '':
+            plot_file = open(vars['subdir'] + '/fdsgeogen.plot', 'a')
+            plot_file.write(devc_id + ';' + devc_q + ';' + plot_type + "\n")
+            plot_file.close()
+        
+        
+        if check_val(node, ["x1", "x2", "y1", "y2", "z1", "z2"]):
+            write_to_fds("&DEVC ID='%s' XB=%f,%f,%f,%f,%f,%f QUANTITY='%s'/\n" % (devc_id,
+                                                                                  get_val(node, "x1"),
+                                                                                  get_val(node, "x2"),
+                                                                                  get_val(node, "y1"),
+                                                                                  get_val(node, "y2"),
+                                                                                  get_val(node, "z1"),
+                                                                                  get_val(node, "z2"),
+                                                                                  devc_q))
+                                                                                  
+        if check_val(node, ["x", "y", "z"]):
+            ior_s = ''
+            if check_val(node, ["ior"], opt=True):
+                ior_s = ", IOR=%s" % get_val(node, "ior")
+            write_to_fds("&DEVC ID='%s', XYZ=%f,%f,%f, QUANTITY='%s'%s/\n" % (devc_id,
+                                                                              get_val(node, "x"),
+                                                                              get_val(node, "y"),
+                                                                              get_val(node, "z"),
+                                                                              devc_q,
+                                                                              ior_s))
+
 
 
 def slcf(node):
