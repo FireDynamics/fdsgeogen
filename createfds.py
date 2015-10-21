@@ -635,7 +635,7 @@ def devc(node):
     # OR
     #  x, y, z      - coordinates of the point where the devices are to be placed
     #  ior          - ?
-    #  plot         - instruct the analysis script to plot the device output, options: [single]
+    #  plot         - instruct the analysis script to plot the device output, options: [single, local:group]
     
     check_val(node, ["q", "id"], opt=False)
 
