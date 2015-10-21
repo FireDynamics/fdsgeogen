@@ -653,11 +653,12 @@ def devc(node):
         else:
             devc_id = id_list[devc_cnt]
     
-        plot_type = check_get_val(node, 'plot', '')
-        if plot_type != '':
-            plot_file = open(vars['subdir'] + '/fdsgeogen.plot', 'a')
-            plot_file.write(devc_id + ';' + devc_q + ';' + plot_type + "\n")
-            plot_file.close()
+        plot_type = check_get_val(node, 'plot', [])
+        if not (type(q_list) is list or type(q_list) is tuple):
+            plot_type = [plot_type]
+        if len(plot_type) > 0:
+            for pt in range(len(plot_type)):
+                plots.append(devc_id + ';' + devc_q + ';' + plot_type[pt])
         
         
         if check_val(node, ["x1", "x2", "y1", "y2", "z1", "z2"]):
@@ -1003,6 +1004,24 @@ def paradim(node, dirlist):
     for ip in range(nump):
         dirlist[ip][node.attrib['var']] = paralist[ip]
 
+######################
+##### HELPERS ########
+######################
+
+
+def dump_subdirectories(subdirs):
+	subdirs_file = open('fdsgeogen.subdirlist', 'w')
+	subdirs_file.write("# subdir; fds input file; chid\n")
+	for i in subdirs:
+		subdirs_file.write(i + ';' + subdirs[i][0] + ';' + subdirs[i][1] + '\n')
+	subdirs_file.close()
+
+def dump_plot_types(plots, dir):
+	plot_file = open(dir + '/fdsgeogen.plot', 'w')
+	plot_file.write("# device ID; device quantity; plot type \n")
+	for i in plots:
+		plot_file.write(i + '\n')
+	plot_file.close()
 
 ######################
 ##### MAIN LOOP ######
@@ -1027,6 +1046,8 @@ for node in root:
 # generating a parameter space and traversing the tree for each set of parameters
 para_id = 0
 for items in product(*[params[pd] for pd in params]):
+    plots = []
+    
     vars = {'outfile': "output.fds", 'chid': "chid", 'title': "title", 'fds_file_open': False, 'fds_file': 0,
             'para_id': para_id}
     para_id += 1
@@ -1037,9 +1058,8 @@ for items in product(*[params[pd] for pd in params]):
     traverse(root)
 
     close_fds_file()
+    
+    dump_plot_types(plots, vars['subdir'])
 
-subdirs_file = open('fdsgeogen.subdirlist', 'w')
-subdirs_file.write("# subdir; fds input file; chid")
-for i in subdirs:
-    subdirs_file.write(i + ';' + subdirs[i][0] + ';' + subdirs[i][1] + '\n')
-subdirs_file.close()
+dump_subdirectories(subdirs)
+
