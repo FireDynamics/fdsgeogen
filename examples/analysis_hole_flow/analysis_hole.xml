@@ -1,0 +1,69 @@
+<fds>
+
+	<para var='hole_z' list='1.0, 1.25, 1.5, 1.75, 2.0, 2.25' />
+
+    <!-- file naming -->
+    <info chid="'analysis_opening'" subdir="'id_%03d'%para_id" title="'Example file for FDSgeogen'" outfile="'analysis_hole.fds'"/>
+
+    <!-- fixed input parameter -->
+    <input text="TIME T_END=0.0" />
+
+
+	<!--===================================
+	========= mesh and wall definition ====
+	====================================-->
+    
+    <var delta = '0.1' />
+    
+    <var room_x='2.4' room_y='2.4' room_z='2.5' />
+          
+	<bounded_room x1='0.0' x2='room_x + 1.0' y1='0.0' y2='room_y' z1='0.0' z2='room_z + 1.0' />
+	
+	<fds_obst xb='0.0, delta, 0.0, room_y, 0.0, room_z' color="'FIREBRICK'"/>
+	<fds_obst xb='room_x-delta, room_x, 0.0, room_y, 0.0, room_z' color="'FIREBRICK'" />
+	
+	<fds_obst xb='0.0, room_x, 0.0, delta, 0.0, room_z' color="'FIREBRICK'"/>
+	<fds_obst xb='0.0, room_x, room_y-delta, room_y, 0.0, room_z' color="'FIREBRICK'" />
+	
+	<fds_obst xb='0.0, room_x, 0.0, room_y, room_z, room_z+delta' color="'FIREBRICK'"/>
+
+
+	<!--================================
+	========= fire definition ==========
+	=================================-->
+
+	<!-- variables for the position and diameter of the burner -->
+    <var xpos = "0.6"  ypos = "1.0" diameter = "0.4" hrr = "1000" />
+
+    <!-- definition of the reaction -->
+    <fds_reac id="'METHANE'" fuel="'METHANE'" soot_yield="0.05"/> 
+
+    <!-- burning surface -->
+    <fds_surf id="'burner'" hrrpua="hrr" />
+    
+    <!-- creating and positioning the burner -->
+    <fds_obst xb="xpos-diameter/2., xpos+diameter/2., ypos-diameter/2., ypos+diameter/2., 0.0, 0.4" surf_ids="'burner', 'INERT', 'INERT'"/>
+    
+    <devc id="'my_id'" q="'TEMPERATURE', 'VELOCITY'" plot="'single', 'local:g1'" x="1.5" y="1.5" z="1.0"/>
+    <devc id="'my_id'" q="'TEMPERATURE', 'PRESSURE'" plot="'single', 'local:gV'" x="1.5" y="1.5" z="1.0"/>
+    
+    <!--================================
+	========= hole definition ==========
+	=================================-->
+	
+	<var radius='0.5' />
+	<var nlines='int(radius / delta * 2.0)' />
+	
+	<loop var='i' start='0' stop='nlines' >
+	
+		<var z = "hole_z - radius + i*delta" />
+		<var ymin = "room_y/2.0 - radius + abs(z - hole_z)" /> 
+		<var ymax = "room_y/2.0 + radius - abs(z - hole_z)" /> 
+	
+		<dbg print="'i: %2d'%i" />
+		
+		<fds_hole xb='room_x-delta, room_x, ymin, ymax, z, z+delta' />
+	
+	</loop>
+
+</fds>
