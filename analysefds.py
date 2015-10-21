@@ -126,6 +126,9 @@ for ind in range(len(subdirs)):
 	data = np.loadtxt(fn_devc, skiprows=2, delimiter=',')
 	
 	for i in single_tasks[csd]:
+	
+		print "processing single task in directory: ", csd
+	
 		if not i[1] in ids:
 			print "WARNINIG: did not find according device id: ", i[1]
 			continue
@@ -135,6 +138,8 @@ for ind in range(len(subdirs)):
 		saveDevcPlot(csd, data[:,0], (data[:,col],), (i[1], ), (i[2], ), (units[col],), '')
 
 	for cg in local_tasks[csd]:
+		
+		print "processing local task in directory: ", csd, ", group: ", cg
 		
 		gc_cols  = []
 		gc_ids   = []
