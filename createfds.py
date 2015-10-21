@@ -290,7 +290,7 @@ def open_fds_file():
     if not os.path.isdir(vars['subdir']):
         os.mkdir(vars['subdir'])
     if not vars['subdir'] in subdirs:
-        subdirs[vars['subdir']] = vars['outfile']
+        subdirs[vars['subdir']] = (vars['outfile'], vars['chid'])
     else:
         print "WARNING: sub directory used multiple times"
     vars['fds_file'] = open(vars['subdir'] + '/' + vars['outfile'], 'w')
@@ -1039,6 +1039,7 @@ for items in product(*[params[pd] for pd in params]):
     close_fds_file()
 
 subdirs_file = open('fdsgeogen.subdirlist', 'w')
+subdirs_file.write("# subdir; fds input file; chid")
 for i in subdirs:
-    subdirs_file.write(i + ';' + subdirs[i] + '\n')
+    subdirs_file.write(i + ';' + subdirs[i][0] + ';' + subdirs[i][1] + '\n')
 subdirs_file.close()
