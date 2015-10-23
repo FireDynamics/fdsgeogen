@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import os.path
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -122,12 +123,12 @@ for i in local_tasks:
 	print " =", i
 	for j in local_tasks[i]:
 		print "  -", j
-	
+
 print "== global tasks"
 for i in global_tasks:
 	print i
 
-# go to all directories and check for tasks
+# go to all directories and check for tasks (single and local)
 for ind in range(len(subdirs)):
 	csd = subdirs[ind]
 	ccid = chids[ind]
@@ -135,6 +136,10 @@ for ind in range(len(subdirs)):
 	
 	if not ((csd in single_tasks) or (csd in local_tasks)):
 		print "INFO: skipping directory, as not single or local tasks exist", csd
+		continue
+	
+	if not os.path.isfile(fn_devc):
+		print "INFO: skipping directory, as devc file does not exist (yet)"
 		continue
 	
 	units, ids = readDevcInfo(fn_devc)
