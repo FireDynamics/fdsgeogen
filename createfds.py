@@ -193,7 +193,7 @@ def get_val(node, name, opt=False):
     #  name     - name of the attribute to return the value for (required)
     #  opt      - determines if the program should be exited if no value for name can be found (default: False)
     if name in node.attrib:
-        return eval(node.attrib[name], {}, vars)
+        return eval(node.attrib[name], globals(), vars)
     elif (opt) and (name in vars):
         return vars[name]
     else:
