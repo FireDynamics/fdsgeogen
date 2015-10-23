@@ -304,6 +304,21 @@ def close_fds_file():
     vars['fds_file'].close()
 
 
+def dump_subdirectories(subdirs):
+	subdirs_file = open('fdsgeogen.subdirlist', 'w')
+	subdirs_file.write("# subdir; fds input file; chid\n")
+	for i in subdirs:
+		subdirs_file.write(i + ';' + subdirs[i][0] + ';' + subdirs[i][1] + '\n')
+	subdirs_file.close()
+
+
+def dump_plot_types(plots, dir):
+	plot_file = open(dir + '/fdsgeogen.plot', 'w')
+	plot_file.write("# device ID; device quantity; plot type \n")
+	for i in plots:
+		plot_file.write(i + '\n')
+	plot_file.close()
+
 ###############################
 ##### FDS CODE GENERATION #####
 ###############################
@@ -1003,25 +1018,6 @@ def paradim(node, dirlist):
         sys.exit()
     for ip in range(nump):
         dirlist[ip][node.attrib['var']] = paralist[ip]
-
-######################
-##### HELPERS ########
-######################
-
-
-def dump_subdirectories(subdirs):
-	subdirs_file = open('fdsgeogen.subdirlist', 'w')
-	subdirs_file.write("# subdir; fds input file; chid\n")
-	for i in subdirs:
-		subdirs_file.write(i + ';' + subdirs[i][0] + ';' + subdirs[i][1] + '\n')
-	subdirs_file.close()
-
-def dump_plot_types(plots, dir):
-	plot_file = open(dir + '/fdsgeogen.plot', 'w')
-	plot_file.write("# device ID; device quantity; plot type \n")
-	for i in plots:
-		plot_file.write(i + '\n')
-	plot_file.close()
 
 ######################
 ##### MAIN LOOP ######
