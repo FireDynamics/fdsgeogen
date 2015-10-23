@@ -107,10 +107,14 @@ for ind in range(len(subdirs)):
 				if not group in local_tasks[subdirs[ind]]:
 					local_tasks[subdirs[ind]][group] = []
 				local_tasks[subdirs[ind]][group].append([chids[ind], devc_id, devc_q])
+			if place == 'global':
+				if not group in global_tasks:
+					global_tasks[group] = {}
+				if not subdirs[ind] in global_tasks[group]:
+					global_tasks[group][subdirs[ind]] = []
+				global_tasks[group][subdirs[ind]].append([chids[ind], devc_id, devc_q])
 		else:
 			print "WARNING: the plot task syntax is not known: ", plot_type
-		
-		
 
 print "== single tasks"
 for i in single_tasks:
@@ -180,4 +184,51 @@ for ind in range(len(subdirs)):
 			gc_data.append(data[:,col])
 		
 		saveDevcPlot(csd, data[:,0], gc_data, gc_ids, gc_qs, gc_units, cg)
+
+# process the global tasks
+for cg in global_tasks:
+	print "processing global task group: ", cg
+	
+	group_id = ''
+	group_q = ''
+	group_unit = ''
+	
+	for csd in global_tasks[cg]:
+		ccid = global_tasks[cg][csd][0][0]
+		fn_devc = csd + '/' + ccid + '_devc.csv'
+		
+		if not os.path.isfile(fn_devc):
+			print "INFO: skipping directory, as devc file does not exist (yet)"
+			continue
+		
+		units, ids = readDevcInfo(fn_devc)
+		
+		data = np.loadtxt(fn_devc, skiprows=2, delimiter=',')
+		
+		gd_cols  = []
+		gd_ids   = []
+		gd_qs    = []
+		gd_units = []
+		gd_data  = []
+		
+		for ct in global_tasks[cg][csd]:
+			if not ct[1] in ids:
+				print "WARNINIG: did not find according device id: ", i[1]
+				continue
+				
+			col = ids.index(ct[1])
+			gd_cols.append(col)
+			gd_units.append(units[col])
+			gd_ids.append(csd) # ct[1]
+			gd_qs.append(ct[2])
+			gd_data.append(data[:,col])
+			
+			group_id = ct[1]
+			group_q  = ct[2]
+			group_unit = units[col]
+		
+		saveDevcPlot(csd, data[:,0], gd_data, gd_ids, gd_qs, gd_units, cg, mode='init')
+		
+	if group_id != '':
+		saveDevcPlot('./', [], [0,1], group_id, group_q, group_unit, cg, mode='finish')
 		
