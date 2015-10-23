@@ -663,10 +663,14 @@ def devc(node):
     for devc_cnt in range(len(q_list)):
     
         devc_q  = q_list[devc_cnt]
-        if not (type(id_list) is list or type(id_list) is tuple):
-            devc_id = id_list + '_%03d'%devc_cnt
+        devc_id = ''
+        if len(q_list) > 1:
+            if not (type(id_list) is list or type(id_list) is tuple):
+                devc_id = id_list + '_%03d'%devc_cnt
+            else:
+                devc_id = id_list[devc_cnt]
         else:
-            devc_id = id_list[devc_cnt]
+            devc_id = id_list
     
         plot_type = check_get_val(node, 'plot', [])
         if not (type(q_list) is list or type(q_list) is tuple):
