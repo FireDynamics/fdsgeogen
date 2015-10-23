@@ -24,30 +24,44 @@ def readDevcInfo(fn):
 
 #################
 
-def saveDevcPlot(dir, t, ys, ids, qs, units, group):
+def saveDevcPlot(dir, t, ys, ids, qs, units, group, mode='all'):
+
+	mode_init = False
+	mode_finish = False
+	if mode == 'all': 
+		mode_init = True
+		mode_finish = True
+	if mode == 'init':
+		mode_init = True
+	if mode == 'finish':
+		mode_finish = True
 
 	allSame = True
-	for i in range(len(ids)-1):
-		if qs[i] != qs[i+1]: allSame = False
-		if units[i] != units[i+1]: allSame = False
+
+	if mode_init:
+		for i in range(len(ids)-1):
+			if qs[i] != qs[i+1]: allSame = False
+			if units[i] != units[i+1]: allSame = False
+		
+		for i in range(len(ys)):
+			label = ids[i]
+			if not allSame:
+				label = ids[i] + " [" + units[i] + "]" 
+			plt.plot(t, ys[i], marker='o', linestyle='--', label=label)
 	
-	for i in range(len(ys)):
-		label = ids[i]
+	if mode_finish:
+		plt.xlabel('time [s]')
+		
+		ylabel = qs[0] + " [" + units[0] + "]" 
 		if not allSame:
-			label = ids[i] + " [" + units[i] + "]" 
-		plt.plot(t, ys[i], marker='o', linestyle='--', label=label)
-	plt.xlabel('time [s]')
-	
-	ylabel = qs[0] + " [" + units[0] + "]" 
-	if not allSame:
-		ylabel = 'individual scale'
-	plt.ylabel(ylabel)
-	plt.legend()
-	fn = "fgg_" + group + ".pdf"
-	if len(ys) == 1:
-		fn = "fgg_" + ids[0] + ".pdf"
-	plt.savefig(dir + '/' + fn)
-	plt.clf()
+			ylabel = 'individual scale'
+		plt.ylabel(ylabel)
+		plt.legend()
+		fn = "fgg_" + group + ".pdf"
+		if len(ys) == 1:
+			fn = "fgg_" + ids[0] + ".pdf"
+		plt.savefig(dir + '/' + fn)
+		plt.clf()
 
 ############################
 
