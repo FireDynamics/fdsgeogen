@@ -8,8 +8,6 @@ fn_subdirlist = 'fdsgeogen.subdirlist'
 fds_exec = 'fds'
 
 subdirs = []
-inputs  = []
-chids   = []
 
 # read in all sub directories, FDS input files, and CHIDs
 subdirs_file = open(fn_subdirlist, 'r')
