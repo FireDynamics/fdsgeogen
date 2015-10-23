@@ -2,12 +2,13 @@
 
 	<!--<para var='hole_z' list='1.0, 1.25, 1.5, 1.75, 2.0, 2.25' />-->
 	<para var='hole_z' list='np.linspace(1.0, 2.0, 5)' />
+	<var hole_radius='0.5' />
 
 	<!-- file naming -->
 	<info chid="'analysis_opening'" subdir="'id_%03d'%para_id" title="'Example file for FDSgeogen'" outfile="'analysis_hole.fds'"/>
 
 	<!-- fixed input parameter -->
-	<input text="TIME T_END=1.0" />
+	<input text="TIME T_END=10.0" />
 
 
 	<!--===================================
@@ -43,25 +44,30 @@
     
 	<!-- creating and positioning the burner -->
 	<fds_obst xb="xpos-diameter/2., xpos+diameter/2., ypos-diameter/2., ypos+diameter/2., 0.0, 0.4" surf_ids="'burner', 'INERT', 'INERT'"/>
-    
-	<devc id="'my_id'" q="'TEMPERATURE', 'VELOCITY'" plot="'single', 'local:g1'" x="1.5" y="1.5" z="1.0"/>
-	<devc id="'my_id'" q="'TEMPERATURE', 'PRESSURE'" plot="'single', 'local:gV'" x="1.5" y="1.5" z="1.0"/>
 
 	<!--================================
 	========= hole definition ==========
 	=================================-->
 	
-	<var radius='0.5' />
-	<var nlines='int(radius / delta * 2.0)' />
+	<var nlines='int(hole_radius / delta * 2.0)' />
 	
 	<loop var='i' start='0' stop='nlines' >
 	
-		<var zoff = "- radius + i*delta" />
-	<!--<var ywidth = "radius - abs(z - hole_z)" /> -->
-		<var ywidth = "np.sqrt(radius**2 - zoff**2)" />
+		<var zoff = "- hole_radius + i*delta" />
+		<var ywidth = "np.sqrt(hole_radius**2 - zoff**2)" />
 	
 		<fds_hole xb='room_x-delta, room_x, room_y/2. - ywidth, room_y/2. + ywidth, hole_z + zoff, hole_z + zoff + delta' />
 	
 	</loop>
+	
+	<!--================================
+	========= devc definition ==========
+	=================================-->
+	
+	<devc id="'t_up'" q="'TEMPERATURE'" plot="'single', 'local:t', 'global:t_up'" x="room_x" y="room_y/2.0" z="hole_z+hole_radius/2.0"/>
+	<devc id="'t_mid'" q="'TEMPERATURE'" plot="'single', 'local:t', 'global:t_mid'" x="room_x" y="room_y/2.0" z="hole_z"/>
+	<devc id="'t_down'" q="'TEMPERATURE'" plot="'single', 'local:t', 'global:t_down'" x="room_x" y="room_y/2.0" z="hole_z-hole_radius/2.0"/>
 
+	<slcf q="'TEMPERATURE'" y='room_y/2.0' />
+	
 </fds>
