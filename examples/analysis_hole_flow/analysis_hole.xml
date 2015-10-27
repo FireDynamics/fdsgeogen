@@ -5,10 +5,10 @@
 	<var hole_radius='0.5' />
 
 	<!-- file naming -->
-	<info chid="'analysis_opening'" subdir="'id_%03d'%para_id" title="'Example file for FDSgeogen'" outfile="'analysis_hole.fds'"/>
+	<info chid="'analysis_hole'" subdir="'id_%03d'%para_id" title="'Example file for FDSgeogen'" outfile="'analysis_hole.fds'"/>
 
 	<!-- fixed input parameter -->
-	<input text="TIME T_END=10.0" />
+	<input text="TIME T_END=4.0" />
 
 
 	<!--===================================
