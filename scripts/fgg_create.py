@@ -767,7 +767,10 @@ def fire(node):
     #  width    - width of the box (required)
     #  height   - height of the box (required)
     # hrr      - heat release rate (required)
-    if node.attrib['type'] == "burningbox":
+    
+    fire_type = get_val(node, 'type')
+    
+    if fire_type == "burningbox":
         # define the box
         cx = get_val(node, 'cx')
         cy = get_val(node, 'cy')
@@ -786,6 +789,68 @@ def fire(node):
         write_to_fds("&VENT XB=%f,%f,%f,%f,%f,%f SURF_ID='burningbox' color='RED'/\n" % (
             cx - w2, cx + w2, cy - w2, cy + w2, lz + h, lz + h))
 
+    if fire_type == 'spread_square_box':
+        cx = get_val(node, 'cx')
+        cy = get_val(node, 'cy')
+        lz = get_val(node, 'lz')
+        wx = get_val(node, 'width_x')
+        wy = get_val(node, 'width_y')
+        h = get_val(node, 'height')
+        delta = get_val(node, 'delta', opt=True)
+        
+        box_obst = "&OBST "
+        box_obst += "XB=%f, %f, %f, %f, %f, %f" % (cx - wx/2., cx + wx/2., cy - wy/2., cy + wy/2., lz, lz + h)
+        box_obst += "/\n"
+        write_to_fds(box_obst)
+        
+        write_to_fds("&REAC FUEL = 'METHANE' /\n")
+        
+        hrrmax = get_val(node, 'hrrmax')
+        alpha  = get_val(node, 'alpha')
+        
+        sx = int(wx / delta)
+        sy = int(wy / delta)
+        
+        x = np.linspace(cx-wx/2.+delta/2., cx+wx/2.-delta/2., sx)
+        y = np.linspace(cy-wy/2.+delta/2., cy+wy/2.-delta/2., sy)
+        X, Y = np.meshgrid(y,x)
+        distance = np.sqrt((X-cx)**2 + (Y-cy)**2)
+        global_max_distance = 10 * distance.max()
+        
+        n_elements = sx*sy
+        
+        f_hrr = np.linspace(0.0, hrrmax, n_elements+1)
+        f_t = np.sqrt(f_hrr / alpha)
+        
+        for e in range(len(f_t)-1):
+            ramp_name = 'ramp_spread_square_%04d'%e
+            surf_name = 'surf_spread_square_%04d'%e
+            write_to_fds("&SURF ID='%s', HRRPUA=%f, RAMP_Q='%s'/\n" % (surf_name, hrrmax / wx / wy, ramp_name))
+            t_start = f_t[e]
+            t_end   = f_t[e+1]
+            
+            write_to_fds("&RAMP ID='%s', T=-0.1, F=0.0 /\n"%ramp_name)
+            write_to_fds("&RAMP ID='%s', T=%e, F=0.0 /\n"%(ramp_name, t_start))
+            write_to_fds("&RAMP ID='%s', T=%e, F=1.0 /\n"%(ramp_name, t_end))
+            
+            # lexiographic stepping
+            #ix = int(e % sx) 
+            #iy = int(e / sx)
+            
+            ix, iy = np.unravel_index(distance.argmin(), distance.shape)
+            
+            distance[ix,iy] = global_max_distance
+            
+            x0 = cx - wx/2.
+            y0 = cy - wy/2.
+            x1 = x0 + ix * delta
+            x2 = x0 + (ix + 1) * delta
+            y1 = y0 + iy * delta
+            y2 = y0 + (iy + 1) * delta
+            
+            write_to_fds("&VENT XB=%f,%f,%f,%f,%f,%f SURF_ID='%s' color='RED'/\n" % (
+                x1, x2, y1, y2, lz + h, lz + h, surf_name))
+        
 
 def bounded_room(node):
     # DESCRIPTION:
