@@ -48,7 +48,7 @@ def saveDevcPlot(dir, t, ys, ids, qs, units, group, mode='all'):
 			label = ids[i]
 			if not allSame:
 				label = ids[i] + " [" + units[i] + "]" 
-			plt.plot(t, ys[i], marker='o', linestyle='--', label=label)
+			plt.plot(t, ys[i], marker='.', linestyle='-', label=label)
 	
 	if mode_finish:
 		plt.xlabel('time [s]')
@@ -57,7 +57,7 @@ def saveDevcPlot(dir, t, ys, ids, qs, units, group, mode='all'):
 		if not allSame:
 			ylabel = 'individual scale'
 		plt.ylabel(ylabel)
-		plt.legend()
+		plt.legend(loc='best')
 		fn = "fgg_" + group + ".pdf"
 		if len(ys) == 1:
 			fn = "fgg_" + ids[0] + ".pdf"
@@ -219,7 +219,7 @@ for cg in global_tasks:
 			col = ids.index(ct[1])
 			gd_cols.append(col)
 			gd_units.append(units[col])
-			gd_ids.append(csd) # ct[1]
+			gd_ids.append(csd + '/' + ct[1])
 			gd_qs.append(ct[2])
 			gd_data.append(data[:,col])
 			
@@ -230,5 +230,5 @@ for cg in global_tasks:
 		saveDevcPlot(csd, data[:,0], gd_data, gd_ids, gd_qs, gd_units, cg, mode='init')
 		
 	if group_id != '':
-		saveDevcPlot('./', [], [0,1], group_id, group_q, group_unit, cg, mode='finish')
+		saveDevcPlot('./', [], [0,1], [group_id], [group_q], [group_unit], cg, mode='finish')
 		
