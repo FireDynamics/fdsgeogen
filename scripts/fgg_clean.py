@@ -3,7 +3,7 @@
 import shutil
 import os
 
-fn_subdirlist = 'fdsgeogen.subdirlist'
+fn_subdirlist = 'fgg.subdirlist'
 
 fds_exec = 'fds'
 

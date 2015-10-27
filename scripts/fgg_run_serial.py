@@ -3,7 +3,7 @@
 import subprocess as sp
 import os.path
 
-fn_subdirlist = 'fdsgeogen.subdirlist'
+fn_subdirlist = 'fgg.subdirlist'
 
 fds_exec = 'fds'
 

@@ -6,8 +6,8 @@ import os.path
 import numpy as np
 import matplotlib.pyplot as plt
 
-fn_subdirlist = 'fdsgeogen.subdirlist'
-fn_plotlist = 'fdsgeogen.plot'
+fn_subdirlist = 'fgg.subdirlist'
+fn_plotlist = 'fgg.plot'
 
 ############################ HELPER
 

@@ -305,7 +305,7 @@ def close_fds_file():
 
 
 def dump_subdirectories(subdirs):
-	subdirs_file = open('fdsgeogen.subdirlist', 'w')
+	subdirs_file = open('fgg.subdirlist', 'w')
 	subdirs_file.write("# subdir; fds input file; chid\n")
 	for i in subdirs:
 		subdirs_file.write(i + ';' + subdirs[i][0] + ';' + subdirs[i][1] + '\n')
@@ -313,7 +313,7 @@ def dump_subdirectories(subdirs):
 
 
 def dump_plot_types(plots, dir):
-	plot_file = open(dir + '/fdsgeogen.plot', 'w')
+	plot_file = open(dir + '/fgg.plot', 'w')
 	plot_file.write("# device ID; device quantity; plot type \n")
 	for i in plots:
 		plot_file.write(i + '\n')
