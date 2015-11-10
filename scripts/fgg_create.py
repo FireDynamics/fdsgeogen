@@ -861,7 +861,8 @@ def bounded_room(node):
     #  x2, y2, z2                       - coordinates of the opposing corner of the room
     #  bx1, bx2, by1, by2, bz1, bz2     - wall thickness in relation to wt (default: 0)
     #  wt                               - reference value for wall thickness (default: 0.0)
-    #  ax, ay, az                       - number of meshes in the x, y or z direction (default: 1)
+    #  px, py, pz                       - number of meshes in the x, y or z direction (default: 1)
+    #  ax, ay, az                       - direction in which the domain is extended, if needed (default: 0,0,0)
     #  delta                            - cell width of the mesh
     #  wall_color                       - color of room walls (default: "FIREBRICK")
     #  wall_transparency                - transparency of walls (default: 0.5)
