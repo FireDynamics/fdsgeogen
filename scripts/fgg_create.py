@@ -3,12 +3,21 @@
 import sys
 import re
 import os
+import argparse
 from itertools import product
 import xml.etree.ElementTree as ET
 import numpy as np
 
 fgg_version = "1.3.1"
 
+#########################
+##### CMDL arguments ####
+#########################
+
+parser = argparse.ArgumentParser()
+parser.add_argument("xml_file", type=str,
+                    help="xml_file to be parsed")
+cmdl_args = parser.parse_args()
 #########################
 ##### FDS arguments #####
 #########################
@@ -1109,8 +1118,9 @@ def paradim(node, dirlist):
 ##### MAIN LOOP ######
 ######################
 
-tree = ET.parse(str(sys.argv[1]))
 print " === running FDSgeogen, version", fgg_version, " === "
+
+tree = ET.parse(cmdl_args.xml_file)
 root = tree.getroot()
 
 params = {}
