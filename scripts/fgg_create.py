@@ -863,6 +863,7 @@ def bounded_room(node):
     #  wt                               - reference value for wall thickness (default: 0.0)
     #  px, py, pz                       - number of meshes in the x, y or z direction (default: 1)
     #  ax, ay, az                       - direction in which the domain is extended, if needed (default: 0,0,0)
+    #  ex1, ex2, ey1, ey2, ez1, ez2     - domain extension in x, y or z (default: 0.0)
     #  delta                            - cell width of the mesh
     #  wall_color                       - color of room walls (default: "FIREBRICK")
     #  wall_transparency                - transparency of walls (default: 0.5)
@@ -881,6 +882,12 @@ def bounded_room(node):
     bz1 = check_get_val(node, "bz1", 0)
     bz2 = check_get_val(node, "bz2", 0)
     wt = check_get_val(node, "wt", 0.0)
+    ex1 = check_get_val(node, "ex1", 0)
+    ex2 = check_get_val(node, "ex2", 0)
+    ey1 = check_get_val(node, "ey1", 0)
+    ey2 = check_get_val(node, "ey2", 0)
+    ez1 = check_get_val(node, "ez1", 0)
+    ez2 = check_get_val(node, "ez2", 0)
 
     ax = check_get_val(node, "ax", 1)
     ay = check_get_val(node, "ay", 1)
@@ -895,6 +902,12 @@ def bounded_room(node):
     dymax = y2 + by2 * wt
     dzmin = z1 - bz1 * wt
     dzmax = z2 + bz2 * wt
+    dxmin = x1 - bx1 * wt - ex1
+    dxmax = x2 + bx2 * wt + ex2
+    dymin = y1 - by1 * wt - ey1
+    dymax = y2 + by2 * wt + ey2
+    dzmin = z1 - bz1 * wt - ez1
+    dzmax = z2 + bz2 * wt + ez2
 
     # compute required number of mesh cells
     nx = int(div235((dxmax - dxmin) / delta))
