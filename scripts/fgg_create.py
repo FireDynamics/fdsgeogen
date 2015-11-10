@@ -588,7 +588,7 @@ def boundary(node):
         if check_get_val(node, "ymax", "") == "open":
             write_to_fds("&VENT MB='YMAX' ,SURF_ID='OPEN' /\n")
 
-    if check_get_val(node, "z", "") == " open":
+    if check_get_val(node, "z", "") == "open":
         write_to_fds("&VENT MB='ZMIN' ,SURF_ID='OPEN' /\n")
         write_to_fds("&VENT MB='ZMAX' ,SURF_ID='OPEN' /\n")
     else:
