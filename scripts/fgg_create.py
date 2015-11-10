@@ -896,12 +896,6 @@ def bounded_room(node):
     delta = get_val(node, "delta", opt=True)
 
     # compute the minimum mesh size (room + walls)
-    dxmin = x1 - bx1 * wt
-    dxmax = x2 + bx2 * wt
-    dymin = y1 - by1 * wt
-    dymax = y2 + by2 * wt
-    dzmin = z1 - bz1 * wt
-    dzmax = z2 + bz2 * wt
     dxmin = x1 - bx1 * wt - ex1
     dxmax = x2 + bx2 * wt + ex2
     dymin = y1 - by1 * wt - ey1
