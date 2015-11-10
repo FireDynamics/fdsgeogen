@@ -910,9 +910,10 @@ def bounded_room(node):
     dzmax = z2 + bz2 * wt + ez2
 
     # compute required number of mesh cells
-    nx = int(div235((dxmax - dxmin) / delta))
-    ny = int(div235((dymax - dymin) / delta))
-    nz = int(div235((dzmax - dzmin) / delta))
+    nx = div235((dxmax - dxmin) / delta)
+    ny = div235((dymax - dymin) / delta)
+    nz = div235((dzmax - dzmin) / delta)
+    
     if ax == 1:
         dxmax = dxmin + nx * delta
     else:
@@ -1061,7 +1062,7 @@ def div235(n):
     #  increases a given integer value until its factors only consist of 2, 3 and 5
     # INPUT:
     #  n        - integer value to increase (required)
-    r_init = int(n)
+    r_init = np.ceil(n)
     while True:
         r = r_init
         while r % 2 == 0 and r != 0: r /= 2
