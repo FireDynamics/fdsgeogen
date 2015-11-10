@@ -860,6 +860,7 @@ def bounded_room(node):
     #  x1, y1, z1                       - coordinates of one corner of the room
     #  x2, y2, z2                       - coordinates of the opposing corner of the room
     #  bx1, bx2, by1, by2, bz1, bz2     - wall thickness in relation to wt (default: 0)
+    #  ball                             - set all bx1, ..., values to this value
     #  wt                               - reference value for wall thickness (default: 0.0)
     #  px, py, pz                       - number of meshes in the x, y or z direction (default: 1)
     #  ax, ay, az                       - direction in which the domain is extended, if needed (default: 0,0,0)
@@ -875,13 +876,18 @@ def bounded_room(node):
     z1 = get_val(node, "z1", opt=True)
     z2 = get_val(node, "z2", opt=True)
 
-    bx1 = check_get_val(node, "bx1", 0)
-    bx2 = check_get_val(node, "bx2", 0)
-    by1 = check_get_val(node, "by1", 0)
-    by2 = check_get_val(node, "by2", 0)
-    bz1 = check_get_val(node, "bz1", 0)
-    bz2 = check_get_val(node, "bz2", 0)
-    wt = check_get_val(node, "wt", 0.0)
+    ball = 0
+    if check_val(node, 'ball'):
+        ball = get_val(node, 'ball')
+
+    bx1 = check_get_val(node, "bx1", ball)
+    bx2 = check_get_val(node, "bx2", ball)
+    by1 = check_get_val(node, "by1", ball)
+    by2 = check_get_val(node, "by2", ball)
+    bz1 = check_get_val(node, "bz1", ball)
+    bz2 = check_get_val(node, "bz2", ball)
+    wt  = check_get_val(node, "wt", 0.0)
+
     ex1 = check_get_val(node, "ex1", 0)
     ex2 = check_get_val(node, "ex2", 0)
     ey1 = check_get_val(node, "ey1", 0)
