@@ -7,6 +7,7 @@ from itertools import product
 import xml.etree.ElementTree as ET
 import numpy as np
 
+fgg_version = "1.3.1"
 
 #########################
 ##### FDS arguments #####
@@ -1109,6 +1110,7 @@ def paradim(node, dirlist):
 ######################
 
 tree = ET.parse(str(sys.argv[1]))
+print " === running FDSgeogen, version", fgg_version, " === "
 root = tree.getroot()
 
 params = {}
