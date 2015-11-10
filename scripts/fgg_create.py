@@ -300,8 +300,9 @@ def open_fds_file():
 def close_fds_file():
     # DESCRIPTION:
     #  writes a TAIL statement via write_to_fds and closes the FDS file
-    write_to_fds("&TAIL/\n")
-    vars['fds_file'].close()
+    if type(vars['fds_file']) == file:
+        write_to_fds("&TAIL/\n")
+        vars['fds_file'].close()
 
 
 def dump_subdirectories(subdirs):
