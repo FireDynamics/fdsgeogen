@@ -746,10 +746,10 @@ def info(node):
     #  outfile  - name of the FDS file, should match with chid (required)
     #  subdir   - name of subdirectory to be created and where the output FDS file will be placed
     if check_val(node, ['chid', 'outfile'], opt=False):
-        vars['chid'] = get_val(node, "chid")
-        vars['title'] = get_val(node, "title", opt=True)
+        vars['chid']    = get_val(node, "chid")
+        vars['title']   = get_val(node, "title", opt=True)
         vars['outfile'] = get_val(node, "outfile")
-        vars['subdir'] = check_get_val(node, "subdir", "./")
+        vars['subdir']  = get_val(node, "subdir", opt=True)
         print "chid          : %s" % vars['chid']
         print "title         : %s" % vars['title']
         print "outfile       : %s" % vars['outfile']
@@ -1115,7 +1115,7 @@ for items in product(*[params[pd] for pd in params]):
     plots = []
     
     vars = {'outfile': "output.fds", 'chid': "chid", 'title': "title", 'fds_file_open': False, 'fds_file': 0,
-            'para_id': para_id}
+            'subdir': "./", 'para_id': para_id}
     para_id += 1
     for v in items:
         vars = dict(vars.items() + v.items())
