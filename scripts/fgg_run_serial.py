@@ -43,11 +43,13 @@ printHead()
 parser = argparse.ArgumentParser()
 parser.add_argument("--force",
                     help="run FDS even if job was finished", action="store_true")
+parser.add_argument("--fdsexec",
+                    help="name of the FDS executable (default: fds)", default="fds", action="store_true")
 cmdl_args = parser.parse_args()
 
 fn_subdirlist = 'fgg.subdirlist'
 
-fds_exec = 'fds'
+fds_exec = cmdl_args.fdsexec
 
 subdirs = []
 inputs  = []
@@ -56,6 +58,7 @@ chids   = []
 # read in all sub directories, FDS input files, and CHIDs
 if not os.path.isfile(fn_subdirlist):
     print " -- file %s could not be opened -> EXIT"%fn_subdirlist
+    print 
     sys.exit(1)
 subdirs_file = open(fn_subdirlist, 'r')
 for line in subdirs_file:
