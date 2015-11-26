@@ -24,6 +24,14 @@ import matplotlib.pyplot as plt
 fn_subdirlist = 'fgg.subdirlist'
 fn_plotlist = 'fgg.plot'
 
+# check for command line options
+parser = argparse.ArgumentParser()
+parser.add_argument("--nolegend",
+                    help="supress legend", action="store_true")
+parser.add_argument("--nocolor",
+                    help="supress colors", action="store_true")
+cmdl_args = parser.parse_args()
+
 ############################ HELPER
 
 def readDevcInfo(fn):
@@ -62,8 +70,11 @@ def saveDevcPlot(dir, t, ys, ids, qs, units, group, mode='all'):
 		for i in range(len(ys)):
 			label = ids[i]
 			if not allSame:
-				label = ids[i] + " [" + units[i] + "]" 
-			plt.plot(t, ys[i], marker='.', linestyle='-', label=label)
+				label = ids[i] + " [" + units[i] + "]"
+			if not cmdl_args.nocolor:
+				plt.plot(t, ys[i], marker='.', linestyle='-', label=label)
+			else:
+				plt.plot(t, ys[i], marker='.', linestyle='-', label=label, color='k')
 	
 	if mode_finish:
 		plt.xlabel('time [s]')
@@ -72,7 +83,8 @@ def saveDevcPlot(dir, t, ys, ids, qs, units, group, mode='all'):
 		if not allSame:
 			ylabel = 'individual scale'
 		plt.ylabel(ylabel)
-		plt.legend(loc='best')
+		if not cmdl_args.nolegend:
+			plt.legend(loc='best')
 		fn = "fgg_" + group + ".pdf"
 		if len(ys) == 1:
 			fn = "fgg_" + ids[0] + ".pdf"
@@ -246,3 +258,4 @@ for cg in global_tasks:
 		
 	if group_id != '':
 		saveDevcPlot('./', [], [0,1], [group_id], [group_q], [group_unit], cg, mode='finish')
+		
