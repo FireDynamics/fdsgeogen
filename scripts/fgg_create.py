@@ -87,10 +87,10 @@ epsilon = 0.0001
 
 def printHead():
     rootdir = os.path.abspath(os.path.dirname(__file__)) 
-    vf = open(rootdir + "/version", "r")
+    vf = open(rootdir + "/scripts/version", "r")
     version = vf.readline()
     vf.close()
-    lf = open(rootdir + "/logo", "r")
+    lf = open(rootdir + "/scripts/logo", "r")
     logo = lf.read()
     lf.close()
 
