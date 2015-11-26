@@ -20,6 +20,25 @@ import subprocess as sp
 import os.path
 import argparse
 
+def printHead():
+    rootdir = os.path.abspath(os.path.dirname(__file__))
+    vf = open(rootdir + "/scripts/version", "r")
+    version = vf.readline()
+    vf.close()
+    lf = open(rootdir + "/scripts/logo", "r")
+    logo = lf.read()
+    lf.close()
+
+    print logo
+
+    print "###"
+    print "### fdsgeogen -- serial execution tool"
+    print "### version %s"%version
+    print "###"
+    print
+
+printHead()
+
 # check for command line options
 parser = argparse.ArgumentParser()
 parser.add_argument("--force",

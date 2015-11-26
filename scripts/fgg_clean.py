@@ -18,6 +18,25 @@
 import shutil
 import os
 
+def printHead():
+    rootdir = os.path.abspath(os.path.dirname(__file__)) 
+    vf = open(rootdir + "/version", "r")
+    version = vf.readline()
+    vf.close()
+    lf = open(rootdir + "/logo", "r")
+    logo = lf.read()
+    lf.close()
+
+    print logo
+
+    print "###"
+    print "### fdsgeogen -- clean up tool"
+    print "### version %s"%version
+    print "###"
+    print
+	
+printHead()
+
 fn_subdirlist = 'fgg.subdirlist'
 
 fds_exec = 'fds'

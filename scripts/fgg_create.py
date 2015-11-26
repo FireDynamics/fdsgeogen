@@ -23,8 +23,6 @@ from itertools import product
 import xml.etree.ElementTree as ET
 import numpy as np
 
-fgg_version = "1.3.1"
-
 #########################
 ##### CMDL arguments ####
 #########################
@@ -86,6 +84,23 @@ epsilon = 0.0001
 ###############################
 #####  HELPER FUNCTIONS   #####
 ###############################
+
+def printHead():
+    rootdir = os.path.abspath(os.path.dirname(__file__)) 
+    vf = open(rootdir + "/version", "r")
+    version = vf.readline()
+    vf.close()
+    lf = open(rootdir + "/logo", "r")
+    logo = lf.read()
+    lf.close()
+
+    print logo
+
+    print "###"
+    print "### fdsgeogen -- create tool"
+    print "### version %s"%version
+    print "###"
+    print
 
 def primes(n):
     primfac = []
@@ -1133,7 +1148,7 @@ def paradim(node, dirlist):
 ##### MAIN LOOP ######
 ######################
 
-print " === running FDSgeogen, version", fgg_version, " === "
+printHead()
 
 tree = ET.parse(cmdl_args.xml_file)
 root = tree.getroot()

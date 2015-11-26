@@ -36,6 +36,23 @@ cmdl_args = parser.parse_args()
 
 ############################ HELPER
 
+def printHead():
+    rootdir = os.path.abspath(os.path.dirname(__file__)) 
+    vf = open(rootdir + "/scripts/version", "r")
+    version = vf.readline()
+    vf.close()
+    lf = open(rootdir + "/scripts/logo", "r")
+    logo = lf.read()
+    lf.close()
+
+    print logo
+
+    print "###"
+    print "### fdsgeogen -- analyse tool"
+    print "### version %s"%version
+    print "###"
+    print
+
 def readDevcInfo(fn):
 	devc_file = open(fn, 'r')
 	units = devc_file.readline().rstrip().split(',')
@@ -95,6 +112,9 @@ def saveDevcPlot(dir, t, ys, ids, qs, units, group, mode='all'):
 
 ############################
 
+#### MAIN
+
+printHead()
 
 subdirs = []
 chids = []
