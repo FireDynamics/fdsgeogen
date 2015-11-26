@@ -1,0 +1,11 @@
+<fds>
+	
+<para dim="pos" var="xpos" list="1.0, 1.2, 1.4, 1.6, 1.8, 2.0" /> 
+<para dim="pos" var="ypos" list="range(6)" />
+<para dim="dia" var="diam" list="0.1, 0.2, 0.3" />
+<para dim="hrr" var="hrr"  file="input-hrr.csv"/>
+	
+	<dbg print="'para ID: %02d -- xpos=%f -- ypos=%f'%(para_id, xpos, ypos)" />
+	<dbg print="'            -- diam=%f -- hrr =%f'%(diam, hrr )" />
+	
+</fds>

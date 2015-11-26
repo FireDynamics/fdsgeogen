@@ -1,0 +1,14 @@
+<fds>
+
+	<info chid="'fgg_example_04'" title="'fgg example 04'" 
+			outfile="'e04.fds'" subdir="'rundir'" />
+			
+	<input str="'TIME T_END=1.0'" />
+	
+	<var lx="1.0" ly="2.0" lz="1.5" />
+	
+	<fds_mesh ijk="10, 10, 10" xb="0.0, lx, 0.0, ly, 0.0, lz" />
+
+	<devc id="'central'" q="'TEMPERATURE', 'VELOCITY'" x="lx/2.0" y="ly/2.0" z="lz/2.0" />
+
+</fds>

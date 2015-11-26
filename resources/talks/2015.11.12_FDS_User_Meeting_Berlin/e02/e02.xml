@@ -1,0 +1,8 @@
+<fds>
+
+	<info chid="'fgg_example_02'" title="'fgg example 02'" 
+			outfile="'e02.fds'" subdir="'rundir'" />
+			
+	<input str="'MISC TMPA=28.2'" />
+
+</fds>

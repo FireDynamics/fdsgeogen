@@ -1,0 +1,12 @@
+<fds>
+
+	<info chid="'fgg_example_03'" title="'fgg example 03'" 
+			outfile="'e03.fds'" subdir="'rundir'" />
+			
+	<input str="'TIME T_END=0.0'" />
+	
+	<var nx="20" />
+	
+	<fds_mesh ijk="nx, 10, 10" xb="0.0, 1.0, 0.0, 1.0, 0.0, 1.0" />
+
+</fds>

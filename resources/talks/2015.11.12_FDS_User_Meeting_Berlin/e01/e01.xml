@@ -1,0 +1,12 @@
+<fds>
+
+	<var xpos_offset="12.5" />
+	
+	<dbg print="'offset in x is %f'%xpos_offset" />
+	
+	<loop var='ix' start='0' stop='10'>
+		<var xpos="xpos_offset + ix / 10." />
+		<dbg print="'current x position is %f'%xpos" />
+	</loop>
+
+</fds>

@@ -1,0 +1,54 @@
+<fds>
+
+  <para dim="zpos" var="hole_z" list="np.linspace(0.5, 1.5, 6)" />
+  <para dim="radi" var="hole_radius" list="np.linspace(0.5, 0.2, 4)" />
+
+  <info chid="'fgg_example_09'" title="'fgg example 09'" 
+    outfile="'e09.fds'" subdir="'rundir_%02d'%para_id" />
+	
+  <dump str="'!! hole_z      :%f'%hole_z" />
+  <dump str="'!! hole_radius :%f'%hole_radius" />
+  
+  <input str="'TIME T_END=10.0'" />
+	
+  <boundary x="'open'" y="'open'" zmax="'open'" />
+	
+  <var delta="0.1" />
+  <var lx="2.4" ly="2.4" lz="2.0" />
+  <var fx="1.0" fy="1.0" />
+	
+  <bounded_room x1="0.0" y1="0.0" z1="0.0" x2="lx" y2="ly" z2="lz" 
+    wt='delta' 
+    ball="1"
+    ex2="1.0" ey1="0.5" ey2="0.5" ez2="1.0" />
+	
+  <fire type="'burningbox'" cx="fx" cy="fy" lz="0.0" 
+    width="0.6" height="0.3" hrr="100" />
+
+  <var nlines='int(hole_radius / delta * 2.0)' />
+  	
+  <loop var='i' start='0' stop='nlines' >
+  
+    <var zoff = "- hole_radius + i*delta" />
+    <var ywidth = "np.sqrt(hole_radius**2 - zoff**2)" />
+  
+    <fds_hole xb='lx, lx+delta, ly/2. - ywidth, ly/2. + ywidth, 
+                  hole_z + zoff, hole_z + zoff + delta' />
+  
+  </loop>
+
+  <devc id="'top_vx'" x="lx" y="ly/2." z="hole_z + 0.5*hole_radius" 
+    q="'U-VELOCITY'" 
+    plot="'single', 'local:vx', 'global:vx', 'global:top_vx'" />
+  
+  <devc id="'mid_vx'" x="lx" y="ly/2." z="hole_z" 
+    q="'U-VELOCITY'" 
+    plot="'single', 'local:vx', 'global:vx', 'global:mid_vx'" />
+  
+  <devc id="'low_vx'" x="lx" y="ly/2." z="hole_z - 0.5*hole_radius" 
+    q="'U-VELOCITY'" 
+    plot="'single', 'local:vx', 'global:vx', 'global:low_vx'" />
+
+  <slcf q="'TEMPERATURE', 'VELOCITY'" x="fx" y="fy" />
+
+</fds>
