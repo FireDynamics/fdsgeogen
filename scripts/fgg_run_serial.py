@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with fdsgeogen. If not, see <http://www.gnu.org/licenses/>.
 
+import sys
 import subprocess as sp
 import os.path
 import argparse
@@ -34,6 +35,9 @@ inputs  = []
 chids   = []
 
 # read in all sub directories, FDS input files, and CHIDs
+if not os.path.isfile(fn_subdirlist):
+    print " -- file %s could not be opened -> EXIT"%fn_subdirlist
+    sys.exit(1)
 subdirs_file = open(fn_subdirlist, 'r')
 for line in subdirs_file:
 	if line[0] == '#': continue
