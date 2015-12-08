@@ -812,7 +812,8 @@ def fire(node):
     fire_type = get_val(node, 'type')
     
     if fire_type == "burningbox":
-        # define the box
+        
+        # define the burning box
         cx = get_val(node, 'cx')
         cy = get_val(node, 'cy')
         lz = get_val(node, 'lz')
@@ -831,6 +832,62 @@ def fire(node):
             cx - w2, cx + w2, cy - w2, cy + w2, lz + h, lz + h))
 
     if fire_type == 'spread_square_box':
+        
+        # setup hrr curve discretisation
+        # f_hrr: hrr values
+        # f_t: corresponding time points
+
+        f_hrr = None
+        f_t   = None
+        hrr_first_max = None
+        hrr_first_max_index = None
+        
+        # set discretisation based on alpha*t^2 up to hrrmax
+        if check_val(node, ["hrrmax", "alpha"]):
+            hrr_max = get_val(node, 'hrrmax')
+            alpha   = get_val(node, 'alpha')
+            
+            time_to_max = np.sqrt(hrr_max / alpha)
+            f_t         = np.linspace(0.0, time_to_max, n_elements)            
+            f_hrr = alpha * f_t**2
+            
+        # read in values from file
+        if check_val(node, "from_file"):
+            data = np.loadtxt(get_val(node, "from_file"))
+            
+            if data.shape[1] != 2:
+                print " -- hrr curve format is not recognised (not two columns) -> EXIT"
+                sys.exit(1)
+            if np.any((data[1:,0]-data[:-1,0]) < 0.0):
+                print " -- time in hrr curve format is not monotonly increasing -> EXIT"
+                sys.exit(1)
+            
+            f_t = data[:,0]
+            f_hrr = data[:,1]
+        
+        # check that one of the above methods was used
+        if f_hrr is None and f_t is None:
+            print " -- no fire model chosen -> EXIT"
+            sys.exit(1)
+        
+        # scale and delay hrr curve
+        hrr_factor = check_get_val(node, "hrr_factor", 1.0)
+        f_hrr     *= hrr_factor
+        t_delay    = check_get_val(node, "delay", 0.0)
+        t_delay   += t_delay
+        
+        # find first maximum of hrr curve
+        hrr_first_max_index = len(f_hrr)-1
+        print np.where((f_hrr[1:] - f_hrr[:-1]) < epsilon)[0]
+        if len(np.where((f_hrr[1:] - f_hrr[:-1]) < epsilon)[0]) > 0:
+            hrr_first_max_index = np.where((f_hrr[1:] - f_hrr[:-1]) < epsilon)[0][0]
+        hrr_first_max = f_hrr[hrr_first_max_index]
+        t_first_max = f_t[hrr_first_max_index]
+        
+        # setup trigger arrays for the ramp up to the first maximum
+        trigger_hrr = np.linspace(0.0, hrr_first_max, n_elements+1)
+        trigger_t = np.interp(trigger_hrr, f_hrr[:hrr_first_max_index+1], f_t[:hrr_first_max_index+1])
+        
         # get information about the burning box
         cx = get_val(node, 'cx')
         cy = get_val(node, 'cy')
@@ -854,80 +911,41 @@ def fire(node):
         sy = int(wy / delta)
         n_elements = sx*sy
         
-        # compute distance mesh w.r.t. the center of box
+        # compute distance mesh w.r.t. the initial burning point, will be used for choosing the order of burning surface elements
+        burning_center_x = check_get_val(node, "spread_cx", cx)
+        burning_center_y = check_get_val(node, "spread_cy", cy)
+        
         x = np.linspace(cx-wx/2.+delta/2., cx+wx/2.-delta/2., sx)
         y = np.linspace(cy-wy/2.+delta/2., cy+wy/2.-delta/2., sy)
         X, Y = np.meshgrid(y,x)
-        distance = np.sqrt((X-cx)**2 + (Y-cy)**2)
+        distance = np.sqrt((burning_center_x)**2 + (burning_center_y)**2)
         global_max_distance = 10 * distance.max()
         
-        # setup hrr curve discretisation
-        # f_hrr: equally spaced discretisation of the hrr curve
-        # f_t: time points at which to trigger the next surface element to start burning
-
-        f_hrr = None
-        f_t   = None
-        hrr_first_max = None
-        # set discretisation based on alpha*t^2 up to hrrmax
-        if check_val(node, ["hrrmax", "alpha"]):
-            hrr_max = get_val(node, 'hrrmax')
-            alpha  = get_val(node, 'alpha')
-            
-            f_hrr = np.linspace(0.0, hrr_max, n_elements+1)
-            f_t = np.sqrt(f_hrr / alpha)
-            
-            hrr_first_max = f_hrr[-1]
-            t_first_max = f_t[-1]
-            
-        # read in values from file
-        if check_val(node, "from_file"):
-            data = np.loadtxt(get_val(node, "from_file"))
-            
-            if data.shape[1] != 2:
-                print " -- hrr curve format is not recognised (not two columns) -> EXIT"
-                sys.exit(1)
-            if np.any((data[1:,0]-data[:-1,0]) < 0.0):
-                print " -- time in hrr curve format is not monotonly increasing -> EXIT"
-                sys.exit(1)
-            
-            
-            # find first maximum
-            first_max_index = -1
-            if len(np.where((data[1:,1] - data[:-1,1]) < epsilon)) > 0:
-                first_max_index = np.where((data[1:,1] - data[:-1,1]) < 0)[0][0]
-            hrr_first_max = data[first_max_index,1]
-            t_first_max = data[first_max_index,0]
-            print hrr_first_max, t_first_max
-            
-            f_hrr = np.linspace(0.0, hrr_first_max, n_elements+1)
-            f_t = np.interp(f_hrr, data[:first_max_index,1], data[:first_max_index,0])
-            
-            print f_hrr
-            print f_t
-            
-        
-        for e in range(len(f_t)-1):
-            ramp_name = 'ramp_spread_square_%04d'%e
-            surf_name = 'surf_spread_square_%04d'%e
+        ramp_id = check_get_val(node, "id", "default")
+        # create ramps
+        for e in range(n_elements):
+            ramp_name = 'id_%s_ramp_spread_square_%04d'%(ramp_id,e)
+            surf_name = 'id_%s_surf_spread_square_%04d'%(ramp_id,e)
             write_to_fds("&SURF ID='%s', HRRPUA=%f, RAMP_Q='%s'/\n" % (surf_name, hrr_first_max / wx / wy, ramp_name))
-            t_start = f_t[e]
-            t_end   = f_t[e+1]
+            t_start = trigger_t[e]
+            t_end   = trigger_t[e+1]
             
+            # ramps up to first maximum -> increas in burning surface
             write_to_fds("&RAMP ID='%s', T=-0.1, F=0.0 /\n"%ramp_name)
             write_to_fds("&RAMP ID='%s', T=%e, F=0.0 /\n"%(ramp_name, t_start))
             write_to_fds("&RAMP ID='%s', T=%e, F=1.0 /\n"%(ramp_name, t_end))
             
-            for i in range(first_max_index, len(data[:,0])):
-                write_to_fds("&RAMP ID='%s', T=%e, F=%e /\n"%(ramp_name, data[i,0], data[i,1]/hrr_first_max))
+            # ramps for time after maximum -> global scaling of specific heat release rate
+            for i in range(hrr_first_max_index+1, len(f_t[:])):
+                write_to_fds("&RAMP ID='%s', T=%e, F=%e /\n"%(ramp_name, f_t[i], f_hrr[i]/hrr_first_max))
             
-            # lexiographic stepping
-            #ix = int(e % sx) 
-            #iy = int(e / sx)
-            
+            # compute target surface element index, based on distance to center of surface
             ix, iy = np.unravel_index(distance.argmin(), distance.shape)
             
+            # mark current surface element with a very high distance -> will be skipped in next search
             distance[ix,iy] = global_max_distance
             
+            # compute absolute positon for FDS
             x0 = cx - wx/2.
             y0 = cy - wy/2.
             x1 = x0 + ix * delta
@@ -935,6 +953,7 @@ def fire(node):
             y1 = y0 + iy * delta
             y2 = y0 + (iy + 1) * delta
             
+            # write vent
             write_to_fds("&VENT XB=%f,%f,%f,%f,%f,%f SURF_ID='%s' color='RED'/\n" % (
                 x1, x2, y1, y2, lz + h, lz + h, surf_name))
         
