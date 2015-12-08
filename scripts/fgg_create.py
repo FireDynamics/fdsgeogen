@@ -833,6 +833,33 @@ def fire(node):
 
     if fire_type == 'spread_square_box':
         
+        ############################# OBST geometry 
+        
+        # get information about the burning box
+        cx = get_val(node, 'cx')
+        cy = get_val(node, 'cy')
+        lz = get_val(node, 'lz')
+        wx = get_val(node, 'width_x')
+        wy = get_val(node, 'width_y')
+        h = get_val(node, 'height')
+        delta = get_val(node, 'delta', opt=True)
+        
+        # write out obst definition
+        box_obst = "&OBST "
+        box_obst += "XB=%f, %f, %f, %f, %f, %f" % (cx - wx/2., cx + wx/2., cy - wy/2., cy + wy/2., lz, lz + h)
+        box_obst += "/\n"
+        write_to_fds(box_obst)
+        
+        # set default combustion reaction
+        write_to_fds("&REAC FUEL = 'METHANE' /\n")
+        
+        # compute number of surface (top surface) cells in each direction
+        sx = int(wx / delta)
+        sy = int(wy / delta)
+        n_elements = sx*sy
+        
+        ############################# HRR curve definition
+        
         # setup hrr curve discretisation
         # f_hrr: hrr values
         # f_t: corresponding time points
@@ -870,15 +897,16 @@ def fire(node):
             print " -- no fire model chosen -> EXIT"
             sys.exit(1)
         
+        ############################# preparation for ramps
+        
         # scale and delay hrr curve
         hrr_factor = check_get_val(node, "hrr_factor", 1.0)
         f_hrr     *= hrr_factor
         t_delay    = check_get_val(node, "delay", 0.0)
-        t_delay   += t_delay
+        f_t       += t_delay
         
         # find first maximum of hrr curve
         hrr_first_max_index = len(f_hrr)-1
-        print np.where((f_hrr[1:] - f_hrr[:-1]) < epsilon)[0]
         if len(np.where((f_hrr[1:] - f_hrr[:-1]) < epsilon)[0]) > 0:
             hrr_first_max_index = np.where((f_hrr[1:] - f_hrr[:-1]) < epsilon)[0][0]
         hrr_first_max = f_hrr[hrr_first_max_index]
@@ -888,29 +916,6 @@ def fire(node):
         trigger_hrr = np.linspace(0.0, hrr_first_max, n_elements+1)
         trigger_t = np.interp(trigger_hrr, f_hrr[:hrr_first_max_index+1], f_t[:hrr_first_max_index+1])
         
-        # get information about the burning box
-        cx = get_val(node, 'cx')
-        cy = get_val(node, 'cy')
-        lz = get_val(node, 'lz')
-        wx = get_val(node, 'width_x')
-        wy = get_val(node, 'width_y')
-        h = get_val(node, 'height')
-        delta = get_val(node, 'delta', opt=True)
-        
-        # write out obst definition
-        box_obst = "&OBST "
-        box_obst += "XB=%f, %f, %f, %f, %f, %f" % (cx - wx/2., cx + wx/2., cy - wy/2., cy + wy/2., lz, lz + h)
-        box_obst += "/\n"
-        write_to_fds(box_obst)
-        
-        # set default combustion reaction
-        write_to_fds("&REAC FUEL = 'METHANE' /\n")
-        
-        # compute number of surface (top surface) cells in each direction
-        sx = int(wx / delta)
-        sy = int(wy / delta)
-        n_elements = sx*sy
-        
         # compute distance mesh w.r.t. the initial burning point, will be used for choosing the order of burning surface elements
         burning_center_x = check_get_val(node, "spread_cx", cx)
         burning_center_y = check_get_val(node, "spread_cy", cy)
@@ -918,8 +923,10 @@ def fire(node):
         x = np.linspace(cx-wx/2.+delta/2., cx+wx/2.-delta/2., sx)
         y = np.linspace(cy-wy/2.+delta/2., cy+wy/2.-delta/2., sy)
         X, Y = np.meshgrid(y,x)
-        distance = np.sqrt((burning_center_x)**2 + (burning_center_y)**2)
+        distance = np.sqrt((X - burning_center_x)**2 + (Y - burning_center_y)**2)
         global_max_distance = 10 * distance.max()
+        
+        ############################# RAMP definition
         
         ramp_id = check_get_val(node, "id", "default")
         # create ramps
