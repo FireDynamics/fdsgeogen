@@ -870,10 +870,10 @@ def fire(node):
         hrr_first_max = None
         # set discretisation based on alpha*t^2 up to hrrmax
         if check_val(node, ["hrrmax", "alpha"]):
-            hrrmax = get_val(node, 'hrrmax')
+            hrr_max = get_val(node, 'hrrmax')
             alpha  = get_val(node, 'alpha')
             
-            f_hrr = np.linspace(0.0, hrrmax, n_elements+1)
+            f_hrr = np.linspace(0.0, hrr_max, n_elements+1)
             f_t = np.sqrt(f_hrr / alpha)
             
             hrr_first_max = f_hrr[-1]
@@ -890,6 +890,7 @@ def fire(node):
                 print " -- time in hrr curve format is not monotonly increasing -> EXIT"
                 sys.exit(1)
             
+            
             # find first maximum
             first_max_index = -1
             if len(np.where((data[1:,1] - data[:-1,1]) < epsilon)) > 0:
@@ -898,18 +899,26 @@ def fire(node):
             t_first_max = data[first_max_index,0]
             print hrr_first_max, t_first_max
             
-            sys.exit(0)
+            f_hrr = np.linspace(0.0, hrr_first_max, n_elements+1)
+            f_t = np.interp(f_hrr, data[:first_max_index,1], data[:first_max_index,0])
+            
+            print f_hrr
+            print f_t
+            
         
         for e in range(len(f_t)-1):
             ramp_name = 'ramp_spread_square_%04d'%e
             surf_name = 'surf_spread_square_%04d'%e
-            write_to_fds("&SURF ID='%s', HRRPUA=%f, RAMP_Q='%s'/\n" % (surf_name, hrrmax / wx / wy, ramp_name))
+            write_to_fds("&SURF ID='%s', HRRPUA=%f, RAMP_Q='%s'/\n" % (surf_name, hrr_first_max / wx / wy, ramp_name))
             t_start = f_t[e]
             t_end   = f_t[e+1]
             
             write_to_fds("&RAMP ID='%s', T=-0.1, F=0.0 /\n"%ramp_name)
             write_to_fds("&RAMP ID='%s', T=%e, F=0.0 /\n"%(ramp_name, t_start))
             write_to_fds("&RAMP ID='%s', T=%e, F=1.0 /\n"%(ramp_name, t_end))
+            
+            for i in range(first_max_index, len(data[:,0])):
+                write_to_fds("&RAMP ID='%s', T=%e, F=%e /\n"%(ramp_name, data[i,0], data[i,1]/hrr_first_max))
             
             # lexiographic stepping
             #ix = int(e % sx) 
