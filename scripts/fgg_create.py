@@ -831,6 +831,7 @@ def fire(node):
             cx - w2, cx + w2, cy - w2, cy + w2, lz + h, lz + h))
 
     if fire_type == 'spread_square_box':
+        # get information about the burning box
         cx = get_val(node, 'cx')
         cy = get_val(node, 'cy')
         lz = get_val(node, 'lz')
@@ -839,29 +840,65 @@ def fire(node):
         h = get_val(node, 'height')
         delta = get_val(node, 'delta', opt=True)
         
+        # write out obst definition
         box_obst = "&OBST "
         box_obst += "XB=%f, %f, %f, %f, %f, %f" % (cx - wx/2., cx + wx/2., cy - wy/2., cy + wy/2., lz, lz + h)
         box_obst += "/\n"
         write_to_fds(box_obst)
         
+        # set default combustion reaction
         write_to_fds("&REAC FUEL = 'METHANE' /\n")
         
-        hrrmax = get_val(node, 'hrrmax')
-        alpha  = get_val(node, 'alpha')
-        
+        # compute number of surface (top surface) cells in each direction
         sx = int(wx / delta)
         sy = int(wy / delta)
+        n_elements = sx*sy
         
+        # compute distance mesh w.r.t. the center of box
         x = np.linspace(cx-wx/2.+delta/2., cx+wx/2.-delta/2., sx)
         y = np.linspace(cy-wy/2.+delta/2., cy+wy/2.-delta/2., sy)
         X, Y = np.meshgrid(y,x)
         distance = np.sqrt((X-cx)**2 + (Y-cy)**2)
         global_max_distance = 10 * distance.max()
         
-        n_elements = sx*sy
-        
-        f_hrr = np.linspace(0.0, hrrmax, n_elements+1)
-        f_t = np.sqrt(f_hrr / alpha)
+        # setup hrr curve discretisation
+        # f_hrr: equally spaced discretisation of the hrr curve
+        # f_t: time points at which to trigger the next surface element to start burning
+
+        f_hrr = None
+        f_t   = None
+        hrr_first_max = None
+        # set discretisation based on alpha*t^2 up to hrrmax
+        if check_val(node, ["hrrmax", "alpha"]):
+            hrrmax = get_val(node, 'hrrmax')
+            alpha  = get_val(node, 'alpha')
+            
+            f_hrr = np.linspace(0.0, hrrmax, n_elements+1)
+            f_t = np.sqrt(f_hrr / alpha)
+            
+            hrr_first_max = f_hrr[-1]
+            t_first_max = f_t[-1]
+            
+        # read in values from file
+        if check_val(node, "from_file"):
+            data = np.loadtxt(get_val(node, "from_file"))
+            
+            if data.shape[1] != 2:
+                print " -- hrr curve format is not recognised (not two columns) -> EXIT"
+                sys.exit(1)
+            if np.any((data[1:,0]-data[:-1,0]) < 0.0):
+                print " -- time in hrr curve format is not monotonly increasing -> EXIT"
+                sys.exit(1)
+            
+            # find first maximum
+            first_max_index = -1
+            if len(np.where((data[1:,1] - data[:-1,1]) < epsilon)) > 0:
+                first_max_index = np.where((data[1:,1] - data[:-1,1]) < 0)[0][0]
+            hrr_first_max = data[first_max_index,1]
+            t_first_max = data[first_max_index,0]
+            print hrr_first_max, t_first_max
+            
+            sys.exit(0)
         
         for e in range(len(f_t)-1):
             ramp_name = 'ramp_spread_square_%04d'%e
