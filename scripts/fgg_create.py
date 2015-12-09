@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # This file is part of fdsgeogen.
-# 
+#
 # fdsgeogen is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -45,7 +45,7 @@ global_args['fds_surf'] = ['rgb', 'color', 'vel', 'hrrpua', 'heat_of_vaporizatio
                        'ignition_temperature', 'burn_away', 'matl_id', 'matl_mass_fraction',
                        'thickness', 'external_flux', 'backing', 'hrrupa', 'stretch_factor', 'cell_size_factor',
                        'ramp_q', 'mlrpua', 'tmp_front', 'tmp_inner','tmp_back', 'transparency', 'net_heat_flux','emissivity']
-global_args['fds_obst'] = ['xb', 'surf_ids', 'surf_id', 'color', 'bulk_density', 'bndf_obst',
+global_args['fds_obst'] = ['xb', 'surf_ids', 'surf_id', 'color', 'rgb', 'transparency', 'bulk_density', 'bndf_obst',
                        'thickness', 'external_flux', 'backing', 'hrrupa', 'stretch_factor', 'cell_size_factor',
                        'ramp_q', 'mlrpua']
 global_args['fds_hole'] = ['xb', 'color']
@@ -86,7 +86,7 @@ epsilon = 0.0001
 ###############################
 
 def printHead():
-    rootdir = os.path.abspath(os.path.dirname(__file__)) 
+    rootdir = os.path.abspath(os.path.dirname(__file__))
     vf = open(rootdir + "/scripts/version", "r")
     version = vf.readline()
     vf.close()
@@ -692,17 +692,17 @@ def devc(node):
     #  x, y, z      - coordinates of the point where the devices are to be placed
     #  ior          - ?
     #  plot         - instruct the analysis script to plot the device output, options: [single, local:group]
-    
+
     check_val(node, ["q", "id"], opt=False)
 
     q_list  = get_val(node, 'q')
     id_list = get_val(node, 'id')
-    
+
     if not (type(q_list) is list or type(q_list) is tuple):
         q_list = [q_list]
-    
+
     for devc_cnt in range(len(q_list)):
-    
+
         devc_q  = q_list[devc_cnt]
         devc_id = ''
         if len(q_list) > 1:
@@ -712,15 +712,15 @@ def devc(node):
                 devc_id = id_list[devc_cnt]
         else:
             devc_id = id_list
-    
+
         plot_type = check_get_val(node, 'plot', [])
         if not (type(q_list) is list or type(q_list) is tuple):
             plot_type = [plot_type]
         if len(plot_type) > 0:
             for pt in range(len(plot_type)):
                 plots.append(devc_id + ';' + devc_q + ';' + plot_type[pt])
-        
-        
+
+
         if check_val(node, ["x1", "x2", "y1", "y2", "z1", "z2"]):
             write_to_fds("&DEVC ID='%s' XB=%f,%f,%f,%f,%f,%f QUANTITY='%s'/\n" % (devc_id,
                                                                                   get_val(node, "x1"),
@@ -730,7 +730,7 @@ def devc(node):
                                                                                   get_val(node, "z1"),
                                                                                   get_val(node, "z2"),
                                                                                   devc_q))
-                                                                                  
+
         if check_val(node, ["x", "y", "z"]):
             ior_s = ''
             if check_val(node, ["ior"], opt=True):
@@ -808,11 +808,11 @@ def fire(node):
     #  width    - width of the box (required)
     #  height   - height of the box (required)
     # hrr      - heat release rate (required)
-    
+
     fire_type = get_val(node, 'type')
-    
+
     if fire_type == "burningbox":
-        
+
         # define the burning box
         cx = get_val(node, 'cx')
         cy = get_val(node, 'cy')
@@ -832,9 +832,9 @@ def fire(node):
             cx - w2, cx + w2, cy - w2, cy + w2, lz + h, lz + h))
 
     if fire_type == 'spread_square_box':
-        
-        ############################# OBST geometry 
-        
+
+        ############################# OBST geometry
+
         # get information about the burning box
         cx = get_val(node, 'cx')
         cy = get_val(node, 'cy')
@@ -843,23 +843,23 @@ def fire(node):
         wy = get_val(node, 'width_y')
         h = get_val(node, 'height')
         delta = get_val(node, 'delta', opt=True)
-        
+
         # write out obst definition
-        box_obst = "&OBST "
-        box_obst += "XB=%f, %f, %f, %f, %f, %f" % (cx - wx/2., cx + wx/2., cy - wy/2., cy + wy/2., lz, lz + h)
-        box_obst += "/\n"
-        write_to_fds(box_obst)
-        
+        # box_obst = "&OBST "
+        # box_obst += "XB=%f, %f, %f, %f, %f, %f" % (cx - wx/2., cx + wx/2., cy - wy/2., cy + wy/2., lz, lz + h)
+        # box_obst += "/\n"
+        # write_to_fds(box_obst)
+
         # set default combustion reaction
-        write_to_fds("&REAC FUEL = 'METHANE' /\n")
-        
+        #write_to_fds("&REAC FUEL = 'METHANE' /\n")
+
         # compute number of surface (top surface) cells in each direction
         sx = int(wx / delta)
         sy = int(wy / delta)
         n_elements = sx*sy
-        
+
         ############################# HRR curve definition
-        
+
         # setup hrr curve discretisation
         # f_hrr: hrr values
         # f_t: corresponding time points
@@ -868,66 +868,66 @@ def fire(node):
         f_t   = None
         hrr_first_max = None
         hrr_first_max_index = None
-        
+
         # set discretisation based on alpha*t^2 up to hrrmax
         if check_val(node, ["hrrmax", "alpha"]):
             hrr_max = get_val(node, 'hrrmax')
             alpha   = get_val(node, 'alpha')
-            
+
             time_to_max = np.sqrt(hrr_max / alpha)
-            f_t         = np.linspace(0.0, time_to_max, n_elements)            
+            f_t         = np.linspace(0.0, time_to_max, n_elements)
             f_hrr = alpha * f_t**2
-            
+
         # read in values from file
         if check_val(node, "from_file"):
             data = np.loadtxt(get_val(node, "from_file"))
-            
+
             if data.shape[1] != 2:
                 print " -- hrr curve format is not recognised (not two columns) -> EXIT"
                 sys.exit(1)
             if np.any((data[1:,0]-data[:-1,0]) < 0.0):
                 print " -- time in hrr curve format is not monotonly increasing -> EXIT"
                 sys.exit(1)
-            
+
             f_t = data[:,0]
             f_hrr = data[:,1]
-        
+
         # check that one of the above methods was used
         if f_hrr is None and f_t is None:
             print " -- no fire model chosen -> EXIT"
             sys.exit(1)
-        
+
         ############################# preparation for ramps
-        
+
         # scale and delay hrr curve
         hrr_factor = check_get_val(node, "hrr_factor", 1.0)
         f_hrr     *= hrr_factor
         t_delay    = check_get_val(node, "delay", 0.0)
         f_t       += t_delay
-        
+
         # find first maximum of hrr curve
         hrr_first_max_index = len(f_hrr)-1
         if len(np.where((f_hrr[1:] - f_hrr[:-1]) < epsilon)[0]) > 0:
             hrr_first_max_index = np.where((f_hrr[1:] - f_hrr[:-1]) < epsilon)[0][0]
         hrr_first_max = f_hrr[hrr_first_max_index]
         t_first_max = f_t[hrr_first_max_index]
-        
+
         # setup trigger arrays for the ramp up to the first maximum
         trigger_hrr = np.linspace(0.0, hrr_first_max, n_elements+1)
         trigger_t = np.interp(trigger_hrr, f_hrr[:hrr_first_max_index+1], f_t[:hrr_first_max_index+1])
-        
+
         # compute distance mesh w.r.t. the initial burning point, will be used for choosing the order of burning surface elements
         burning_center_x = check_get_val(node, "spread_cx", cx)
         burning_center_y = check_get_val(node, "spread_cy", cy)
-        
+
         x = np.linspace(cx-wx/2.+delta/2., cx+wx/2.-delta/2., sx)
         y = np.linspace(cy-wy/2.+delta/2., cy+wy/2.-delta/2., sy)
         X, Y = np.meshgrid(x,y, indexing='ij')
         distance = np.sqrt((X - burning_center_x)**2 + (Y - burning_center_y)**2)
         global_max_distance = 10 * distance.max()
-        
+
         ############################# RAMP definition
-        
+
         ramp_id = check_get_val(node, "id", "default")
         # create ramps
         for e in range(n_elements):
@@ -936,22 +936,22 @@ def fire(node):
             write_to_fds("&SURF ID='%s', HRRPUA=%f, RAMP_Q='%s'/\n" % (surf_name, hrr_first_max / wx / wy, ramp_name))
             t_start = trigger_t[e]
             t_end   = trigger_t[e+1]
-            
+
             # ramps up to first maximum -> increas in burning surface
             write_to_fds("&RAMP ID='%s', T=-0.1, F=0.0 /\n"%ramp_name)
             write_to_fds("&RAMP ID='%s', T=%e, F=0.0 /\n"%(ramp_name, t_start))
             write_to_fds("&RAMP ID='%s', T=%e, F=1.0 /\n"%(ramp_name, t_end))
-            
+
             # ramps for time after maximum -> global scaling of specific heat release rate
             for i in range(hrr_first_max_index+1, len(f_t[:])):
                 write_to_fds("&RAMP ID='%s', T=%e, F=%e /\n"%(ramp_name, f_t[i], f_hrr[i]/hrr_first_max))
-            
+
             # compute target surface element index, based on distance to center of surface
             ix, iy = np.unravel_index(distance.argmin(), distance.shape)
-            
+
             # mark current surface element with a very high distance -> will be skipped in next search
             distance[ix,iy] = global_max_distance
-            
+
             # compute absolute positon for FDS
             x0 = cx - wx/2.
             y0 = cy - wy/2.
@@ -959,11 +959,11 @@ def fire(node):
             x2 = x0 + (ix + 1) * delta
             y1 = y0 + iy * delta
             y2 = y0 + (iy + 1) * delta
-            
+
             # write vent
             write_to_fds("&VENT XB=%f,%f,%f,%f,%f,%f SURF_ID='%s' color='RED'/\n" % (
                 x1, x2, y1, y2, lz + h, lz + h, surf_name))
-        
+
 
 def bounded_room(node):
     # DESCRIPTION:
@@ -1025,7 +1025,7 @@ def bounded_room(node):
     nx = div235((dxmax - dxmin) / delta)
     ny = div235((dymax - dymin) / delta)
     nz = div235((dzmax - dzmin) / delta)
-    
+
     if ax == 1:
         dxmax = dxmin + nx * delta
     else:
@@ -1242,7 +1242,7 @@ for node in root:
 para_id = 0
 for items in product(*[params[pd] for pd in params]):
     plots = []
-    
+
     vars = {'outfile': "output.fds", 'chid': "chid", 'title': "title", 'fds_file_open': False, 'fds_file': 0,
             'subdir': "./", 'para_id': para_id}
     para_id += 1
@@ -1253,7 +1253,7 @@ for items in product(*[params[pd] for pd in params]):
     traverse(root)
 
     close_fds_file()
-    
+
     dump_plot_types(plots, vars['subdir'])
 
 dump_subdirectories(subdirs)
