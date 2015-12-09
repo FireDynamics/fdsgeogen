@@ -922,7 +922,7 @@ def fire(node):
         
         x = np.linspace(cx-wx/2.+delta/2., cx+wx/2.-delta/2., sx)
         y = np.linspace(cy-wy/2.+delta/2., cy+wy/2.-delta/2., sy)
-        X, Y = np.meshgrid(y,x)
+        X, Y = np.meshgrid(x,y, indexing='ij')
         distance = np.sqrt((X - burning_center_x)**2 + (Y - burning_center_y)**2)
         global_max_distance = 10 * distance.max()
         
