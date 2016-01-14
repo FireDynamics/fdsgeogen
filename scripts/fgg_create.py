@@ -341,7 +341,7 @@ def close_fds_file():
     # DESCRIPTION:
     #  writes a TAIL statement via write_to_fds and closes the FDS file
     if type(vars['fds_file']) == file:
-        write_to_fds("&TAIL/\n")
+        write_to_fds("\n&TAIL/\n")
         vars['fds_file'].close()
 
 
