@@ -1,5 +1,5 @@
 &OBST XB=1.0, 2.0, 1.0, 2.0, 0.0, 4.0 /
 &HOLE XB=1.0, 2.0, 1.0, 2.0, 1.0, 2.0 /
-&OBST XB=2.0, 3.0, 1.0, 2.0, 0.0, 4.0 /
+&OBST XB=#PH2#, 3.0, 1.0, 2.0, 0.0, 4.0 /
 &OBST XB=1.0, 2.0, 2.0, 4.0, 0.0, 4.0 /
-&SLCF PBX = 2.0 QUANTITY='TEMPERATURE' /
+&SLCF PBX = #PH3# QUANTITY='#PH1#' /

@@ -440,6 +440,17 @@ def input(node):
         in_file.close()
         # look for lines starting with '&' which marks FDS commands
         in_file_contents = re.findall('&.*?/', in_file_raw.replace('\n', ' '))
+        
+        # find replacement command
+        replace_dict = {}
+        for subnode in node:
+            if subnode.tag == "replace":
+                f = subnode.attrib['from']
+                t = get_val(subnode, 'to')
+                replace_dict[f] = t
+        
+        print replace_dict
+        
         # insert the found commands into the FDS file
         write_to_fds("\n == insertion from file: %s == \n" % in_file_name)
         for line in in_file_contents:
