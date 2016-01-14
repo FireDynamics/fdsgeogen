@@ -87,10 +87,12 @@ epsilon = 0.0001
 
 def printHead():
     rootdir = os.path.abspath(os.path.dirname(__file__)) 
-    vf = open(rootdir + "/scripts/version", "r")
+    vf = open(rootdir + "\\version", "r")
+    # vf = open(rootdir + "/scripts/version", "r")
     version = vf.readline()
     vf.close()
-    lf = open(rootdir + "/scripts/logo", "r")
+    lf = open(rootdir + "\\logo", "r")
+    # lf = open(rootdir + "/scripts/logo", "r")
     logo = lf.read()
     lf.close()
 
@@ -442,14 +444,31 @@ def input(node):
         in_file_contents = re.findall('&.*?/', in_file_raw.replace('\n', ' '))
         
         # find replacement command
-        replace_dict = {}
+        replace_dict = {"#PH1#":"'TEMPERATURE'","#PH2#":"x1","#PH3#":"2.0"}
+        '''
         for subnode in node:
             if subnode.tag == "replace":
                 f = subnode.attrib['from']
                 t = get_val(subnode, 'to')
                 replace_dict[f] = t
+                '''
         
         print replace_dict
+        print in_file_contents
+        print in_file_raw
+        
+            # in every line, look for keywords (source) to be changed to 
+            # new value (target) according to items in 'newvalues'-dictionary
+        #         
+        for line in in_file_raw:
+            for source, target in replace_dict.iteritems():
+            # for source, target in replace_dict.iteritems():
+                line = line.replace(source,target)
+                print line
+            write_to_fds(line)
+    
+        print in_file_contents        
+        
         
         # insert the found commands into the FDS file
         write_to_fds("\n == insertion from file: %s == \n" % in_file_name)
@@ -464,6 +483,9 @@ def input(node):
             else:
                 print "  - ignoring key ", fds_key
         write_to_fds("== end of insertion == \n\n")
+    
+    
+'''    
     # test of a function to replace keywords from an FDS file
     if check_val(node, "replace_file"):
         newvalues = {'--puttypehere--':'Toast', '--putvalue2here--':'Suppe'}
@@ -471,12 +493,7 @@ def input(node):
         # open and read template file
         in_file_name = get_val(node, "replace_file")
         with open(in_file_name,'r') as template:
-            for line in template:
-                # in every line, look for keywords to be changed to new value according to items in 'newvalues'-dictionary
-                for src, target in newvalues.iteritems():
-                    line = line.replace(src,target)
-                write_to_fds(line)
-    
+   ''' 
 
 
 def loop(node):

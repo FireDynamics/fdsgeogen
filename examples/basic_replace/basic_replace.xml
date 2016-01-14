@@ -1,0 +1,15 @@
+<fds>
+
+    <!-- FDS input file naming -->
+    <info chid="'basic_replace'" outfile="'basic_replace.fds'" />
+
+    <var x1="1.0" />
+
+    <!-- inclusion of only OBST statements of from an external file -->
+    <input from_file="'external_replace.fds'">
+      <replace from="#PH1#" to="'TEMPERATURE'" />
+      <replace from="#PH2#" to="x1" />
+      <replace from="#PH3#" to="2.0" />
+    </input>
+
+</fds>
