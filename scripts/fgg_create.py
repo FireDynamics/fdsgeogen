@@ -453,6 +453,19 @@ def input(node):
             else:
                 print "  - ignoring key ", fds_key
         write_to_fds("== end of insertion == \n\n")
+    # test of a function to replace keywords from an FDS file
+    if check_val(node, "replace_file"):
+        newvalues = {'--puttypehere--':'Toast', '--putvalue2here--':'Suppe'}
+
+        # open and read template file
+        in_file_name = get_val(node, "replace_file")
+        with open(in_file_name,'r') as template:
+            for line in template:
+                # in every line, look for keywords to be changed to new value according to items in 'newvalues'-dictionary
+                for src, target in newvalues.iteritems():
+                    line = line.replace(src,target)
+                write_to_fds(line)
+    
 
 
 def loop(node):
