@@ -343,7 +343,7 @@ def close_fds_file():
     # DESCRIPTION:
     #  writes a TAIL statement via write_to_fds and closes the FDS file
     if type(vars['fds_file']) == file:
-        write_to_fds("&TAIL/\n")
+        write_to_fds("\n&TAIL/\n")
         vars['fds_file'].close()
 
 
@@ -411,9 +411,48 @@ def input(node):
         write_to_fds("&%s /\n" % (node.attrib["text"]))
     if check_val(node, 'str'):
         write_to_fds("&%s /\n" % (get_val(node, "str")))
+        
+    
+    # test of a function to replace keywords from an FDS file
+    if check_val(node, "replace_file"):
+        # open and read input file
+        in_file_name = get_val(node, "replace_file") 
+        in_file = open(in_file_name, 'r')
+        in_file_raw = in_file.read()
+        in_file.close()
+        # look for lines starting with '&' which marks FDS commands
+        in_file_contents = re.findall('&.*?/', in_file_raw.replace('\n', ' '))
+        
+        # find replacement command
+        replace_dict = {"#PH1#":"TEMPERATURE","#PH2#":"x1","#PH3#":"2.0"}
+        print replace_dict
+        print in_file_contents
+        
+        
+        # in every line, look for keywords (source) to be changed to 
+        # new value (target) according to items in 'newvalues'-dictionary
+        for line in in_file_contents:
+            for source, target in replace_dict.iteritems():
+            # for source, target in replace_dict.iteritems():
+                line = line.replace(source,target)
+                print line
+            write_to_fds(line)
+
+        
+    
+    
     # given as a file
-    #  check for included and excluded keywords
     if check_val(node, "from_file"):
+        # open and read input file
+        in_file_name = get_val(node, "from_file") 
+        in_file = open(in_file_name, 'r')
+        in_file_raw = in_file.read()
+        in_file.close()
+        # look for lines starting with '&' which marks FDS commands
+        in_file_contents = re.findall('&.*?/', in_file_raw.replace('\n', ' '))
+    
+    
+        #  check for included and excluded keywords
         excl = []
         excl_tmp = check_get_val(node, 'excl', None)
         if excl_tmp:
@@ -435,41 +474,6 @@ def input(node):
         if incl != [] and excl != []:
             print "!! exclusion and inclusion of FDS key words at the same time is not possible "
             sys.exit()
-        # open and read input file
-        in_file_name = get_val(node, "from_file")
-        in_file = open(in_file_name, 'r')
-        in_file_raw = in_file.read()
-        in_file.close()
-        # look for lines starting with '&' which marks FDS commands
-        in_file_contents = re.findall('&.*?/', in_file_raw.replace('\n', ' '))
-        
-        # find replacement command
-        replace_dict = {"#PH1#":"'TEMPERATURE'","#PH2#":"x1","#PH3#":"2.0"}
-        '''
-        for subnode in node:
-            if subnode.tag == "replace":
-                f = subnode.attrib['from']
-                t = get_val(subnode, 'to')
-                replace_dict[f] = t
-                '''
-        
-        print replace_dict
-        print in_file_contents
-        print in_file_raw
-        
-            # in every line, look for keywords (source) to be changed to 
-            # new value (target) according to items in 'newvalues'-dictionary
-        #         
-        for line in in_file_raw:
-            for source, target in replace_dict.iteritems():
-            # for source, target in replace_dict.iteritems():
-                line = line.replace(source,target)
-                print line
-            write_to_fds(line)
-    
-        print in_file_contents        
-        
-        
         # insert the found commands into the FDS file
         write_to_fds("\n == insertion from file: %s == \n" % in_file_name)
         for line in in_file_contents:
@@ -483,16 +487,41 @@ def input(node):
             else:
                 print "  - ignoring key ", fds_key
         write_to_fds("== end of insertion == \n\n")
+        
+        
+        
+        '''
+        
+    # test of a function to replace keywords from an FDS file
+    if check_val(node, "replace_file"):
+        # open and read template file
+        in_file_name = get_val(node, "replace_file")
+        
+        
+        
+        
+        newvalues = {'--puttypehere--':'Toast', '--putvalue2here--':'Suppe'}
+
+        with open(in_file_name,'r') as template:
+        #
+        #
+        #
+        for subnode in node:
+            if subnode.tag == "replace":
+                f = subnode.attrib['from']
+                t = get_val(subnode, 'to')
+                replace_dict[f] = t
+                '''
+        
+        
+        
+        
+        
+        
+        
     
     
 '''    
-    # test of a function to replace keywords from an FDS file
-    if check_val(node, "replace_file"):
-        newvalues = {'--puttypehere--':'Toast', '--putvalue2here--':'Suppe'}
-
-        # open and read template file
-        in_file_name = get_val(node, "replace_file")
-        with open(in_file_name,'r') as template:
    ''' 
 
 
