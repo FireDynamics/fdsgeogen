@@ -22,10 +22,10 @@ import argparse
 
 def printHead():
     rootdir = os.path.abspath(os.path.dirname(__file__))
-    vf = open(rootdir + "/scripts/version", "r")
+    vf = open(rootdir + "\\version", "r")
     version = vf.readline()
     vf.close()
-    lf = open(rootdir + "/scripts/logo", "r")
+    lf = open(rootdir + "\\logo", "r")
     logo = lf.read()
     lf.close()
 

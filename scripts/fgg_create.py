@@ -267,7 +267,7 @@ def traverse(root):
 
 def process_node(node):
     # DESCRIPTION:
-    #  processes node with a tag/key found in global_keys and writes it as a FDS statement to the FDS file via write_to_fds
+    # processes node with a tag/key found in global_keys and writes it as a FDS statement to the FDS file via write_to_fds
     # INPUT (arguments of node):
     #  id       - identifier of the statement
     #  comment  - comment to be written after the statement
@@ -312,7 +312,7 @@ def process_node(node):
     all_args.extend(['id', 'comment'])
     # checks if the arguments given are consistent with global_args for the given key
     for att in node.attrib:
-        #print "checking attribute %s"%att
+        # print "checking attribute %s"%att
         if att not in all_args:
             print "WARNING: unknown argument %s" % att
     # writes the statement to the FDS file
