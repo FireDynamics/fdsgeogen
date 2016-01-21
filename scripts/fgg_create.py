@@ -812,12 +812,25 @@ def fire(node):
     #  defines a box and writes the OBST statement via write_to_fds
     #  defines a fire fueled by methane on the box and writes the REAC, SURF and VENT statements via write_to_fds
     # INPUT (arguments of node):
-    #  type     - must be "burningbox" in order for the method to have an effect (required)
+    #  type     - must be "burningbox" or "fire_spread"
+    # BURNINGBOX
     #  cx, cy   - x & y coordinates of the center of the box (required)
     #  lz       - z coordinate of the bottom of the box (required)
     #  width    - width of the box (required)
     #  height   - height of the box (required)
-    # hrr      - heat release rate (required)
+    #  hrr      - heat release rate (required)
+    # FIRE_SPREAD
+    #  delta                - surface element size, default is the grid spacing delta (implicit)
+    #  cx, cy               - x & y coordinates of the center of the box (if height set)
+    #  lz                   - z coordinate of the bottom of the box, or the z-position of the fire surface
+    #  width_x, width_y     - widths of the box (if height set) or of the burning surface 
+    #  height               - height of the box, if set an obstacle is created, otherwise just a surface
+    #  fuel                 - if set, a REAC line is added with chosen fuel
+    #  hrrmax, alpha        - construct a alpha*t^2 HRR curve that increases up to hrrmax
+    #  from_file            - read in a csv file that defines the HRR curve
+    #  hrr_factor, delay    - manipulate the HRR curve, scaling with hrr_factor and time shift with delay
+    #  spread_cx, spread_cy - set the center of fire spread
+    #  nsubsteps            - number of additional interpolations within the ramp of a single burning surface element
 
     fire_type = get_val(node, 'type')
 
@@ -841,27 +854,32 @@ def fire(node):
         write_to_fds("&VENT XB=%f,%f,%f,%f,%f,%f SURF_ID='burningbox' color='RED'/\n" % (
             cx - w2, cx + w2, cy - w2, cy + w2, lz + h, lz + h))
 
-    if fire_type == 'spread_square_box':
+    if fire_type == 'fire_spread':
 
         ############################# OBST geometry
 
-        # get information about the burning box
+        delta = get_val(node, 'delta', opt=True)
+        
         cx = get_val(node, 'cx')
         cy = get_val(node, 'cy')
         lz = get_val(node, 'lz')
         wx = get_val(node, 'width_x')
         wy = get_val(node, 'width_y')
-        h = get_val(node, 'height')
-        delta = get_val(node, 'delta', opt=True)
+        h  = 0
+        
+        # get information about the burning box (if height is set)
+        if check_val(node, 'heigth'):
+            h  = get_val(node, 'height')
 
-        # write out obst definition
-        # box_obst = "&OBST "
-        # box_obst += "XB=%f, %f, %f, %f, %f, %f" % (cx - wx/2., cx + wx/2., cy - wy/2., cy + wy/2., lz, lz + h)
-        # box_obst += "/\n"
-        # write_to_fds(box_obst)
+            # write out obst definition
+            box_obst = "&OBST "
+            box_obst += "XB=%f, %f, %f, %f, %f, %f" % (cx - wx/2., cx + wx/2., cy - wy/2., cy + wy/2., lz, lz + h)
+            box_obst += "/\n"
+            write_to_fds(box_obst)
 
-        # set default combustion reaction
-        #write_to_fds("&REAC FUEL = 'METHANE' /\n")
+        # set default combustion reaction (if fuel is set)
+        if check_val(node, 'fuel'):
+            write_to_fds("&REAC FUEL = '%s' /\n"%get_val(node, 'fuel'))
 
         # compute number of surface (top surface) cells in each direction
         sx = int(wx / delta)
@@ -938,7 +956,7 @@ def fire(node):
 
         ############################# RAMP definition
 
-        nsubsteps = check_get_val(node, "substeps", 3)
+        nsubsteps = 2 + check_get_val(node, "nsubsteps", 0)
 
         ramp_id = check_get_val(node, "id", "default")
         # create ramps
