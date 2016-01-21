@@ -928,6 +928,8 @@ def fire(node):
 
         ############################# RAMP definition
 
+        nsubsteps = check_get_val(node, "substeps", 3)
+
         ramp_id = check_get_val(node, "id", "default")
         # create ramps
         for e in range(n_elements):
@@ -937,10 +939,18 @@ def fire(node):
             t_start = trigger_t[e]
             t_end   = trigger_t[e+1]
 
+            # create interpolation of the hrr curve
+            ramp_substeps_t = np.linspace(t_start, t_end, nsubsteps)
+            ramp_substeps_hrr = np.interp(ramp_substeps_t, f_t, f_hrr)
+            ramp_substeps_hrr_scaled = ramp_substeps_hrr - ramp_substeps_hrr[0]
+            ramp_substeps_hrr_scaled = ramp_substeps_hrr_scaled / ramp_substeps_hrr_scaled[-1]
+            
+
             # ramps up to first maximum -> increas in burning surface
             write_to_fds("&RAMP ID='%s', T=-0.1, F=0.0 /\n"%ramp_name)
-            write_to_fds("&RAMP ID='%s', T=%e, F=0.0 /\n"%(ramp_name, t_start))
-            write_to_fds("&RAMP ID='%s', T=%e, F=1.0 /\n"%(ramp_name, t_end))
+            for substep in range(nsubsteps):
+                write_to_fds("&RAMP ID='%s', T=%e, F=%e /\n"%(ramp_name, ramp_substeps_t[substep], ramp_substeps_hrr_scaled[substep]))
+
 
             # ramps for time after maximum -> global scaling of specific heat release rate
             for i in range(hrr_first_max_index+1, len(f_t[:])):
