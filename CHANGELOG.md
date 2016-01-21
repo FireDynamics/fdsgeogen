@@ -1,3 +1,6 @@
+### Version 1.3.3
+- allow for if-statements in condition nodes
+
 ### Version 1.3.2
 - multiple corrections
 - added logo
