@@ -389,6 +389,7 @@ def condition(node):
     #                   fulfilled and exits the program with an error message
     #                   to standard output otherwise
     #  if            -  checks for the condition and traverses the node if true
+    
     if check_val(node, 'assert'):
         if not get_val(node, 'assert'):
             print "assert condition was not met: ", node.attrib['assert']
