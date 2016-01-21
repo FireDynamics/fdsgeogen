@@ -241,16 +241,6 @@ def get_val(node, name, opt=False):
         sys.exit()
 
 
-def cond(node):
-    # DESCRIPTION:
-    #  checks if the requirements passed as node arguments are fulfilled and exits the program with an error message
-    #  to standard output otherwise
-    for att in node.attrib:
-        if not get_val(node, att):
-            print "condition was not met: ", node.attrib[att]
-            sys.exit()
-
-
 def traverse(root):
     # DESCRIPTION:
     #  traverses through the tree and processes the child nodes of root
@@ -391,6 +381,25 @@ def dump(node):
         for line in f:
             write_to_fds("%s\n" % line.rstrip('\n'))
         f.close()
+
+
+def condition(node):
+    # DESCRIPTION:
+    #  assert        -  checks if the requirements passed as node arguments are 
+    #                   fulfilled and exits the program with an error message
+    #                   to standard output otherwise
+    #  if            -  checks for the condition and traverses the node if true
+    if check_val(node, 'assert'):
+        if not get_val(node, 'assert'):
+            print "assert condition was not met: ", node.attrib['assert']
+            sys.exit()
+            
+    if check_val(node, 'if'):
+        cond = get_val(node, 'if')
+        if cond:
+            traverse(node)
+        else:
+            pass
 
 
 def input(node):
