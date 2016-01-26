@@ -1268,7 +1268,7 @@ vars = {}
 subdirs = {}
 
 # looking for parameters
-for node in root:
+for node in root.iter('para'):
     if node.tag == 'para':
         if 'dim' not in node.attrib:
             node.attrib['dim'] = 'default_dim'
