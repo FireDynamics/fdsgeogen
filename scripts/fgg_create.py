@@ -478,31 +478,33 @@ def input(node):
                 print "  - ignoring key ", fds_key
         write_to_fds("== end of insertion == \n\n")
     
-    # given as a FDS-file template, replace keywords in given template
+        
+        # given as a FDS-file template, replace keywords in given template
     if check_val(node, "replace_file"):
         # open and read input file
         in_file_name = get_val(node, "replace_file") 
-        in_file = open(in_file_name, 'r')
-        in_file_raw = in_file.read()
-        in_file.close()
-        # look for lines starting with '&' which marks FDS commands
-        in_file_contents = re.findall('&.*?/', in_file_raw.replace('\n', ' '))
         
-        # find replacement command and store them in 'replace_dict'-dictionary
-        replace_dict = {}
-        for subnode in node:
-            if subnode.tag == "replace":
-                f = subnode.attrib['from']
-                t = get_val(subnode, 'to')
-                replace_dict[f] = t
+        # Open and reading the template, change keywords and write new file
+        with open(in_file_name, 'r') as in_file:
+            # Looks replacement commands and stores them in 'replace_dict'-dictionary
+            replace_dict = {}
+            for subnode in node:
+                if subnode.tag == "replace":
+                    f = subnode.attrib['from']
+                    t = get_val(subnode, 'to')
+                    replace_dict[f] = t
                 
-        # in every line, look for keywords (source) to be changed to 
-        # new value (target) according to items in 'replace_dict'-dictionary
-        for line in in_file_contents:
-            for source, target in replace_dict.iteritems():
-            # for source, target in replace_dict.iteritems():
-                line = line.replace(source,str(target))
-            write_to_fds(line + '\n')
+            # in every line, look for keywords (source) to be changed to 
+            # new value (target) according to items in 'replace_dict'-dictionary
+            #for line in in_file_contents:
+            for line in in_file:
+                for source, target in replace_dict.iteritems():
+                # for source, target in replace_dict.iteritems():
+                    line = line.replace(source,str(target))
+                write_to_fds(line)
+                #print line
+            
+            
         
 
 def loop(node):
