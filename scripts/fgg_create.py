@@ -90,7 +90,8 @@ def printHead():
     vf = open(rootdir + "/scripts/version", "r")
     version = vf.readline()
     vf.close()
-    lf = open(rootdir + "/scripts/logo", "r")
+    lf = open(rootdir + "\\logo", "r")
+    # lf = open(rootdir + "/scripts/logo", "r")
     logo = lf.read()
     lf.close()
 
@@ -255,7 +256,7 @@ def traverse(root):
 
 def process_node(node):
     # DESCRIPTION:
-    #  processes node with a tag/key found in global_keys and writes it as a FDS statement to the FDS file via write_to_fds
+    # processes node with a tag/key found in global_keys and writes it as a FDS statement to the FDS file via write_to_fds
     # INPUT (arguments of node):
     #  id       - identifier of the statement
     #  comment  - comment to be written after the statement
@@ -300,7 +301,7 @@ def process_node(node):
     all_args.extend(['id', 'comment'])
     # checks if the arguments given are consistent with global_args for the given key
     for att in node.attrib:
-        #print "checking attribute %s"%att
+        # print "checking attribute %s"%att
         if att not in all_args:
             print "WARNING: unknown argument %s" % att
     # writes the statement to the FDS file
@@ -349,6 +350,7 @@ def dump_plot_types(plots, dir):
 	for i in plots:
 		plot_file.write(i + '\n')
 	plot_file.close()
+
 
 ###############################
 ##### FDS CODE GENERATION #####
@@ -419,9 +421,18 @@ def input(node):
         write_to_fds("&%s /\n" % (node.attrib["text"]))
     if check_val(node, 'str'):
         write_to_fds("&%s /\n" % (get_val(node, "str")))
+   
     # given as a file
-    #  check for included and excluded keywords
     if check_val(node, "from_file"):
+        # open and read input file
+        in_file_name = get_val(node, "from_file") 
+        in_file = open(in_file_name, 'r')
+        in_file_raw = in_file.read()
+        in_file.close()
+        # look for lines starting with '&' which marks FDS commands
+        in_file_contents = re.findall('&.*?/', in_file_raw.replace('\n', ' '))
+    
+        #  check for included and excluded keywords
         excl = []
         excl_tmp = check_get_val(node, 'excl', None)
         if excl_tmp:
@@ -443,13 +454,6 @@ def input(node):
         if incl != [] and excl != []:
             print "!! exclusion and inclusion of FDS key words at the same time is not possible "
             sys.exit()
-        # open and read input file
-        in_file_name = get_val(node, "from_file")
-        in_file = open(in_file_name, 'r')
-        in_file_raw = in_file.read()
-        in_file.close()
-        # look for lines starting with '&' which marks FDS commands
-        in_file_contents = re.findall('&.*?/', in_file_raw.replace('\n', ' '))
         # insert the found commands into the FDS file
         write_to_fds("\n == insertion from file: %s == \n" % in_file_name)
         for line in in_file_contents:
@@ -463,7 +467,35 @@ def input(node):
             else:
                 print "  - ignoring key ", fds_key
         write_to_fds("== end of insertion == \n\n")
-
+    
+        
+        # given as a FDS-file template, replace keywords in given template
+    if check_val(node, "replace_file"):
+        # open and read input file
+        in_file_name = get_val(node, "replace_file") 
+        
+        # Open and reading the template, change keywords and write new file
+        with open(in_file_name, 'r') as in_file:
+            # Looks replacement commands and stores them in 'replace_dict'-dictionary
+            replace_dict = {}
+            for subnode in node:
+                if subnode.tag == "replace":
+                    f = subnode.attrib['from']
+                    t = get_val(subnode, 'to')
+                    replace_dict[f] = t
+                
+            # in every line, look for keywords (source) to be changed to 
+            # new value (target) according to items in 'replace_dict'-dictionary
+            #for line in in_file_contents:
+            for line in in_file:
+                for source, target in replace_dict.iteritems():
+                # for source, target in replace_dict.iteritems():
+                    line = line.replace(source,str(target))
+                write_to_fds(line)
+                #print line
+            
+            
+        
 
 def loop(node):
     # DESCRIPTION:
@@ -1266,6 +1298,8 @@ root = tree.getroot()
 params = {}
 vars = {}
 subdirs = {}
+#auto_run = False
+print auto_run
 
 # looking for parameters
 for node in root.iter('para'):
