@@ -28,6 +28,6 @@
 	========= fire definition ==========
 	=================================-->
 
-    <fire type="'spread_square_box'" cx='1.5' cy='1.5' lz='0.0' width_x='1.0' width_y='1.6' height='0.5' hrrmax='1000' alpha='10' />
+    <fire type="'fire_spread'" fuel="'METHANE'" cx='1.5' cy='1.5' lz='0.0' width_x='1.0' width_y='1.6' height='0.5' from_file="'hrr.csv'" hrr_factor="10"/>
 
 </fds>

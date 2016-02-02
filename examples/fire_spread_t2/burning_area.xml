@@ -1,0 +1,33 @@
+<fds>
+
+    <!-- variables for the position and diameter of the burner -->
+    <var xpos = "0.6"  ypos = "1.0" diameter = "0.4"/>
+
+    <!-- file naming -->
+    <info chid="'simple_fire_spread'" title="'Example file for FDSgeogen'" outfile="'burning_area.fds'"/>
+
+    <!-- fixed input parameter -->
+    <input text="TIME T_END=25.0" />
+
+	<!--================================
+	========= mesh definition ==========
+	=================================-->
+          
+  <var delta = '0.1' />
+	<bounded_room x1="0.0" x2="3.0" y1="0.0" y2="3.0" z1="0.0" z2="2.4" />
+
+	<!-- mesh boundaries -->
+	<fds_vent mb = "'XMIN'" surf_id = "'OPEN'" />
+	<fds_vent mb = "'XMAX'" surf_id = "'OPEN'" />
+	<fds_vent mb = "'YMIN'" surf_id = "'OPEN'" />
+	<fds_vent mb = "'YMAX'" surf_id = "'OPEN'" />
+	<fds_vent mb = "'ZMAX'" surf_id = "'OPEN'" />
+	
+
+	<!--================================
+	========= fire definition ==========
+	=================================-->
+
+    <fire type="'fire_spread'" fuel="'METHANE'" cx='1.5' cy='1.5' lz='0.0' width_x='1.0' width_y='1.6' height='0.5' hrrmax='1000' alpha='10' />
+
+</fds>
