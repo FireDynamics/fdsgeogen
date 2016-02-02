@@ -362,25 +362,6 @@ def dump_plot_types(plots, dir):
 		plot_file.write(i + '\n')
 	plot_file.close()
 
-auto_run = False
-
-print auto_run
-
-def run(node):
-    if check_val(node, 'run_fds'):
-        auto_run = get_val(node, "run_fds")
-        #print toast
-        #print('toast' + str(type(toast)))
-        
-
-print auto_run
-
-'''        
-in_file_name = 
-        rootdir = os.path.abspath(os.path.dirname(__file__)) 
-        os.system('Python ' + rootdir + "\\fgg_run_serial.py")
-#    vf = open(rootdir + "\\version", "r")
-   '''  
 
 ###############################
 ##### FDS CODE GENERATION #####
@@ -1239,15 +1220,3 @@ for items in product(*[params[pd] for pd in params]):
     dump_plot_types(plots, vars['subdir'])
 
 dump_subdirectories(subdirs)
-
-print auto_run
-print type(auto_run)
-
-# checks if autorun is set to True and calls fgg_run_serial.py, else
-if auto_run == True:
-    print auto_run
-    print("Auto-run of FDS set to 'True'.")
-    rootdir = os.path.abspath(os.path.dirname(__file__)) 
-    os.system('Python ' + rootdir + "\\fgg_run_serial.py")
-else:
-    print("Auto-run of FDS set to 'False'.")
