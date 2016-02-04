@@ -1298,8 +1298,7 @@ root = tree.getroot()
 params = {}
 vars = {}
 subdirs = {}
-#auto_run = False
-print auto_run
+
 
 # looking for parameters
 for node in root.iter('para'):

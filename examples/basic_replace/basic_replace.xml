@@ -3,18 +3,12 @@
     <!-- FDS input file naming -->
     <info chid="'basic_replace'" outfile="'basic_replace.fds'" subdir="'id_%03d'%para_id" title="'Show case of the replace function for FDSgeogen.'" />
 
+    <!--list of different energy release rates /-->
+    <para dim='d1' var='err' list='np.linspace(500.0,2000.0,4)' />
 
-	<!--list of different energy release rates /-->
-
-	<para dim='d1' var='err' list='np.linspace(500.0,2000.0,4)' />
-	
-	
-
-    <!-- inclusion of only OBST statements of from an external file -->
+    <!-- inclusion of information from an external template file -->
     <input replace_file="'template1.fds'">
       <replace from="#err#" to="err" />
     </input>
 
-
-	
 </fds>
