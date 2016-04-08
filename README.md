@@ -36,5 +36,3 @@ For any kind of questions or support, please contact firesim@fz-juelich.de, or c
 https://cst.version.fz-juelich.de/users/sign_in
 
 and post an issue.
-
-CST FireSim
