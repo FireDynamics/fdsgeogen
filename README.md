@@ -5,7 +5,7 @@
 /(_))/(_)) /(_)))\))(  ))\ (   )\))(  ))\ (     
 (_))_(_))_ (_)) ((_))\ /((_))\ ((_))\ /((_))\ )  
 | |_  |   \/ __| (()(_|_)) ((_) (()(_|_)) _(_/(  
-| __| | |) \__ \/ _` |/ -_) _ \/ _` |/ -_) ' \)) 
+| __| | |) \__ \/ _` |/ -_) _ \/ _` |/ -_) ' \))
 |_|   |___/|___/\__, |\___\___/\__, |\___|_||_|  
                 |___/          |___/             
 ```
@@ -31,8 +31,10 @@ or here
 
 --------------------------------
 
-For any kind of questions or support, please contact firesim@fz-juelich.de, or create an account at 
+For any kind of questions or support, please contact firesim@fz-juelich.de, or create an account at
 
 https://cst.version.fz-juelich.de/users/sign_in
 
 and post an issue.
+
+CST FireSim
