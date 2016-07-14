@@ -15,22 +15,27 @@
 # You should have received a copy of the GNU General Public License
 # along with fdsgeogen. If not, see <http://www.gnu.org/licenses/>.
 
+import sys
 import shutil
 import os
 
 def printHead():
-    rootdir = os.path.abspath(os.path.dirname(__file__)) 
-    vf = open(rootdir + "/scripts/version", "r")
+    rootdir = os.path.abspath(os.path.dirname(__file__))
+    if sys.platform == "win32": # WINDOWS
+        vf = open(rootdir + "\\version", "r")
+        lf = open(rootdir + "\\logo", "r")
+    else:
+        vf = open(rootdir + "/scripts/version", "r")
+        lf = open(rootdir + "/scripts/logo", "r")
     version = vf.readline()
-    vf.close()
-    lf = open(rootdir + "/scripts/logo", "r")
     logo = lf.read()
+    vf.close()
     lf.close()
-
+    
     print logo
-
+    
     print "###"
-    print "### fdsgeogen -- clean up tool"
+    print "### fdsgeogen -- create tool"
     print "### version %s"%version
     print "###"
     print

@@ -87,12 +87,15 @@ epsilon = 0.0001
 
 def printHead():
     rootdir = os.path.abspath(os.path.dirname(__file__))
-    vf = open(rootdir + "/scripts/version", "r")
+    if sys.platform == "win32": # WINDOWS
+        vf = open(rootdir + "\\version", "r")
+        lf = open(rootdir + "\\logo", "r")
+    else:
+        vf = open(rootdir + "/scripts/version", "r")
+        lf = open(rootdir + "/scripts/logo", "r")
     version = vf.readline()
-    vf.close()
-    lf = open(rootdir + "\\logo", "r")
-    # lf = open(rootdir + "/scripts/logo", "r")
     logo = lf.read()
+    vf.close()
     lf.close()
 
     print logo
