@@ -35,7 +35,7 @@ def printHead():
     print logo
     
     print "###"
-    print "### fdsgeogen -- create tool"
+    print "### fdsgeogen -- clean up tool"
     print "### version %s"%version
     print "###"
     print

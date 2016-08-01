@@ -52,7 +52,7 @@ def printHead():
     print logo
     
     print "###"
-    print "### fdsgeogen -- create tool"
+    print "### fdsgeogen -- analyse tool"
     print "### version %s"%version
     print "###"
     print
