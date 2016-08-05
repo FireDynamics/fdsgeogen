@@ -1226,6 +1226,61 @@ def my_room(node):
     add_var("nz", nz)
 
 
+#####################
+# HPC BATCH SYSTEMS #
+#####################
+
+def job_file(node):
+    # DESCRIPTION:
+    # creates a job file for a submission system
+    # INPUT (arguments of node):
+    #  system                       - name of the target system, currently only 'jureca'
+    #  tasks                        - number of MPI tasks
+    #  omp                          - number of OpenMP threads
+    #  walltime                     - computation time limit (currently no chain jobs supported)
+
+    import re
+
+    system   = get_val(node, 'system')
+    tasks    = get_val(node, 'tasks')
+    omp      = get_val(node, 'omp')
+    walltime = get_val(node, 'walltime')
+
+    rootdir = os.path.abspath(os.path.dirname(__file__))
+
+    if system == 'jureca':
+
+        jureca_cores_per_node = 24
+
+        if jureca_cores_per_node % omp !=0:
+            print " -- number of OMP thread does not fit jureca's node -> EXIT" % system
+            sys.exit(1)
+
+        template_file = open(rootdir + "/resources/hpc_systems/%s_template.job"%system)
+        template = template_file.read()
+        template_file.close()
+
+        replacelist = {
+        '#CHID#': vars['chid'],
+        '#TASKS#': str(tasks),
+            '#TASKSPERNODE#': str(24 // omp),
+            '#OMP#': str(omp),
+            '#WALLTIME#': str(walltime),
+            '#FDSFILE#': vars['outfile']
+        }
+
+        robj = re.compile('|'.join(replacelist.keys()))
+        result = robj.sub(lambda m: replacelist[m.group(0)], template)
+
+        result_file = open(vars['subdir'] + '/' + "fgg.%s.job"%system, 'w')
+        result_file.write(result)
+        result_file.close()
+
+    else:
+        print " -- unsupported hpc system: %s -> EXIT"%system
+        sys.exit(1)
+
+
 ##########
 # OTHERS #
 ##########
