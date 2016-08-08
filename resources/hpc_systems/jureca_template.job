@@ -1,0 +1,24 @@
+#!/bin/bash
+#SBATCH --job-name=FDS_#CHID#
+#SBATCH --ntasks=#TASKS#
+#SBATCH --ntasks-per-node=#TASKSPERNODE#
+#SBATCH --cpus-per-task=#OMP#
+#SBATCH --output=stdout_%j.out
+#SBATCH --error=stderr_%j.err
+#SBATCH --time=#WALLTIME#
+#SBATCH --partition=batch
+
+# load the module environment for latest FDS version
+module use /usr/local/software/jureca/OtherStages
+module load Stages/Devel
+module load Intel/2016.2.181-GCC-4.9.3-2.25 IntelMPI/5.1.3.181
+module load FDS/6.5.1-r17-259
+
+export OMP_NUM_THREADS=#OMP#
+
+echo "Current working directory: " `pwd`
+echo "Time simulation started: " `date`
+
+srun fds ./#FDSFILE#
+
+echo "Time simulation stopped: " `date`
