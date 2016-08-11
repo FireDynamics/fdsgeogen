@@ -355,6 +355,14 @@ def dump_plot_types(plots, dir):
 	plot_file.close()
 
 
+def dump_variables(vs, dir):
+    vars_file = open(dir + '/fgg.vars', 'w')
+    vars_file.write("# variable name; variable value \n")
+    for i in vs.keys():
+        vars_file.write('%s; %s \n'%(i, str(vs[i])))
+    vars_file.close()
+
+
 ###############################
 ##### FDS CODE GENERATION #####
 ###############################
@@ -1384,5 +1392,6 @@ for items in product(*[params[pd] for pd in params]):
     close_fds_file()
 
     dump_plot_types(plots, vars['subdir'])
+    dump_variables(vars, vars['subdir'])
 
 dump_subdirectories(subdirs)
