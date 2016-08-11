@@ -1389,17 +1389,18 @@ for items in product(*[params[pd] for pd in params]):
 
     vars = {'outfile': "output.fds", 'chid': "chid", 'title': "title", 'fds_file_open': False, 'fds_file': 0,
             'subdir': "./", 'para_id': para_id}
-    
-    para_str = "%04d"%para_id
+
+    para_vals = "%04d"%para_id
     para_head = "#para_id"
     for v in items:
         vars = dict(vars.items() + v.items())
         print v
-        para_str += "; " + str(v.items()[0][1])
-        para_head += "; " + str(v.keys()[0][0])
+        for key, val in v.iteritems():
+            para_vals += "; " + str(val)
+            para_head += "; " + str(key)
 
     if para_id == 0: para_list.append(para_head)
-    para_list.append(para_str)
+    para_list.append(para_vals)
 
     traverse(root)
 
