@@ -19,6 +19,10 @@ export OMP_NUM_THREADS=#OMP#
 echo "Current working directory: " `pwd`
 echo "Time simulation started: " `date`
 
+touch fgg.jureca.running
+
 srun fds ./#FDSFILE#
+
+touch fgg.jureca.finished
 
 echo "Time simulation stopped: " `date`
