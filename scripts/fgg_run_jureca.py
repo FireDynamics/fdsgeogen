@@ -25,7 +25,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--force",
                     help="submit FDS job even if job was already submitted", action="store_true")
 parser.add_argument("--number_of_jobs",
-                    help="maximal number of jobs in queue (default: 5)", default=5)
+                    help="maximal number of jobs in queue (default: 5)", default=5, type=int)
 parser.add_argument("--status",
                     help="shows status of jobs (no action / submitted / running / finished)", action="store_true")
 cmdl_args = parser.parse_args()
@@ -54,31 +54,71 @@ subdirs_file.close()
 
 print "processing subdirectories: "
 
-submitted_number=0
+if cmdl_args.status:
 
-for cd_ind in range(len(subdirs)):
-    subdir    = subdirs[cd_ind]
-    chid      = chids[cd_ind]
-    inputfile = inputs[cd_ind]
+    cnt_finished = 0
+    cnt_running  = 0
+    cnt_queued   = 0
+    cnt_noaction = 0
 
-    print " -", subdir
+    for cd_ind in range(len(subdirs)):
+        subdir    = subdirs[cd_ind]
+        chid      = chids[cd_ind]
+        inputfile = inputs[cd_ind]
 
-    if os.path.isfile(subdir + "/" + chid + ".end"):
-        print "   ... skipping, is already finished"
-        continue
+        if os.path.isfile(subdir + "/" + "fgg.jureca.finished"):
+            print subdir + ": simulation finished"
+            cnt_finished +=1
+            continue
 
-    if os.path.isfile(subdir + "/" + "fgg.jureca.submitted") and not cmdl_args.force:
-        print "   ... was already submitted"
-    else:
-        stdoutf = open(subdir + '/fgg.jureca.stdout', 'w')
-        sp.Popen([submit_cmd, 'fgg.jureca.job'], stdout=stdoutf, stderr=sp.STDOUT, cwd=subdir).communicate()
-        stdoutf.close()
+        if os.path.isfile(subdir + "/" + "fgg.jureca.running"):
+            print subdir + ": simulation running"
+            cnt_running += 1
+            continue
 
-        print "   ... submitted to job queue"
+        if os.path.isfile(subdir + "/" + "fgg.jureca.submitted"):
+            print subdir + ": simulation queued"
+            cnt_queued += 1
+            continue
 
-    submitted_number += 1
+        print subdir + ": no action so far"
+        cnt_noaction += 1
 
-    if submitted_number >= cmdl_args.number_of_jobs:
-        print "  maximal number of submitted jobs reached, stopping "
-        break
+    print "SUMMARY"
+    print "finished: ", cnt_finished
+    print "running : ", cnt_running
+    print "queued  : ", cnt_queued
+    print "noaction: ", cnt_noaction
+
+
+else:
+    submitted_number = 0
+    for cd_ind in range(len(subdirs)):
+        subdir    = subdirs[cd_ind]
+        chid      = chids[cd_ind]
+        inputfile = inputs[cd_ind]
+
+        print " -", subdir
+
+        if os.path.isfile(subdir + "/" + "fgg.jureca.finished"):
+            print "   ... skipping, is already finished"
+            continue
+
+        if os.path.isfile(subdir + "/" + "fgg.jureca.submitted") and not cmdl_args.force:
+            print "   ... was already submitted"
+        else:
+            stdoutf = open(subdir + '/fgg.jureca.stdout', 'w')
+            sp.Popen([submit_cmd, 'fgg.jureca.job'], stdout=stdoutf, stderr=sp.STDOUT, cwd=subdir).communicate()
+            stdoutf.close()
+
+            sf = open(subdir + '/fgg.jureca.submitted', 'w')
+            sf.close()
+
+            print "   ... submitted to job queue"
+
+        submitted_number += 1
+
+        if submitted_number >= cmdl_args.number_of_jobs:
+            print "  maximal number of submitted jobs reached, stopping "
+            break
 
