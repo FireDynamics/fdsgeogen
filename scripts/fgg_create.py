@@ -346,6 +346,12 @@ def dump_subdirectories(subdirs):
 		subdirs_file.write(i + ';' + subdirs[i][0] + ';' + subdirs[i][1] + '\n')
 	subdirs_file.close()
 
+def dump_paratable(paralist):
+	para_file = open('fgg.paratable', 'w')
+	for i in paralist:
+		para_file.write(i + '\n')
+	para_file.close()
+
 
 def dump_plot_types(plots, dir):
 	plot_file = open(dir + '/fgg.plot', 'w')
@@ -1376,16 +1382,24 @@ for node in root.iter('para'):
         paradim(node, params[node.attrib['dim']])
 
 # generating a parameter space and traversing the tree for each set of parameters
+para_list = []
 para_id = 0
 for items in product(*[params[pd] for pd in params]):
     plots = []
 
     vars = {'outfile': "output.fds", 'chid': "chid", 'title': "title", 'fds_file_open': False, 'fds_file': 0,
             'subdir': "./", 'para_id': para_id}
-    para_id += 1
+    
+    para_str = "%04d"%para_id
+    para_head = "#para_id"
     for v in items:
         vars = dict(vars.items() + v.items())
         print v
+        para_str += "; " + str(v.items()[0][1])
+        para_head += "; " + str(v.keys()[0][0])
+
+    if para_id == 0: para_list.append(para_head)
+    para_list.append(para_str)
 
     traverse(root)
 
@@ -1394,4 +1408,7 @@ for items in product(*[params[pd] for pd in params]):
     dump_plot_types(plots, vars['subdir'])
     dump_variables(vars, vars['subdir'])
 
+    para_id += 1
+
 dump_subdirectories(subdirs)
+dump_paratable(para_list)
