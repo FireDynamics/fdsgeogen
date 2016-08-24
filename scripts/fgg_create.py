@@ -447,8 +447,30 @@ def input(node):
         in_file_raw = in_file.read()
         in_file.close()
         # look for lines starting with '&' which marks FDS commands
-        in_file_contents = re.findall('&.*?/', in_file_raw.replace('\n', ' '))
-    
+
+        # define helper functions
+        def maskEscaped(matchobj):
+            res = matchobj.group(0)
+            res = re.sub('\/', "##SLASH##", res)
+            res = re.sub('\&', "##AND##", res)
+            return res
+
+        def unmaskEscaped(matchobj):
+            res = matchobj.group(0)
+            res = re.sub("##SLASH##", '/', res)
+            res = re.sub("##AND##", '&', res)
+            return res
+
+        # mask all '/' and '&' in quotes
+        masked_raw = re.sub('\'.*?\'', maskEscaped, in_file_raw)
+
+        # find all FDS statements
+        in_file_contents = re.findall('&.*?/', masked_raw)
+
+        # unmask all '/' and '&'
+        for il in range(len(in_file_contents)):
+            in_file_contents[il] = re.sub('\'.*?\'', unmaskEscaped, in_file_contents[il])
+
         #  check for included and excluded keywords
         excl = []
         excl_tmp = check_get_val(node, 'excl', None)
