@@ -57,7 +57,7 @@ global_args['fds_exit'] = ['ior', 'xyz', 'xb']
 global_args['fds_evac'] = ['number_initial_persons', 'xb', 'agent_type', 'pers_id']
 global_args['fds_ramp'] = ['t', 'f']
 global_args['fds_mesh'] = ['ijk', 'xb']
-
+global_args['fds_bndf'] = ['quantity', 'cell_centered']
 
 #########################
 ##### FDS key words #####
@@ -76,7 +76,7 @@ global_keys['fds_exit'] = 'EXIT'
 global_keys['fds_evac'] = 'EVAC'
 global_keys['fds_ramp'] = 'RAMP'
 global_keys['fds_mesh'] = 'MESH'
-
+global_keys['fds_bndf'] = 'BNDF'
 
 # accepted deviation when dealing with float arithmetic
 epsilon = 0.0001
@@ -142,6 +142,12 @@ def decompose(n, p):
 
     print " - decomposition: resulting proc decomposition ", procs, " local mesh size ", n_tmp
     return procs[0], procs[1], procs[2]
+
+def first_comma(v):
+    if v:
+        return ''
+    else:
+        return ', '
 
 ###############################
 ##### VARIABLE MANAGEMENT #####
@@ -265,8 +271,11 @@ def process_node(node):
     #  comment  - comment to be written after the statement
     global vars
     line = ''
-    line += "ID='%s'" % check_get_val(node, 'id', 'none')
+    res = check_get_val(node, 'id', None)
+    if res:
+        line += "ID='%s'" % res
     args = global_args[node.tag.lower()]
+    first_arg = True
     for arg in args:
         # checks if the argument is a vector in order to treat vectors correctly
         if check_val(node, arg):
@@ -277,12 +286,10 @@ def process_node(node):
             else:
                 val = get_val(node, arg)
             if isinstance(val, tuple):
-                line += ", %s%s=" % (arg.upper(), vec_post)
-                first = True
+                line += "%s%s%s=" % (first_comma(first_arg), arg.upper(), vec_post)
+                first_el = True
                 for el in val:
-                    if not first:
-                        line += ", "
-                    first = False
+                    line += first_comma(first_el)
 
                     if isinstance(el, basestring):
                         line += "'%s'" % (el)
@@ -290,16 +297,18 @@ def process_node(node):
                         line += "%d" % (el)
                     else:
                         line += "%f" % (el)
+                    first_el = False
             else:
                 if isinstance(val, basestring):
-                    line += ", %s='%s'" % (arg.upper(), val)
+                    line += "%s%s='%s'" % (first_comma(first_arg), arg.upper(), val)
                 elif isinstance(val, bool):
                     if val == True:
-                        line += ", %s=%s" % (arg.upper(), '.TRUE.')
+                        line += "%s%s=%s" % (first_comma(first_arg), arg.upper(), '.TRUE.')
                     else:
-                        line += ", %s=%s" % (arg.upper(), '.FALSE.')
+                        line += "%s%s=%s" % (first_comma(first_arg), arg.upper(), '.FALSE.')
                 else:
-                    line += ", %s=%f" % (arg.upper(), val)
+                    line += "%s%s=%f" % (first_comma(first_arg), arg.upper(), val)
+        first_arg = False
     all_args = args[:]
     all_args.extend(['id', 'comment'])
     # checks if the arguments given are consistent with global_args for the given key
