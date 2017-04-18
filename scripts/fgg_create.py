@@ -50,7 +50,7 @@ global_args['fds_obst'] = ['xb', 'surf_ids', 'surf_id', 'color', 'rgb', 'transpa
                        'ramp_q', 'mlrpua']
 global_args['fds_hole'] = ['xb', 'color']
 global_args['fds_vent'] = ['xb', 'surf_id', 'color', 'dynamic_pressure', 'tmp_exterior', 'mb', 'transparency']
-global_args['fds_slcf'] = ['pbx', 'pby', 'pbz', 'quantity', 'vector', 'evacuation']
+global_args['fds_slcf'] = ['pbx', 'pby', 'pbz', 'quantity', 'vector', 'evacuation', 'cell_centered']
 global_args['fds_pers'] = ['avatar_color', 'color_method', 'default_properties', 'det_mean', 'pre_mean', 'dens_init',
                        'l_non_sp']
 global_args['fds_exit'] = ['ior', 'xyz', 'xb']
@@ -840,6 +840,7 @@ def slcf(node):
     # INPUT (arguments of node):
     #  q        - quantity of slices
     #  spec_id  - (if required) species if
+    #  cc       - cell centered
     #  v        - determines that a vector is used
     #  x, y, z  - dimension to record as slice file
 
@@ -853,19 +854,22 @@ def slcf(node):
 			curr_q = "QUANTITY='%s'" % iq
 
 			v = ""
-			if check_get_val(node, 'v', "False"):
+			if check_get_val(node, 'v', False):
 				v = "VECTOR=.TRUE."
+                        cc = ""
+                        if check_get_val(node, 'cc', False):
+                            cc = "CELL_CENTERED=.TRUE."
                         spec_id = ""
                         res=check_get_val(node, 'spec_id', None)
                         if iq=="DENSITY" and res:
                             spec_id = "SPEC_ID='%s'"%res
 
 			if check_val(node, 'x'):
-				write_to_fds("&SLCF PBX=%e, %s %s %s/\n" % (get_val(node, 'x'), curr_q, v, spec_id))
+				write_to_fds("&SLCF PBX=%e, %s %s %s %s/\n" % (get_val(node, 'x'), curr_q, v, spec_id, cc))
 			if check_val(node, 'y'):
-				write_to_fds("&SLCF PBY=%e, %s %s %s/\n" % (get_val(node, 'y'), curr_q, v, spec_id))
+				write_to_fds("&SLCF PBY=%e, %s %s %s %s/\n" % (get_val(node, 'y'), curr_q, v, spec_id, cc))
 			if check_val(node, 'z'):
-				write_to_fds("&SLCF PBZ=%e, %s %s %s/\n" % (get_val(node, 'z'), curr_q, v, spec_id))
+				write_to_fds("&SLCF PBZ=%e, %s %s %s %s/\n" % (get_val(node, 'z'), curr_q, v, spec_id, cc))
 
 
 #############################
