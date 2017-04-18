@@ -36,7 +36,7 @@ cmdl_args = parser.parse_args()
 #########################
 
 global_args = {}
-global_args['fds_reac'] = ['heat_of_combustion', 'soot_yield', 'C', 'H', 'fuel', 'ideal']
+global_args['fds_reac'] = ['heat_of_combustion', 'soot_yield', 'co_yield', 'C', 'H', 'fuel', 'ideal']
 global_args['fds_matl'] = ['specific_heat', 'conductivity', 'density', 'heat_of_combustion',
                        'n_reactions', 'heat_of_reaction', 'nu_spec', 'reference_temperature',
                        'a', 'e', 'n_s', 'spec_id', 'emissivity', 'heating_rate', 'pyrolysis_range', 'matl_id',
@@ -839,6 +839,7 @@ def slcf(node):
     #  defines slice files and writes the SLCF statements via write_to_fds
     # INPUT (arguments of node):
     #  q        - quantity of slices
+    #  spec_id  - (if required) species if
     #  v        - determines that a vector is used
     #  x, y, z  - dimension to record as slice file
 
@@ -854,13 +855,17 @@ def slcf(node):
 			v = ""
 			if check_get_val(node, 'v', "False"):
 				v = "VECTOR=.TRUE."
+                        spec_id = ""
+                        res=check_get_val(node, 'spec_id', None)
+                        if iq=="DENSITY" and res:
+                            spec_id = "SPEC_ID='%s'"%res
 
 			if check_val(node, 'x'):
-				write_to_fds("&SLCF PBX=%e, %s %s /\n" % (get_val(node, 'x'), curr_q, v))
+				write_to_fds("&SLCF PBX=%e, %s %s %s/\n" % (get_val(node, 'x'), curr_q, v, spec_id))
 			if check_val(node, 'y'):
-				write_to_fds("&SLCF PBY=%e, %s %s /\n" % (get_val(node, 'y'), curr_q, v))
+				write_to_fds("&SLCF PBY=%e, %s %s %s/\n" % (get_val(node, 'y'), curr_q, v, spec_id))
 			if check_val(node, 'z'):
-				write_to_fds("&SLCF PBZ=%e, %s %s /\n" % (get_val(node, 'z'), curr_q, v))
+				write_to_fds("&SLCF PBZ=%e, %s %s %s/\n" % (get_val(node, 'z'), curr_q, v, spec_id))
 
 
 #############################

@@ -7,6 +7,32 @@
 #SBATCH --error=stderr_%j.err
 #SBATCH --time=#WALLTIME#
 #SBATCH --partition=batch
+#SBATCH --signal=B:SIGUSR1@600
+
+# handle the signal sent before the end of the wall clock time
+function handler_sigusr1
+{
+  # protocol stopping time
+  echo "$SLURM_JOB_ID -- `date`" >> time_stop
+  echo "`date` Shell received stop signal"
+
+  # create FDS stop file
+  touch #CHID#.stop
+
+  # as manual stop was triggered, the end of simulation time was
+  # not reached, remove flag file 'simulation_time_end'
+  rm fgg.jureca.running
+  wait
+}
+
+# check for the simulation finished flag file 'simulation_time_end'
+# if it is found, just quit
+if [ -e fgg.jureca.finished ]; then
+
+    ## simulation has already finished, nothing left to do
+    echo "FDS simulation already finished"
+    exit 0
+fi
 
 # load the module environment for latest FDS version
 module use /usr/local/software/jureca/OtherStages
