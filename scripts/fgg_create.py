@@ -36,7 +36,7 @@ cmdl_args = parser.parse_args()
 #########################
 
 global_args = {}
-global_args['fds_reac'] = ['heat_of_combustion', 'soot_yield', 'C', 'H', 'fuel', 'ideal']
+global_args['fds_reac'] = ['heat_of_combustion', 'soot_yield', 'co_yield', 'C', 'H', 'fuel', 'ideal']
 global_args['fds_matl'] = ['specific_heat', 'conductivity', 'density', 'heat_of_combustion',
                        'n_reactions', 'heat_of_reaction', 'nu_spec', 'reference_temperature',
                        'a', 'e', 'n_s', 'spec_id', 'emissivity', 'heating_rate', 'pyrolysis_range', 'matl_id',
