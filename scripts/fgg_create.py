@@ -145,7 +145,7 @@ def decompose(n, p):
 
 def first_comma(v):
     if v:
-        return ''
+        return ' '
     else:
         return ', '
 
