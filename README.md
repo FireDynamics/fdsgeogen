@@ -19,7 +19,7 @@ FDS is a widely used fire and smoke spread simulation tool. Its input file forma
 
 A tentative documentation is provided here:
 
-https://cst.version.fz-juelich.de/l.arnold/fdsgeogen/wikis/home
+https://github.com/FireDynamics/fdsgeogen/wiki
 
 An introduction talk (including examples) given at the FDS user group meeting 2015 in Berlin is located in
 
@@ -31,8 +31,4 @@ or here
 
 --------------------------------
 
-For any kind of questions or support, please contact firesim@fz-juelich.de, or create an account at
-
-https://cst.version.fz-juelich.de/users/sign_in
-
-and post an issue.
+For any kind of questions or support, please contact firesim@fz-juelich.de, or post an issue at GitHub.
