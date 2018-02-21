@@ -43,10 +43,10 @@ global_args['fds_matl'] = ['specific_heat', 'conductivity', 'density', 'heat_of_
                        'nu_matl']
 global_args['fds_surf'] = ['rgb', 'color', 'vel', 'hrrpua', 'heat_of_vaporization',
                        'ignition_temperature', 'burn_away', 'matl_id', 'matl_mass_fraction',
-                       'thickness', 'external_flux', 'backing', 'hrrupa', 'stretch_factor', 'cell_size_factor',
+                       'thickness', 'external_flux', 'backing', 'stretch_factor', 'cell_size_factor',
                        'ramp_q', 'mlrpua', 'tmp_front', 'tmp_inner','tmp_back', 'transparency', 'net_heat_flux','emissivity']
 global_args['fds_obst'] = ['xb', 'surf_ids', 'surf_id', 'color', 'rgb', 'transparency', 'bulk_density', 'bndf_obst',
-                       'thickness', 'external_flux', 'backing', 'hrrupa', 'stretch_factor', 'cell_size_factor',
+                       'thickness', 'external_flux', 'backing', 'stretch_factor', 'cell_size_factor',
                        'ramp_q', 'mlrpua', 'permit_hole']
 global_args['fds_hole'] = ['xb', 'color']
 global_args['fds_vent'] = ['xb', 'surf_id', 'color', 'dynamic_pressure', 'tmp_exterior', 'mb', 'transparency']
