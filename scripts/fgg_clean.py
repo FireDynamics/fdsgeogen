@@ -20,13 +20,11 @@ import shutil
 import os
 
 def printHead():
-    rootdir = os.path.abspath(os.path.dirname(__file__))
-    if sys.platform == "win32": # WINDOWS
-        vf = open(rootdir + "\\version", "r")
-        lf = open(rootdir + "\\logo", "r")
-    else:
-        vf = open(rootdir + "/scripts/version", "r")
-        lf = open(rootdir + "/scripts/logo", "r")
+    scriptdir = os.path.abspath(os.path.dirname(__file__))
+    rootdir = scriptdir.rstrip("/scripts")
+
+    vf = open(os.path.join(rootdir, "scripts", "version"), "r")
+    lf = open(os.path.join(rootdir, "scripts", "logo"), "r")
     version = vf.readline()
     logo = lf.read()
     vf.close()

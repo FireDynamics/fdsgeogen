@@ -66,17 +66,17 @@ if cmdl_args.status:
         chid      = chids[cd_ind]
         inputfile = inputs[cd_ind]
 
-        if os.path.isfile(subdir + "/" + "fgg.jureca.finished"):
+        if os.path.isfile(os.path.join(subdir, "fgg.jureca.finished")):
             print subdir + ": simulation finished"
             cnt_finished +=1
             continue
 
-        if os.path.isfile(subdir + "/" + "fgg.jureca.running"):
+        if os.path.isfile(os.path.join(subdir, "fgg.jureca.running")):
             print subdir + ": simulation running"
             cnt_running += 1
             continue
 
-        if os.path.isfile(subdir + "/" + "fgg.jureca.submitted"):
+        if os.path.isfile(os.path.join(subdir, "fgg.jureca.submitted")):
             print subdir + ": simulation queued"
             cnt_queued += 1
             continue
@@ -100,18 +100,18 @@ else:
 
         print " -", subdir
 
-        if os.path.isfile(subdir + "/" + "fgg.jureca.finished"):
+        if os.path.isfile(os.path.join(subdir, "fgg.jureca.finished")):
             print "   ... skipping, is already finished"
             continue
 
-        if os.path.isfile(subdir + "/" + "fgg.jureca.submitted") and not cmdl_args.force:
+        if os.path.isfile(os.path.join(subdir, "fgg.jureca.submitted")) and not cmdl_args.force:
             print "   ... was already submitted"
         else:
-            stdoutf = open(subdir + '/fgg.jureca.stdout', 'w')
+            stdoutf = open(os.path.join(subdir, 'fgg.jureca.stdout'), 'w')
             sp.Popen([submit_cmd, 'fgg.jureca.job'], stdout=stdoutf, stderr=sp.STDOUT, cwd=subdir).communicate()
             stdoutf.close()
 
-            sf = open(subdir + '/fgg.jureca.submitted', 'w')
+            sf = open(os.path.join(subdir, 'fgg.jureca.submitted'), 'w')
             sf.close()
 
             print "   ... submitted to job queue"
