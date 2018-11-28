@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # This file is part of fdsgeogen.
-# 
+#
 # fdsgeogen is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -31,13 +31,13 @@ def printHead():
     vf.close()
     lf.close()
 
-    print logo
+    print(logo)
 
-    print "###"
-    print "### fdsgeogen -- serial execution tool"
-    print "### version %s"%version
-    print "###"
-    print
+    print("###")
+    print("### fdsgeogen -- analyse tool")
+    print("### version ", version)
+    print("###")
+    print()
 
 printHead()
 
@@ -59,31 +59,31 @@ chids   = []
 
 # read in all sub directories, FDS input files, and CHIDs
 if not os.path.isfile(fn_subdirlist):
-    print " -- file %s could not be opened -> EXIT"%fn_subdirlist
-    print 
+    print(" -- file %s could not be opened -> EXIT"%fn_subdirlist)
+    print()
     sys.exit(1)
 subdirs_file = open(fn_subdirlist, 'r')
 for line in subdirs_file:
-	if line[0] == '#': continue
-	lc = line.rstrip().split(';')
-	subdirs.append(lc[0])
-	inputs.append(lc[1])
-	chids.append(lc[2])
+    if line[0] == '#': continue
+    lc = line.rstrip().split(';')
+    subdirs.append(lc[0])
+    inputs.append(lc[1])
+    chids.append(lc[2])
 subdirs_file.close()
 
-print "processing subdirectories: "
+print("processing subdirectories: ")
 
 for cd_ind in range(len(subdirs)):
-	subdir    = subdirs[cd_ind]
-	chid      = chids[cd_ind]
-	inputfile = inputs[cd_ind]
+    subdir    = subdirs[cd_ind]
+    chid      = chids[cd_ind]
+    inputfile = inputs[cd_ind]
 
-	print " -", subdir
-	
-	if os.path.isfile(os.path.join(subdir, chid + ".end")) and not cmdl_args.force:
-		print "   ... skipping, was already finished"
-	else:
-		stdoutf = open(os.path.join(subdir, 'fgg.stdout'), 'w')
-		sp.Popen([fds_exec, inputfile], stdout=stdoutf, stderr=sp.STDOUT, cwd=subdir).communicate()
-		stdoutf.close()
-		print "   ... finished"
+    print(" -", subdir)
+
+    if os.path.isfile(os.path.join(subdir, chid + ".end")) and not cmdl_args.force:
+        print("   ... skipping, was already finished")
+    else:
+        stdoutf = open(os.path.join(subdir, 'fgg.stdout'), 'w')
+        sp.Popen([fds_exec, inputfile], stdout=stdoutf, stderr=sp.STDOUT, cwd=subdir).communicate()
+        stdoutf.close()
+        print("   ... finished")
