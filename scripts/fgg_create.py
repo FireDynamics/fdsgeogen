@@ -19,6 +19,7 @@ import sys
 import re
 import os
 import argparse
+from io import IOBase
 from itertools import product
 import xml.etree.ElementTree as ET
 import numpy as np
@@ -96,13 +97,13 @@ def printHead():
     vf.close()
     lf.close()
 
-    print logo
+    print(logo)
 
-    print "###"
-    print "### fdsgeogen -- create tool"
-    print "### version %s"%version
-    print "###"
-    print
+    print("###")
+    print("### fdsgeogen -- analyse tool")
+    print("### version ", version)
+    print("###")
+    print()
 
 def first_comma(v):
     if v:
@@ -142,18 +143,18 @@ def var(node):
     for key in node.attrib:
         if key != 'from_file':
             add_var(key, eval(node.attrib[key], globals(), vars))
-            # print "added variable: %s = %s"%(key, str(vars[key]))
+            # print("added variable: %s = %s"%(key, str(vars[key])))
 
     if check_val(node, 'from_file'):
-        print "adding variables from file: "
+        print("adding variables from file: ")
         in_file = open(node.attrib["from_file"], 'r')
         for line in in_file:
             if line.isspace(): continue
             contents = line.split()
             key = contents[0]
             val = eval(contents[1], globals(), vars)
-            print "  found variable name:  ", key
-            print "  found variable value: ", val
+            print("  found variable name:  ", key)
+            print("  found variable value: ", val)
             add_var(key, val)
 
 
@@ -188,7 +189,7 @@ def check_val(node, lst, opt=True):
     for item in lst:
         if not item in node.attrib:
             if not opt:
-                print "required attribute %s not found in node %s" % (item, node)
+                print("required attribute %s not found in node %s" % (item, node))
                 sys.exit()
             return False
     return True
@@ -208,7 +209,7 @@ def get_val(node, name, opt=False):
     elif (opt) and (name in vars):
         return vars[name]
     else:
-        print "error reading attribute %s from node %s" % (name, node)
+        print("error reading attribute %s from node %s" % (name, node))
         sys.exit()
 
 
@@ -252,7 +253,7 @@ def process_node(node):
                 for el in val:
                     line += first_comma(first_el)
 
-                    if isinstance(el, basestring):
+                    if isinstance(el, str):
                         line += "'%s'" % (el)
                     elif isinstance(el, int):
                         line += "%d" % (el)
@@ -260,7 +261,7 @@ def process_node(node):
                         line += "%f" % (el)
                     first_el = False
             else:
-                if isinstance(val, basestring):
+                if isinstance(val, str):
                     line += "%s%s='%s'" % (first_comma(first_arg), arg.upper(), val)
                 elif isinstance(val, bool):
                     if val == True:
@@ -276,7 +277,7 @@ def process_node(node):
     for att in node.attrib:
         # print "checking attribute %s"%att
         if att not in all_args:
-            print "WARNING: unknown argument %s" % att
+            print("WARNING: unknown argument %s" % att)
     # writes the statement to the FDS file
     write_to_fds("&%s %s/ %s\n" % (global_keys[node.tag.lower()], line, check_get_val(node, 'comment', "")))
 
@@ -289,14 +290,14 @@ def open_fds_file():
     # DESCRIPTION:
     #  checks if an FDS file is already open, closes it if necessary and opens a new one
     #  as specified by the outfile variable, writes a HEAD statement via write_to_fds
-    if type(vars['fds_file']) == file:
+    if isinstance(vars['fds_file'], IOBase):
         close_fds_file()
     if not os.path.isdir(vars['subdir']):
         os.mkdir(vars['subdir'])
     if not vars['subdir'] in subdirs:
         subdirs[vars['subdir']] = (vars['outfile'], vars['chid'])
     else:
-        print "WARNING: sub directory used multiple times"
+        print("WARNING: sub directory used multiple times")
     vars['fds_file'] = open(os.path.join(vars['subdir'], vars['outfile']), 'w')
     write_to_fds("&HEAD CHID='%s', TITLE='%s' /\n" % (vars['chid'], vars['title']))
 
@@ -304,31 +305,31 @@ def open_fds_file():
 def close_fds_file():
     # DESCRIPTION:
     #  writes a TAIL statement via write_to_fds and closes the FDS file
-    if type(vars['fds_file']) == file:
+    if isinstance(vars['fds_file'], IOBase):
         write_to_fds("\n&TAIL/\n")
         vars['fds_file'].close()
 
 
 def dump_subdirectories(subdirs):
-	subdirs_file = open('fgg.subdirlist', 'w')
-	subdirs_file.write("# subdir; fds input file; chid\n")
-	for i in subdirs:
-		subdirs_file.write(i + ';' + subdirs[i][0] + ';' + subdirs[i][1] + '\n')
-	subdirs_file.close()
+    subdirs_file = open('fgg.subdirlist', 'w')
+    subdirs_file.write("# subdir; fds input file; chid\n")
+    for i in subdirs:
+        subdirs_file.write(i + ';' + subdirs[i][0] + ';' + subdirs[i][1] + '\n')
+    subdirs_file.close()
 
 def dump_paratable(paralist):
-	para_file = open('fgg.paratable', 'w')
-	for i in paralist:
-		para_file.write(i + '\n')
-	para_file.close()
+    para_file = open('fgg.paratable', 'w')
+    for i in paralist:
+        para_file.write(i + '\n')
+    para_file.close()
 
 
 def dump_plot_types(plots, dir):
-	plot_file = open(os.path.join(dir, 'fgg.plot'), 'w')
-	plot_file.write("# device ID; device quantity; plot type \n")
-	for i in plots:
-		plot_file.write(i + '\n')
-	plot_file.close()
+    plot_file = open(os.path.join(dir, 'fgg.plot'), 'w')
+    plot_file.write("# device ID; device quantity; plot type \n")
+    for i in plots:
+        plot_file.write(i + '\n')
+    plot_file.close()
 
 
 def dump_variables(vs, dir):
@@ -349,7 +350,7 @@ def write_to_fds(text):
     #  via open_fds_file if necessary and writes a given text into the FDS file
     # INPUT:
     #  text     - text to write into the FDS file
-    if type(vars['fds_file']) != file:
+    if not isinstance(vars['fds_file'], IOBase):
         open_fds_file()
     vars['fds_file'].write(text)
 
@@ -374,16 +375,16 @@ def dump(node):
 
 def condition(node):
     # DESCRIPTION:
-    #  assert        -  checks if the requirements passed as node arguments are 
+    #  assert        -  checks if the requirements passed as node arguments are
     #                   fulfilled and exits the program with an error message
     #                   to standard output otherwise
     #  if            -  checks for the condition and traverses the node if true
-    
+
     if check_val(node, 'assert'):
         if not get_val(node, 'assert'):
-            print "assert condition was not met: ", node.attrib['assert']
+            print("assert condition was not met: ", node.attrib['assert'])
             sys.exit()
-            
+
     if check_val(node, 'if'):
         cond = get_val(node, 'if')
         if cond:
@@ -408,11 +409,11 @@ def input(node):
         write_to_fds("&%s /\n" % (node.attrib["text"]))
     if check_val(node, 'str'):
         write_to_fds("&%s /\n" % (get_val(node, "str")))
-   
+
     # given as a file
     if check_val(node, "from_file"):
         # open and read input file
-        in_file_name = get_val(node, "from_file") 
+        in_file_name = get_val(node, "from_file")
         in_file = open(in_file_name, 'r')
         in_file_raw = in_file.read()
         in_file.close()
@@ -461,7 +462,7 @@ def input(node):
         if excl != []: excl = [e.upper() for e in excl]
         # ensure that keywords are not included and excluded at the same time
         if incl != [] and excl != []:
-            print "!! exclusion and inclusion of FDS key words at the same time is not possible "
+            print("!! exclusion and inclusion of FDS key words at the same time is not possible ")
             sys.exit()
         # insert the found commands into the FDS file
         write_to_fds("\n == insertion from file: %s == \n" % in_file_name)
@@ -469,20 +470,20 @@ def input(node):
             # looking for the FDS keyword in each line
             m = re.search('\A\s*&\D{4}', line)
             fds_key = m.group(0).strip().strip('&').upper()
-            print " -- found FDS key: ", fds_key
+            print(" -- found FDS key: ", fds_key)
             # write the command into the FDS file if it is included or not excluded else ignore it
             if (incl != [] and fds_key in incl) or (incl == [] and not fds_key in excl):
                 write_to_fds("%s\n" % line)
             else:
-                print "  - ignoring key ", fds_key
+                print("  - ignoring key ", fds_key)
         write_to_fds("== end of insertion == \n\n")
-    
-        
+
+
         # given as a FDS-file template, replace keywords in given template
     if check_val(node, "replace_file"):
         # open and read input file
-        in_file_name = get_val(node, "replace_file") 
-        
+        in_file_name = get_val(node, "replace_file")
+
         # Open and reading the template, change keywords and write new file
         with open(in_file_name, 'r') as in_file:
             # Looks replacement commands and stores them in 'replace_dict'-dictionary
@@ -492,8 +493,8 @@ def input(node):
                     f = subnode.attrib['from']
                     t = get_val(subnode, 'to')
                     replace_dict[f] = t
-                
-            # in every line, look for keywords (source) to be changed to 
+
+            # in every line, look for keywords (source) to be changed to
             # new value (target) according to items in 'replace_dict'-dictionary
             #for line in in_file_contents:
             for line in in_file:
@@ -501,10 +502,10 @@ def input(node):
                 # for source, target in replace_dict.iteritems():
                     line = line.replace(source,str(target))
                 write_to_fds(line)
-                #print line
-            
-            
-        
+                #print(line)
+
+
+
 
 def loop(node):
     # DESCRIPTION:
@@ -853,30 +854,30 @@ def slcf(node):
 
     if check_val(node, 'q'):
 
-		q = get_val(node, 'q')
-		if not (type(q) is list or type(q) is tuple):
-			q = [q]
+        q = get_val(node, 'q')
+        if not (type(q) is list or type(q) is tuple):
+            q = [q]
 
-		for iq in q:
-			curr_q = "QUANTITY='%s'" % iq
+        for iq in q:
+            curr_q = "QUANTITY='%s'" % iq
 
-			v = ""
-			if check_get_val(node, 'v', False):
-				v = "VECTOR=.TRUE."
-                        cc = ""
-                        if check_get_val(node, 'cc', False):
-                            cc = "CELL_CENTERED=.TRUE."
-                        spec_id = ""
-                        res=check_get_val(node, 'spec_id', None)
-                        if iq=="DENSITY" and res:
-                            spec_id = "SPEC_ID='%s'"%res
+            v = ""
+            cc = ""
+            spec_id = ""
+            if check_get_val(node, 'v', False):
+                v = "VECTOR=.TRUE."
+                if check_get_val(node, 'cc', False):
+                    cc = "CELL_CENTERED=.TRUE."
+                res=check_get_val(node, 'spec_id', None)
+                if iq=="DENSITY" and res:
+                    spec_id = "SPEC_ID='%s'"%res
 
-			if check_val(node, 'x'):
-				write_to_fds("&SLCF PBX=%e, %s %s %s %s/\n" % (get_val(node, 'x'), curr_q, v, spec_id, cc))
-			if check_val(node, 'y'):
-				write_to_fds("&SLCF PBY=%e, %s %s %s %s/\n" % (get_val(node, 'y'), curr_q, v, spec_id, cc))
-			if check_val(node, 'z'):
-				write_to_fds("&SLCF PBZ=%e, %s %s %s %s/\n" % (get_val(node, 'z'), curr_q, v, spec_id, cc))
+            if check_val(node, 'x'):
+                write_to_fds("&SLCF PBX=%e, %s %s %s %s/\n" % (get_val(node, 'x'), curr_q, v, spec_id, cc))
+            if check_val(node, 'y'):
+                write_to_fds("&SLCF PBY=%e, %s %s %s %s/\n" % (get_val(node, 'y'), curr_q, v, spec_id, cc))
+            if check_val(node, 'z'):
+                write_to_fds("&SLCF PBZ=%e, %s %s %s %s/\n" % (get_val(node, 'z'), curr_q, v, spec_id, cc))
 
 
 #############################
@@ -896,10 +897,10 @@ def info(node):
         vars['title']   = get_val(node, "title", opt=True)
         vars['outfile'] = get_val(node, "outfile")
         vars['subdir']  = get_val(node, "subdir", opt=True)
-        print "chid          : %s" % vars['chid']
-        print "title         : %s" % vars['title']
-        print "outfile       : %s" % vars['outfile']
-        print "sub directory : %s" % vars['subdir']
+        print("chid          : %s" % vars['chid'])
+        print("title         : %s" % vars['title'])
+        print("outfile       : %s" % vars['outfile'])
+        print("sub directory : %s" % vars['subdir'])
         open_fds_file()
 
 
@@ -919,7 +920,7 @@ def fire(node):
     #  delta                - surface element size, default is the grid spacing delta (implicit)
     #  cx, cy               - x & y coordinates of the center of the box (if height set)
     #  lz                   - z coordinate of the bottom of the box, or the z-position of the fire surface
-    #  width_x, width_y     - widths of the box (if height set) or of the burning surface 
+    #  width_x, width_y     - widths of the box (if height set) or of the burning surface
     #  height               - height of the box, if set an obstacle is created, otherwise just a surface
     #  fuel                 - if set, a REAC line is added with chosen fuel
     #  hrrmax, alpha        - construct a alpha*t^2 HRR curve that increases up to hrrmax
@@ -955,14 +956,14 @@ def fire(node):
         ############################# OBST geometry
 
         delta = get_val(node, 'delta', opt=True)
-        
+
         cx = get_val(node, 'cx')
         cy = get_val(node, 'cy')
         lz = get_val(node, 'lz')
         wx = get_val(node, 'width_x')
         wy = get_val(node, 'width_y')
         h  = 0
-        
+
         # get information about the burning box (if height is set)
         if check_val(node, 'heigth'):
             h  = get_val(node, 'height')
@@ -1007,10 +1008,10 @@ def fire(node):
             data = np.loadtxt(get_val(node, "from_file"))
 
             if data.shape[1] != 2:
-                print " -- hrr curve format is not recognised (not two columns) -> EXIT"
+                print(" -- hrr curve format is not recognised (not two columns) -> EXIT")
                 sys.exit(1)
             if np.any((data[1:,0]-data[:-1,0]) < 0.0):
-                print " -- time in hrr curve format is not monotonly increasing -> EXIT"
+                print(" -- time in hrr curve format is not monotonly increasing -> EXIT")
                 sys.exit(1)
 
             f_t = data[:,0]
@@ -1018,7 +1019,7 @@ def fire(node):
 
         # check that one of the above methods was used
         if f_hrr is None and f_t is None:
-            print " -- no fire model chosen -> EXIT"
+            print(" -- no fire model chosen -> EXIT")
             sys.exit(1)
 
         ############################# preparation for ramps
@@ -1068,7 +1069,7 @@ def fire(node):
             ramp_substeps_hrr = np.interp(ramp_substeps_t, f_t, f_hrr)
             ramp_substeps_hrr_scaled = ramp_substeps_hrr - ramp_substeps_hrr[0]
             ramp_substeps_hrr_scaled = ramp_substeps_hrr_scaled / ramp_substeps_hrr_scaled[-1]
-            
+
 
             # ramps up to first maximum -> increas in burning surface
             write_to_fds("&RAMP ID='%s', T=-0.1, F=0.0 /\n"%ramp_name)
@@ -1314,7 +1315,7 @@ def job_file(node):
         jureca_cores_per_node = 24
 
         if jureca_cores_per_node % omp !=0:
-            print " -- number of OMP thread does not fit jureca's node -> EXIT" % system
+            print(" -- number of OMP thread does not fit jureca's node -> EXIT" % system)
             sys.exit(1)
 
         template_file = open(os.path.join(rootdir, "resources", "hpc_systems", "%s_template.job"%system))
@@ -1338,7 +1339,7 @@ def job_file(node):
         result_file.close()
 
     else:
-        print " -- unsupported hpc system: %s -> EXIT"%system
+        print(" -- unsupported hpc system: %s -> EXIT"%system)
         sys.exit(1)
 
 
@@ -1355,7 +1356,7 @@ def section(node):
 def dbg(node):
     # DESCRIPTION:
     #  writes the value of the node argument print to standard output
-    print get_val(node, "print")
+    print(get_val(node, "print"))
 
 
 def div235(n):
@@ -1400,7 +1401,7 @@ def paradim(node, dirlist):
     if len(dirlist) == 0:
         for ip in paralist: dirlist.append({})
     if len(dirlist) != nump:
-        print "wrong number of parameter!!"
+        print("wrong number of parameter!!")
         sys.exit()
     for ip in range(nump):
         dirlist[ip][node.attrib['var']] = paralist[ip]
@@ -1441,7 +1442,7 @@ for items in product(*[params[pd] for pd in params]):
     para_head = "#para_id"
     for v in items:
         vars = dict(vars.items() + v.items())
-        print v
+        print(v)
         for key, val in v.iteritems():
             para_vals += "; " + str(val)
             para_head += "; " + str(key)

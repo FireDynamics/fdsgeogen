@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # This file is part of fdsgeogen.
-# 
+#
 # fdsgeogen is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -29,15 +29,15 @@ def printHead():
     logo = lf.read()
     vf.close()
     lf.close()
-    
-    print logo
-    
-    print "###"
-    print "### fdsgeogen -- clean up tool"
-    print "### version %s"%version
-    print "###"
-    print
-	
+
+    print(logo)
+
+    print("###")
+    print("### fdsgeogen -- analyse tool")
+    print("### version ", version)
+    print("###")
+    print()
+
 printHead()
 
 fn_subdirlist = 'fgg.subdirlist'
@@ -49,16 +49,16 @@ subdirs = []
 # read in all sub directories, FDS input files, and CHIDs
 subdirs_file = open(fn_subdirlist, 'r')
 for line in subdirs_file:
-	if line[0] == '#': continue
-	lc = line.rstrip().split(';')
-	subdirs.append(lc[0])
+    if line[0] == '#': continue
+    lc = line.rstrip().split(';')
+    subdirs.append(lc[0])
 subdirs_file.close()
 
 ans = raw_input("removing all subdirectories? (yes / no): ")
 
 if ans == 'yes':
 
-	for d in subdirs:
-		shutil.rmtree(d)
-	
-	os.remove(fn_subdirlist)
+    for d in subdirs:
+        shutil.rmtree(d)
+
+    os.remove(fn_subdirlist)
