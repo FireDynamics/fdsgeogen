@@ -37,19 +37,15 @@ cmdl_args = parser.parse_args()
 ############################ HELPER
 
 def printHead():
-    rootdir = os.path.abspath(os.path.dirname(__file__))
-    if sys.platform == "win32": # WINDOWS
-        vf = open(rootdir + "\\version", "r")
-        lf = open(rootdir + "\\logo", "r")
-    else:
-        vf = open(rootdir + "/scripts/version", "r")
-        lf = open(rootdir + "/scripts/logo", "r")
+    scriptdir = os.path.abspath(os.path.dirname(__file__))
+    rootdir = scriptdir.rstrip("/scripts")
+
+    vf = open(os.path.join(rootdir, "scripts", "version"), "r")
+    lf = open(os.path.join(rootdir, "scripts", "logo"), "r")
     version = vf.readline()
     logo = lf.read()
     vf.close()
     lf.close()
-    
-    print logo
     
     print "###"
     print "### fdsgeogen -- analyse tool"
@@ -111,7 +107,7 @@ def saveDevcPlot(dir, t, ys, ids, qs, units, group, mode='all'):
 		fn = "fgg_" + group + ".pdf"
 		if len(ys) == 1:
 			fn = "fgg_" + ids[0] + ".pdf"
-		plt.savefig(dir + '/' + fn)
+		plt.savefig(os.path.join(dir, fn))
 		plt.clf()
 
 ############################
@@ -141,7 +137,7 @@ subdirs_file.close()
 # read in all plot tasks
 for ind in range(len(subdirs)):
 
-	plot_file = open(subdirs[ind] + '/' + fn_plotlist, 'r')
+	plot_file = open(os.path.join(subdirs[ind], fn_plotlist), 'r')
 	for line in plot_file:
 		if line[0] == '#': continue
 		line_content = line.rstrip().split(';')
@@ -192,7 +188,7 @@ for i in global_tasks:
 for ind in range(len(subdirs)):
 	csd = subdirs[ind]
 	ccid = chids[ind]
-	fn_devc = csd + '/' + ccid + '_devc.csv'
+	fn_devc = os.path.join(csd, ccid + '_devc.csv')
 	
 	if not ((csd in single_tasks) or (csd in local_tasks)):
 		print "INFO: skipping directory, as not single or local tasks exist", csd
@@ -251,7 +247,7 @@ for cg in global_tasks:
 	
 	for csd in global_tasks[cg]:
 		ccid = global_tasks[cg][csd][0][0]
-		fn_devc = csd + '/' + ccid + '_devc.csv'
+		fn_devc = os.path.join(csd, ccid + '_devc.csv')
 		
 		if not os.path.isfile(fn_devc):
 			print "INFO: skipping directory, as devc file does not exist (yet)"
@@ -275,7 +271,7 @@ for cg in global_tasks:
 			col = ids.index(ct[1])
 			gd_cols.append(col)
 			gd_units.append(units[col])
-			gd_ids.append(csd + '/' + ct[1])
+			gd_ids.append(os.path.join(csd, ct[1]))
 			gd_qs.append(ct[2])
 			gd_data.append(data[:,col])
 			

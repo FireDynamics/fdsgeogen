@@ -21,13 +21,11 @@ import os.path
 import argparse
 
 def printHead():
-    rootdir = os.path.abspath(os.path.dirname(__file__))
-    if sys.platform == "win32": # WINDOWS
-        vf = open(rootdir + "\\version", "r")
-        lf = open(rootdir + "\\logo", "r")
-    else:
-        vf = open(rootdir + "/scripts/version", "r")
-        lf = open(rootdir + "/scripts/logo", "r")
+    scriptdir = os.path.abspath(os.path.dirname(__file__))
+    rootdir = scriptdir.rstrip("/scripts")
+
+    vf = open(os.path.join(rootdir, "scripts", "version"), "r")
+    lf = open(os.path.join(rootdir, "scripts", "logo"), "r")
     version = vf.readline()
     logo = lf.read()
     vf.close()
@@ -82,10 +80,10 @@ for cd_ind in range(len(subdirs)):
 
 	print " -", subdir
 	
-	if os.path.isfile(subdir + "/" + chid + ".end") and not cmdl_args.force:
+	if os.path.isfile(os.path.join(subdir, chid + ".end")) and not cmdl_args.force:
 		print "   ... skipping, was already finished"
 	else:
-		stdoutf = open(subdir + '/fgg.stdout', 'w')
+		stdoutf = open(os.path.join(subdir, 'fgg.stdout'), 'w')
 		sp.Popen([fds_exec, inputfile], stdout=stdoutf, stderr=sp.STDOUT, cwd=subdir).communicate()
 		stdoutf.close()
 		print "   ... finished"

@@ -86,13 +86,11 @@ epsilon = 0.0001
 ###############################
 
 def printHead():
-    rootdir = os.path.abspath(os.path.dirname(__file__))
-    if sys.platform == "win32": # WINDOWS
-        vf = open(rootdir + "\\version", "r")
-        lf = open(rootdir + "\\logo", "r")
-    else:
-        vf = open(rootdir + "/scripts/version", "r")
-        lf = open(rootdir + "/scripts/logo", "r")
+    scriptdir = os.path.abspath(os.path.dirname(__file__))
+    rootdir = scriptdir.rstrip("/scripts")
+
+    vf = open(os.path.join(rootdir, "scripts", "version"), "r")
+    lf = open(os.path.join(rootdir, "scripts", "logo"), "r")
     version = vf.readline()
     logo = lf.read()
     vf.close()
@@ -299,7 +297,7 @@ def open_fds_file():
         subdirs[vars['subdir']] = (vars['outfile'], vars['chid'])
     else:
         print "WARNING: sub directory used multiple times"
-    vars['fds_file'] = open(vars['subdir'] + '/' + vars['outfile'], 'w')
+    vars['fds_file'] = open(os.path.join(vars['subdir'], vars['outfile']), 'w')
     write_to_fds("&HEAD CHID='%s', TITLE='%s' /\n" % (vars['chid'], vars['title']))
 
 
@@ -326,7 +324,7 @@ def dump_paratable(paralist):
 
 
 def dump_plot_types(plots, dir):
-	plot_file = open(dir + '/fgg.plot', 'w')
+	plot_file = open(os.path.join(dir, 'fgg.plot'), 'w')
 	plot_file.write("# device ID; device quantity; plot type \n")
 	for i in plots:
 		plot_file.write(i + '\n')
@@ -334,7 +332,7 @@ def dump_plot_types(plots, dir):
 
 
 def dump_variables(vs, dir):
-    vars_file = open(dir + '/fgg.vars', 'w')
+    vars_file = open(os.path.join(dir, 'fgg.vars'), 'w')
     vars_file.write("# variable name; variable value \n")
     for i in vs.keys():
         vars_file.write('%s; %s \n'%(i, str(vs[i])))
@@ -1319,7 +1317,7 @@ def job_file(node):
             print " -- number of OMP thread does not fit jureca's node -> EXIT" % system
             sys.exit(1)
 
-        template_file = open(rootdir + "/resources/hpc_systems/%s_template.job"%system)
+        template_file = open(os.path.join(rootdir, "resources", "hpc_systems", "%s_template.job"%system))
         template = template_file.read()
         template_file.close()
 
@@ -1335,7 +1333,7 @@ def job_file(node):
         robj = re.compile('|'.join(replacelist.keys()))
         result = robj.sub(lambda m: replacelist[m.group(0)], template)
 
-        result_file = open(vars['subdir'] + '/' + "fgg.%s.job"%system, 'w')
+        result_file = open(os.path.join(vars['subdir'], "fgg.%s.job"%system), 'w')
         result_file.write(result)
         result_file.close()
 
