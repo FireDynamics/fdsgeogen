@@ -106,43 +106,6 @@ def printHead():
     print "###"
     print
 
-def primes(n):
-    primfac = []
-    d = 2
-    while d*d <= n:
-        while (n % d) == 0:
-            primfac.append(d)  # supposing you want multiple factors repeated
-            n //= d
-        d += 1
-    if n > 1:
-       primfac.append(n)
-    return primfac
-
-def decompose(n, p):
-    p_primes = primes(p)[::-1]
-    procs = np.array([1,1,1])
-    n_tmp = np.copy(n)
-
-    for fac in p_primes:
-        while (np.any(n_tmp > 0)):
-            cpmax = np.argmax(n_tmp)
-            cmax  = np.amax(n_tmp)
-            if (cmax % fac == 0):
-                n_tmp[cpmax] /= fac
-                procs[cpmax] *= fac
-                break
-            else:
-                n_tmp[cpmax] = -n_tmp[cpmax]
-
-        if np.all(n_tmp < 0):
-            print "!! decomposition does not work out... ", fac, n_tmp
-            sys.exit()
-
-        n_tmp = np.abs(n_tmp)
-
-    print " - decomposition: resulting proc decomposition ", procs, " local mesh size ", n_tmp
-    return procs[0], procs[1], procs[2]
-
 def first_comma(v):
     if v:
         return ' '
@@ -580,10 +543,18 @@ def mesh(node):
     #  xmin, ymin, zmin     - starting coordinates of the mesh
     #  xmax, ymax, zmax     - end coordinates of the mesh
 
-    # calculating the number of cells
+    # getting the number of cells
     gnx = get_val(node, "nx", opt=True)
     gny = get_val(node, "ny", opt=True)
     gnz = get_val(node, "nz", opt=True)
+
+    # getting the domain size
+    gxmin = get_val(node, "xmin", opt=True)
+    gxmax = get_val(node, "xmax", opt=True)
+    gymin = get_val(node, "ymin", opt=True)
+    gymax = get_val(node, "ymax", opt=True)
+    gzmin = get_val(node, "zmin", opt=True)
+    gzmax = get_val(node, "zmax", opt=True)
 
     # calculating the number of meshes
     px = 1
@@ -595,36 +566,74 @@ def mesh(node):
         pz = get_val(node, "pz", opt=True)
     elif check_val(node, ["P"]):
         P = get_val(node, "P", opt=True)
-        px, py, pz = decompose([gnx, gny, gnz], P)
+        gn = gnx + gny + gnz
+        px = int(P * gnx / gn)
+        py = int(P * gny / gn)
+        pz = int(P * gnz / gn)
 
+        rp = P - (px+py+pz)
+        while True:
+          if rp > 0:
+            px += 1
+            rp -= 1
+          else:
+            break
+
+          if rp > 0:
+            py += 1
+            rp -= 1
+          else:
+            break
+
+          if rp > 0:
+            pz += 1
+            rp -= 1
+          else:
+            break
+
+    if px > gnx:
+      px = gnx
+    if py > gny:
+      py = gny
+    if pz > gnz:
+      pz = gnz
 
     # calculating the local mesh sizes
-    lnx = gnx / px
-    lny = gny / py
-    lnz = gnz / pz
+    dx = (gxmax - gxmin) / gnx
+    dy = (gymax - gymin) / gny
+    dz = (gzmax - gzmin) / gnz
 
-    gxmin = get_val(node, "xmin", opt=True)
-    gxmax = get_val(node, "xmax", opt=True)
-    gymin = get_val(node, "ymin", opt=True)
-    gymax = get_val(node, "ymax", opt=True)
-    gzmin = get_val(node, "zmin", opt=True)
-    gzmax = get_val(node, "zmax", opt=True)
+    lnx = int(gnx / px)
+    lny = int(gny / py)
+    lnz = int(gnz / pz)
+    rnx = gnx % px
+    rny = gny % py
+    rnz = gnz % pz
 
-    dx = (gxmax - gxmin) / px
-    dy = (gymax - gymin) / py
-    dz = (gzmax - gzmin) / pz
     # writing the MESH statements
+    snx = 0
     for ix in range(px):
+        xmin = gxmin + snx * dx
+        nx = lnx + 1 if ix < rnx else lnx
+        snx += nx
+        xmax = gxmin + snx * dx
+
+        sny = 0
         for iy in range(py):
+            ymin = gymin + sny * dy
+            ny = lny + 1 if iy < rny else lny
+            sny += ny
+            ymax = gymin + sny * dy
+
+            snz = 0
             for iz in range(pz):
-                xmin = gxmin + ix * dx
-                xmax = gxmin + (ix + 1) * dx
-                ymin = gymin + iy * dy
-                ymax = gymin + (iy + 1) * dy
-                zmin = gzmin + iz * dz
-                zmax = gzmin + (iz + 1) * dz
+                zmin = gzmin + snz * dz
+                nz = lnz + 1 if iz < rnz else lnz
+                snz += nz
+                zmax = gzmin + snz * dz
+
                 write_to_fds("&MESH IJK=%d,%d,%d, XB=%f,%f,%f,%f,%f,%f /\n" % (
-                    lnx, lny, lnz,
+                    nx, ny, nz,
                     xmin, xmax, ymin, ymax, zmin, zmax))
 
 
